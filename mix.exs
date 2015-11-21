@@ -36,6 +36,6 @@ defmodule Complex.Mixfile do
      maintainers: ["Tom Krauss"],
      licenses: ["Apache 2.0"],
      links: %{"GitHub" => "https://github.com/twist-vector/elixir-complex.git",
-              "Docs" => "http://http://hexdocs.pm/complex"}]
+              "Docs" => "http://hexdocs.pm/complex"}]
   end
 end
