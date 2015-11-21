@@ -1,0 +1,41 @@
+defmodule Complex.Mixfile do
+  use Mix.Project
+
+  def project do
+    [app: :complex,
+     version: "0.2.0",
+     description: description,
+     package: package,
+     elixir: "~> 1.1",
+     deps: deps,
+     docs: [extras: []]]
+  end
+
+  # Configuration for the OTP application
+  #
+  # Type "mix help compile.app" for more information
+  def application do
+    [applications: [:logger]]
+  end
+
+  defp deps do
+    [{:earmark, "~> 0.1"},
+     {:ex_doc, github: "elixir-lang/ex_doc"},
+     {:exprintf, "~> 0.1"}]
+  end
+
+  defp description do
+    """
+    Complex is a library for types and mathematical functions for complex
+    numbers.
+    """
+  end
+
+  defp package do
+    [
+     maintainers: ["Tom Krauss"],
+     licenses: ["Apache 2.0"],
+     links: %{"GitHub" => "https://github.com/twist-vector/elixir-complex.git",
+              "Docs" => "http://http://hexdocs.pm/complex"}]
+  end
+end
