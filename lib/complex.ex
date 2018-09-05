@@ -161,6 +161,23 @@ defmodule Complex do
 
 
   @doc """
+    Returns a new complex that is the square of the provided complex number.
+
+    #### See also
+    [mult/2](#mult/2)
+
+    #### Examples
+        iex> Complex.square( Complex.new(2.0, 0.0) )
+        %Complex{im: 0.0, re: 4.0}
+
+        iex> Complex.square( Complex.imag() )
+        %Complex{im: 0.0, re: -1.0}
+    """
+    @spec square(complex) :: complex
+    def square(z), do: mult(z, z)
+
+
+    @doc """
     Returns a new complex that is the ratio (division) of the provided complex
     numbers.
 
