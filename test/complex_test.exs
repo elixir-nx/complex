@@ -31,6 +31,10 @@ defmodule ComplexTest do
     assert Complex.abs(b) == 5
     assert Complex.abs(c) == 2.23606797749979
     assert Complex.abs(d) == 5
+    assert Complex.abs_squared(a) == 5
+    assert Complex.abs_squared(b) == 25
+    assert Complex.abs_squared(c) == 5
+    assert Complex.abs_squared(d) == 25
     assert Complex.phase(a) == 1.1071487177940904
     assert Complex.conjugate(a) == %Complex{re: 1.0, im: -2.0}
   end

@@ -186,8 +186,7 @@ defmodule Complex do
 
 
   @doc """
-    Returns a new complex that is the magnitude (length)) of the provided complex
-    number.
+    Returns the magnitude (length) of the provided complex number.
 
     #### See also
     [new/2](#new/2), [phase/1](#phase/1)
@@ -209,6 +208,26 @@ defmodule Complex do
     end
   end
 
+
+  @doc """
+  Returns the square of the magnitude of the provided complex number.
+
+  The square of the magnitude is faster to compute---no square roots!
+
+  #### See also
+  [new/2](#new/2), [abs/1](#abs/1)
+
+  #### Examples
+      iex> Complex.abs_squared( Complex.fromPolar(1, :math.pi/2) )
+      1.0
+
+      iex> Complex.abs_squared( Complex.fromPolar(2, :math.pi/2) )
+      4.0
+  """
+  @spec abs_squared(complex) :: number
+  def abs_squared(%Complex{re: r, im: i}) do
+    r * r + i * i
+  end
 
   @doc """
     Returns a new complex that is the complex conjugate of the provided complex
