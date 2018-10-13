@@ -44,6 +44,27 @@ defmodule Complex do
   @spec new(number, number) :: complex
   def new(re, im \\ 0), do: %Complex{re: re, im: im}
 
+
+  @doc """
+    Parses a complex number from a string.
+
+    #### See also
+    [new/2](#new/2)
+
+    #### Examples
+        iex> Complex.parse("1.1+2.2i")
+        %Complex{im: 2.2, re: 1.1}
+
+        iex> Complex.parse("-1.1+-2.2i")
+        %Complex{im: -2.2, re: -1.1}
+    """
+  @spec parse(String.t()) :: complex
+  def parse(str) do
+    [_, real, imag] = Regex.run(~r/([-]?\d+\.\d+)\+([-]?\d+\.\d+)i/, str)
+
+    Complex.new(String.to_float(real), String.to_float(imag))
+  end
+
   @doc """
     Returns a new complex representing the pure imaginary number sqrt(-1).
 
