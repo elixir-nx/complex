@@ -44,6 +44,27 @@ defmodule Complex do
   @spec new(number, number) :: complex
   def new(re, im \\ 0), do: %Complex{re: re, im: im}
 
+
+  @doc """
+    Parses a complex number from a string.
+
+    #### See also
+    [new/2](#new/2)
+
+    #### Examples
+        iex> Complex.parse("1.1+2.2i")
+        %Complex{im: 2.2, re: 1.1}
+
+        iex> Complex.parse("-1.1+-2.2i")
+        %Complex{im: -2.2, re: -1.1}
+    """
+  @spec parse(String.t()) :: complex
+  def parse(str) do
+    [_, real, imag] = Regex.run(~r/([-]?\d+\.\d+)\+([-]?\d+\.\d+)i/, str)
+
+    Complex.new(String.to_float(real), String.to_float(imag))
+  end
+
   @doc """
     Returns a new complex representing the pure imaginary number sqrt(-1).
 
@@ -161,6 +182,23 @@ defmodule Complex do
 
 
   @doc """
+    Returns a new complex that is the square of the provided complex number.
+
+    #### See also
+    [mult/2](#mult/2)
+
+    #### Examples
+        iex> Complex.square( Complex.new(2.0, 0.0) )
+        %Complex{im: 0.0, re: 4.0}
+
+        iex> Complex.square( Complex.imag() )
+        %Complex{im: 0.0, re: -1.0}
+    """
+    @spec square(complex) :: complex
+    def square(z), do: mult(z, z)
+
+
+    @doc """
     Returns a new complex that is the ratio (division) of the provided complex
     numbers.
 
@@ -186,8 +224,7 @@ defmodule Complex do
 
 
   @doc """
-    Returns a new complex that is the magnitude (length)) of the provided complex
-    number.
+    Returns the magnitude (length) of the provided complex number.
 
     #### See also
     [new/2](#new/2), [phase/1](#phase/1)
@@ -209,6 +246,26 @@ defmodule Complex do
     end
   end
 
+
+  @doc """
+  Returns the square of the magnitude of the provided complex number.
+
+  The square of the magnitude is faster to compute---no square roots!
+
+  #### See also
+  [new/2](#new/2), [abs/1](#abs/1)
+
+  #### Examples
+      iex> Complex.abs_squared( Complex.fromPolar(1, :math.pi/2) )
+      1.0
+
+      iex> Complex.abs_squared( Complex.fromPolar(2, :math.pi/2) )
+      4.0
+  """
+  @spec abs_squared(complex) :: number
+  def abs_squared(%Complex{re: r, im: i}) do
+    r * r + i * i
+  end
 
   @doc """
     Returns a new complex that is the complex conjugate of the provided complex
@@ -579,7 +636,7 @@ defmodule Complex do
         %Complex{im: 0.0, re: 2.0943951023931957}
 
         iex> Complex.sec( Complex.asec(Complex.new(2,3)) )
-        %Complex{im: 2.9999999999999987, re: 1.9999999999999984}
+        %Complex{im: 2.9999999999999987, re: 1.9999999999999987}
     """
   @spec asec(complex) :: complex
   def asec(z = %Complex{}) do
@@ -895,7 +952,7 @@ defmodule Complex do
         %Complex{im: -8.164311994315688e-17, re: -0.5493061443340548}
 
         iex> Complex.coth( Complex.acoth(Complex.new(2,3)) )
-        %Complex{im: 2.999999999999999, re: 2.0}
+        %Complex{im: 2.999999999999998, re: 2.000000000000001}
     """
   @spec acoth(complex) :: complex
   def acoth(z = %Complex{}) do
