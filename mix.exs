@@ -4,10 +4,10 @@ defmodule Complex.Mixfile do
   def project do
     [app: :complex,
      version: "0.2.0",
-     description: description,
-     package: package,
+     description: description(),
+     package: package(),
      elixir: "~> 1.1",
-     deps: deps,
+     deps: deps(),
      docs: [extras: []]]
   end
 
@@ -21,7 +21,8 @@ defmodule Complex.Mixfile do
   defp deps do
     [{:earmark, "~> 0.1"},
      {:ex_doc, github: "elixir-lang/ex_doc"},
-     {:exprintf, "~> 0.1"}]
+     {:exprintf, "~> 0.1"},
+     {:dialyxir, "~> 0.4", only: [:dev]}]
   end
 
   defp description do

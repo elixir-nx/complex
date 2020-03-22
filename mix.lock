@@ -1,3 +1,6 @@
-%{"earmark": {:hex, :earmark, "0.1.19"},
+%{
+  "dialyxir": {:hex, :dialyxir, "0.5.1", "b331b091720fd93e878137add264bac4f644e1ddae07a70bf7062c7862c4b952", [:mix], [], "hexpm", "6c32a70ed5d452c6650916555b1f96c79af5fc4bf286997f8b15f213de786f73"},
+  "earmark": {:hex, :earmark, "0.1.19", "ffec54f520a11b711532c23d8a52b75a74c09697062d10613fa2dbdf8a9db36e", [:mix], [], "hexpm", "db85f989ba3030d40d3a901d7eebbf926ee07355bf6113d730b8aaf9404a6bd7"},
   "ex_doc": {:git, "https://github.com/elixir-lang/ex_doc.git", "f93a60dc8168ffdef191af4fcec42292937b4c6a", []},
-  "exprintf": {:hex, :exprintf, "0.1.6"}}
+  "exprintf": {:hex, :exprintf, "0.1.6", "b5b0a38bf78a357dbc61cdf7364fea004af6fdf5214be44021eb2ea7edf61f6e", [:mix], [], "hexpm", "7acb31f93cef83effd3aa1f0572f9e29d7d1b4f50a6d456e2830fa7594c16182"},
+}
