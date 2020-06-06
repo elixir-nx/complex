@@ -5,7 +5,7 @@ defmodule Complex do
 
   Each complex number is represented as a structure holding the real and
   imaginary part.  There are functions for creation and manipulation of
-  them.  Unfortunately since there is n operator overloading in Elixir the
+  them.  Unfortunately since there is no operator overloading in Elixir the
   math functions (add, subtract, etc.) are implemented as add/2, sub/2, etc.
 
   ## Examples
@@ -46,7 +46,9 @@ defmodule Complex do
 
 
   @doc """
-    Parses a complex number from a string.
+    Parses a complex number from a string.  The values of the real and imaginary
+    parts must be represented by a float, including decimal and at least one
+    trailing digit (e.g. 1.2, 0.4).
 
     #### See also
     [new/2](#new/2)
@@ -54,13 +56,10 @@ defmodule Complex do
     #### Examples
         iex> Complex.parse("1.1+2.2i")
         %Complex{im: 2.2, re: 1.1}
-
-        iex> Complex.parse("-1.1+-2.2i")
-        %Complex{im: -2.2, re: -1.1}
     """
   @spec parse(String.t()) :: complex
   def parse(str) do
-    [_, real, imag] = Regex.run(~r/([-]?\d+\.\d+)\+([-]?\d+\.\d+)i/, str)
+    [_, real, imag] = Regex.run(~r/([-]?\d+\.\d+)\s*\+\s*([-]?\d+\.\d+)i/, str)
 
     Complex.new(String.to_float(real), String.to_float(imag))
   end
@@ -80,9 +79,9 @@ defmodule Complex do
 
 
   @doc """
-    Returns a new complex number described by the supplied polar
-    coordinates.  That is, the complex (real and imaginary) will have radius
-    (magnitude) r and angle (phase) phi.
+    Returns a new complex number described by the supplied polar coordinates.  
+    That is, the complex (real and imaginary) will have radius (magnitude) r 
+    and angle (phase) phi.
 
     #### See also
     [new/2](#new/2) [imag/0](#imag/0)
@@ -98,7 +97,7 @@ defmodule Complex do
 
 
   @doc """
-    Returns the phase angle of the supplied complex.
+    Returns the phase angle of the supplied complex, in radians.
 
     #### See also
     [new/2](#new/2) [fromPolar/2](#fromPolar/2)
@@ -115,7 +114,7 @@ defmodule Complex do
 
   @doc """
     Returns the polar coordinates of the supplied complex.  That is, the
-    returned tuple {r,phi} is the magnitude and phase of z.
+    returned tuple {r,phi} is the magnitude and phase (in radians) of z.
 
     #### See also
     [fromPolar/2](#fromPolar/2)

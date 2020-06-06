@@ -4,11 +4,25 @@ defmodule ComplexTest do
 
   test "Creation" do
     assert Complex.new(1.0, 1.0) == %Complex{re: 1.0, im: 1.0}
+    assert Complex.new(1.0, 2.0) == %Complex{re: 1.0, im: 2.0}
     assert Complex.new(2.0) == %Complex{re: 2.0, im: 0.0}
 
     a = Complex.new(1.0, 2.0)
     assert Complex.getPolar(a) == {2.23606797749979, 1.1071487177940904}
     assert Complex.fromPolar(1.0,:math.pi/2) == %Complex{re: 6.123233995736766e-17, im: 1.0}
+  end
+
+  test "Parse from string" do
+    assert Complex.parse("1.0+1.0i") == %Complex{re: 1.0, im: 1.0}
+    # Test various spacing
+    assert Complex.parse("1.0 +1.0i") == %Complex{re: 1.0, im: 1.0}
+    assert Complex.parse("1.0+ 1.0i") == %Complex{re: 1.0, im: 1.0}
+    assert Complex.parse("1.0 + 1.0i") == %Complex{re: 1.0, im: 1.0}
+
+    # We don't handle integer values for re and im
+    assert_raise MatchError, fn -> Complex.parse("1+1i") end
+    assert_raise MatchError, fn -> Complex.parse("1+1.0i") end
+    assert_raise MatchError, fn -> Complex.parse("1.0+1i") end
   end
 
   test "Arithmetic" do

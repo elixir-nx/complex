@@ -19,8 +19,7 @@ defmodule Complex.Mixfile do
   end
 
   defp deps do
-    [{:earmark, "~> 0.1"},
-     {:ex_doc, github: "elixir-lang/ex_doc"},
+    [{:ex_doc, "~> 0.22", only: :dev, runtime: false},
      {:exprintf, "~> 0.1"},
      {:dialyxir, "~> 0.4", only: [:dev]}]
   end
