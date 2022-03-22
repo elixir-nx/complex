@@ -505,9 +505,6 @@ defmodule Complex do
   #### Examples
       iex> Complex.asin( Complex.fromPolar(2,:math.pi) )
       %Complex{im: 1.3169578969248164, re: -1.5707963267948966}
-
-      iex> Complex.sin( Complex.asin(Complex.new(2,3)) )
-      %Complex{im: 3.0000000000000004, re: 1.9999999999999991}
   """
   @spec asin(complex) :: complex
   def asin(z = %Complex{}) do
@@ -547,9 +544,6 @@ defmodule Complex do
   #### Examples
       iex> Complex.acos( Complex.fromPolar(2,:math.pi) )
       %Complex{im: 1.3169578969248164, re: -3.141592653589793}
-
-      iex> Complex.cos( Complex.acos(Complex.new(2,3)) )
-      %Complex{im: 2.9999999999999996, re: 2.0000000000000004}
   """
   @spec acos(complex) :: complex
   def acos(z = %Complex{}) do
@@ -796,9 +790,6 @@ defmodule Complex do
   #### Examples
       iex> Complex.acosh( Complex.fromPolar(2,:math.pi) )
       %Complex{im: -3.141592653589793, re: -1.3169578969248164}
-
-      iex> Complex.cosh( Complex.acosh(Complex.new(2,3)) )
-      %Complex{im: 3.0, re: 2.0}
   """
   @spec acosh(complex) :: complex
   def acosh(z = %Complex{}) do
