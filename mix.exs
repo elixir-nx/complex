@@ -2,13 +2,15 @@ defmodule Complex.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :complex,
-     version: "0.3.0",
-     description: description(),
-     package: package(),
-     elixir: "~> 1.1",
-     deps: deps(),
-     docs: [extras: []]]
+    [
+      app: :complex,
+      version: "0.3.0",
+      description: description(),
+      package: package(),
+      elixir: "~> 1.1",
+      deps: deps(),
+      docs: [extras: []]
+    ]
   end
 
   # Configuration for the OTP application
@@ -19,9 +21,10 @@ defmodule Complex.Mixfile do
   end
 
   defp deps do
-    [{:ex_doc, "~> 0.22", only: :dev, runtime: false},
-     {:exprintf, "~> 0.1"},
-     {:dialyxir, "~> 0.4", only: [:dev]}]
+    [
+      {:ex_doc, "~> 0.22", only: :dev, runtime: false},
+      {:dialyxir, "~> 0.4", only: [:dev]}
+    ]
   end
 
   defp description do
@@ -33,9 +36,12 @@ defmodule Complex.Mixfile do
 
   defp package do
     [
-     maintainers: ["Tom Krauss"],
-     licenses: ["Apache 2.0"],
-     links: %{"GitHub" => "https://github.com/twist-vector/elixir-complex.git",
-              "Docs" => "http://hexdocs.pm/complex"}]
+      maintainers: ["Tom Krauss"],
+      licenses: ["Apache 2.0"],
+      links: %{
+        "GitHub" => "https://github.com/twist-vector/elixir-complex.git",
+        "Docs" => "http://hexdocs.pm/complex"
+      }
+    ]
   end
 end
