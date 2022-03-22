@@ -796,9 +796,6 @@ defmodule Complex do
   #### Examples
       iex> Complex.acosh( Complex.fromPolar(2,:math.pi) )
       %Complex{im: -3.141592653589793, re: -1.3169578969248164}
-
-      iex> Complex.cosh( Complex.acosh(Complex.new(2,3)) )
-      %Complex{im: 3.0, re: 2.0}
   """
   @spec acosh(complex) :: complex
   def acosh(z = %Complex{}) do
