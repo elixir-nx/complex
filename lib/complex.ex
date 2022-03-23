@@ -18,7 +18,10 @@ defmodule Complex do
 
   @vsn 2
 
+  @two_over_sqrt_pi 2 / :math.sqrt(:math.pi())
+
   import Kernel, except: [abs: 1]
+  import Complex.CompileTimeChecks
 
   @typedoc """
   General type for complex numbers
@@ -900,6 +903,17 @@ defmodule Complex do
   """
   @spec asinh(complex) :: complex
   @spec asinh(number) :: number
+
+  if math_fun_supported?(:asinh, 1) do
+    def asinh(n) when is_number(n) do
+      :math.asinh(n)
+    end
+  else
+    def asinh(n) when is_number(n) do
+      :math.log(x + :math.sqrt(1 + x * x))
+    end
+  end
+
   def asinh(z) do
     # result = ln(z+sqrt(z*z+1))
     # result = ln(z+sqrt(t1))
@@ -943,14 +957,12 @@ defmodule Complex do
   # Windows apparently doesn't support :math.acosh
   @spec acosh(complex) :: complex
   @spec acosh(number) :: number
-  case :os.type() do
-    {:win32, _} ->
-      def acosh(n) when is_number(n) do
-        :math.log(n + :math.sqrt(n * n - 1))
-      end
-
-    _ ->
-      def acosh(n) when is_number(n), do: :math.acosh(n)
+  if math_fun_supported?(:acosh, 1) do
+    def acosh(n) when is_number(n), do: :math.acosh(n)
+  else
+    def acosh(n) when is_number(n) do
+      :math.log(n + :math.sqrt(n * n - 1))
+    end
   end
 
   def acosh(z = %Complex{}) do
@@ -997,14 +1009,12 @@ defmodule Complex do
   """
   @spec atanh(complex) :: complex
   @spec atanh(number) :: number
-  case :os.type() do
-    {:win32, _} ->
-      def atanh(n) when is_number(n) do
-        0.5 * :math.log((1 + n) / (1 - n))
-      end
-
-    _ ->
-      def atanh(n) when is_number(n), do: :math.atanh(n)
+  if math_fun_supported?(:atanh, 1) do
+    def atanh(n) when is_number(n), do: :math.atanh(n)
+  else
+    def atanh(n) when is_number(n) do
+      0.5 * :math.log((1 + n) / (1 - n))
+    end
   end
 
   def atanh(z = %Complex{}) do
@@ -1144,6 +1154,103 @@ defmodule Complex do
     t2 = add(1, t1)
     t3 = subtract(1, t1)
     multiply(0.5, subtract(ln(t2), ln(t3)))
+  end
+
+  @doc """
+  Calculates erf(x) of the argument
+  """
+  if math_fun_supported?(:erf, 1) do
+    def erf(x) when is_number(x) do
+      :math.erf(x)
+    end
+  else
+    def erf(x) when is_number(x) do
+      erf_impl(x)
+    end
+
+    defp erf_impl(x) do
+      x = x |> max(-4.0) |> min(4.0)
+      x2 = x * x
+
+      alpha =
+        0.0
+        |> muladd(x2, -2.72614225801306e-10)
+        |> muladd(x2, 2.77068142495902e-08)
+        |> muladd(x2, -2.10102402082508e-06)
+        |> muladd(x2, -5.69250639462346e-05)
+        |> muladd(x2, -7.34990630326855e-04)
+        |> muladd(x2, -2.95459980854025e-03)
+        |> muladd(x2, -1.60960333262415e-02)
+
+      beta =
+        0.0
+        |> muladd(x2, -1.45660718464996e-05)
+        |> muladd(x2, -2.13374055278905e-04)
+        |> muladd(x2, -1.68282697438203e-03)
+        |> muladd(x2, -7.37332916720468e-03)
+        |> muladd(x2, -1.42647390514189e-02)
+
+      min(x * alpha / beta, 1.0)
+    end
+  end
+
+  def erf(%Complex{re: re, im: im}) do
+    if im != 0 do
+      raise ArithmeticError, "erf not implemented for non-real numbers"
+    end
+
+    Complex.new(erf(re))
+  end
+
+  if math_fun_supported?(:erfc, 1) do
+    def erfc(z) when is_number(z), do: :math.erfc(z)
+  end
+
+  def erfc(z), do: subtract(1, erf(z))
+
+  def erf_inv(z) when is_number(z) do
+    w = -:math.log((1 - z) * (1 + z))
+    erf_inv_p(w) * z
+  end
+
+  def erf_inv(%Complex{re: re, im: im}) do
+    if im != 0 do
+      raise ArithmeticError, "erf_inv not implemented for non-real numbers"
+    end
+
+    Complex.new(erf_inv(re))
+  end
+
+  defp erf_inv_p(w) when w < 5 do
+    w = w - 2.5
+
+    2.81022636e-08
+    |> muladd(w, 3.43273939e-07)
+    |> muladd(w, -3.5233877e-06)
+    |> muladd(w, -4.39150654e-06)
+    |> muladd(w, 0.00021858087)
+    |> muladd(w, -0.00125372503)
+    |> muladd(w, -0.00417768164)
+    |> muladd(w, 0.246640727)
+    |> muladd(w, 1.50140941)
+  end
+
+  defp erf_inv_p(w) do
+    w = :math.sqrt(w) - 3
+
+    -0.000200214257
+    |> muladd(w, 0.000100950558)
+    |> muladd(w, 0.00134934322)
+    |> muladd(w, -0.00367342844)
+    |> muladd(w, 0.00573950773)
+    |> muladd(w, -0.0076224613)
+    |> muladd(w, 0.00943887047)
+    |> muladd(w, 1.00167406)
+    |> muladd(w, 2.83297682)
+  end
+
+  defp muladd(acc, t, n) do
+    acc * t + n
   end
 
   ### Logical Operations
