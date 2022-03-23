@@ -908,7 +908,7 @@ defmodule Complex do
     end
   else
     def asinh(n) when is_number(n) do
-      :math.log(x + :math.sqrt(1 + x * x))
+      :math.log(n + :math.sqrt(1 + n * n))
     end
   end
 
