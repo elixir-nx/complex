@@ -8,12 +8,12 @@ defmodule ComplexTest do
     assert_close Complex.new(2.0), %Complex{re: 2.0, im: 0.0}
 
     a = Complex.new(1.0, 2.0)
-    {r, theta} = Complex.getPolar(a)
+    {r, theta} = Complex.to_polar(a)
 
     assert_close r, 2.23606797749979
     assert_close theta, 1.1071487177940904
 
-    assert_close Complex.fromPolar(1.0, :math.pi() / 2), %Complex{
+    assert_close Complex.from_polar(1.0, :math.pi() / 2), %Complex{
       re: 6.123233995736766e-17,
       im: 1.0
     }
@@ -36,10 +36,20 @@ defmodule ComplexTest do
     a = Complex.new(1.0, 2.0)
     b = Complex.new(3.0, 4.0)
     assert_close Complex.add(a, b), %Complex{re: 4.0, im: 6.0}
-    assert_close Complex.sub(a, b), %Complex{re: -2.0, im: -2.0}
-    assert_close Complex.mult(a, b), %Complex{re: -5.0, im: 10.0}
-    assert_close Complex.div(a, b), %Complex{re: 0.44, im: 0.08}
-    assert_close Complex.div(b, a), %Complex{re: 2.2, im: -0.4}
+    assert_close Complex.subtract(a, b), %Complex{re: -2.0, im: -2.0}
+    assert_close Complex.multiply(a, b), %Complex{re: -5.0, im: 10.0}
+    assert_close Complex.divide(a, b), %Complex{re: 0.44, im: 0.08}
+    assert_close Complex.divide(b, a), %Complex{re: 2.2, im: -0.4}
+  end
+
+  test "Arithmetic (no upcasts)" do
+    a = 2.0
+    b = 3.0
+    assert_close Complex.add(a, b), 5
+    assert_close Complex.subtract(a, b), -1
+    assert_close Complex.multiply(a, b), 6
+    assert_close Complex.divide(a, b), 0.666666
+    assert_close Complex.divide(b, a), 1.5
   end
 
   test "Math functions" do
@@ -58,10 +68,31 @@ defmodule ComplexTest do
     assert_close Complex.abs_squared(d), 25
     assert_close Complex.phase(a), 1.1071487177940904
     assert_close Complex.conjugate(a), %Complex{re: 1.0, im: -2.0}
-    assert_close Complex.square(a), Complex.mult(a, a)
-    assert_close Complex.square(b), Complex.mult(b, b)
-    assert_close Complex.square(c), Complex.mult(c, c)
-    assert_close Complex.square(d), Complex.mult(d, d)
+    assert_close Complex.square(a), Complex.multiply(a, a)
+    assert_close Complex.square(b), Complex.multiply(b, b)
+    assert_close Complex.square(c), Complex.multiply(c, c)
+    assert_close Complex.square(d), Complex.multiply(d, d)
+  end
+
+  test "Math functions (no upcasts)" do
+    a = 1
+    b = 2
+    c = 3
+    d = 4
+
+    assert_close Complex.abs(a), 1
+    assert_close Complex.abs(b), 2
+    assert_close Complex.abs(c), 3
+    assert_close Complex.abs(d), 4
+    assert_close Complex.abs_squared(a), 1
+    assert_close Complex.abs_squared(b), 4
+    assert_close Complex.abs_squared(c), 9
+    assert_close Complex.abs_squared(d), 16
+    assert_close Complex.phase(a), 0
+    assert_close Complex.phase(-a), :math.pi()
+    assert_close Complex.conjugate(a), a
+    assert_close Complex.square(a), a * a
+    assert_close Complex.square(d), d * d
   end
 
   test "Exp and logs" do
@@ -72,6 +103,16 @@ defmodule ComplexTest do
     assert_close Complex.log10(a), %Complex{re: 0.3494850021680094, im: 0.480828578784234}
     assert_close Complex.log2(a), %Complex{re: 1.1609640474436813, im: 1.5972779646881088}
     assert_close Complex.pow(a, b), %Complex{re: 0.129009594074467, im: 0.03392409290517014}
+  end
+
+  test "Exp and logs (no upcasts)" do
+    a = 3
+    b = 4.0
+    assert_close Complex.exp(a), :math.exp(a)
+    assert_close Complex.ln(a), :math.log(a)
+    assert_close Complex.log10(a), :math.log10(a)
+    assert_close Complex.log2(a), :math.log2(a)
+    assert_close Complex.pow(a, b), :math.pow(a, b)
   end
 
   test "Trig functions" do
@@ -90,6 +131,22 @@ defmodule ComplexTest do
     assert_close Complex.acsc(a), %Complex{re: 0.18631805410781554, im: -0.3965682301123289}
   end
 
+  test "Trig functions (no upcasts)" do
+    a = 3
+    assert_close Complex.sin(a), 0.141120
+    assert_close Complex.asin(0.141120), :math.pi() - a
+    assert_close Complex.cos(a), -0.989992
+    assert_close Complex.acos(-0.989992), a
+    assert_close Complex.tan(a), -0.1425466
+    assert_close Complex.atan(-0.1425466), a - :math.pi()
+    assert_close Complex.cot(a), -7.015252
+    assert_close Complex.acot(-7.015252), a - :math.pi()
+    assert_close Complex.sec(a), -1.010108
+    assert_close Complex.asec(-1.010108), a
+    assert_close Complex.csc(a), 7.086167
+    assert_close Complex.acsc(7.086167), :math.pi() - a
+  end
+
   test "Hyperbolic functions" do
     a = Complex.new(1.0, 2.0)
     assert_close Complex.sinh(a), %Complex{re: -0.48905625904129363, im: 1.4031192506220405}
@@ -106,12 +163,38 @@ defmodule ComplexTest do
     assert_close Complex.acoth(a), %Complex{re: 0.1732867951399863, im: -0.39269908169872414}
   end
 
+  test "Hyperbolic functions (no upcasts)" do
+    a = 3
+    assert_close Complex.sinh(a), 10.017874
+    assert_close Complex.asinh(10.017874), a
+    assert_close Complex.cosh(a), 10.06766
+    assert_close Complex.acosh(10.06766), a
+    assert_close Complex.tanh(a), 0.9950547
+    assert_close Complex.atanh(0.9950547), a
+    assert_close Complex.sech(a), 0.099327
+    assert_close Complex.asech(0.099327), a
+    assert_close Complex.csch(a), 0.0998215
+    assert_close Complex.acsch(0.0998215), a
+    assert_close Complex.coth(a), 1.0049698
+    assert_close Complex.acoth(1.0049698), a
+  end
+
   defp assert_close(left, right, opts \\ []) do
     eps = opts[:eps] || 1.0e-5
 
     left
-    |> Complex.sub(right)
+    |> Complex.subtract(right)
     |> Complex.abs()
-    |> assert_in_delta(0, eps)
+    |> case do
+      val when val <= eps ->
+        true
+
+      _ ->
+        flunk("""
+        Expected the two values to be close.
+        left: #{inspect(left)}
+        right: #{inspect(right)}
+        """)
+    end
   end
 end
