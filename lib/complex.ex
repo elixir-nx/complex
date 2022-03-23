@@ -26,11 +26,6 @@ defmodule Complex do
   @type complex :: %Complex{re: number, im: number}
   defstruct re: 0, im: 0
 
-  # Distinguishes between a Complex type and a number type.  This function
-  # is used to allow mixed Complex and numbers in function calls.
-  defp decompose(number) when is_number(number), do: {number, 0}
-  defp decompose(%Complex{re: re, im: im}), do: {re, im}
-
   @doc """
   Returns a new complex with specified real and imaginary components.  The
   imaginary part defaults to zero so a "real" number can be created with new/1
@@ -175,8 +170,8 @@ defmodule Complex do
   def add(left, right) when is_number(left) and is_number(right), do: left + right
 
   def add(left, right) do
-    {re_left, im_left} = decompose(left)
-    {re_right, im_right} = decompose(right)
+    %Complex{re: re_left, im: im_left} = as_complex(left)
+    %Complex{re: re_right, im: im_right} = as_complex(right)
     new(re_left + re_right, im_left + im_right)
   end
 
@@ -204,8 +199,8 @@ defmodule Complex do
   def subtract(left, right) when is_number(left) and is_number(right), do: left - right
 
   def subtract(left, right) do
-    {re_left, im_left} = decompose(left)
-    {re_right, im_right} = decompose(right)
+    %Complex{re: re_left, im: im_left} = as_complex(left)
+    %Complex{re: re_right, im: im_right} = as_complex(right)
     new(re_left - re_right, im_left - im_right)
   end
 
@@ -236,8 +231,8 @@ defmodule Complex do
   def multiply(left, right) when is_number(left) and is_number(right), do: left * right
 
   def multiply(left, right) do
-    {r1, i1} = decompose(left)
-    {r2, i2} = decompose(right)
+    %Complex{re: r1, im: i1} = as_complex(left)
+    %Complex{re: r2, im: i2} = as_complex(right)
     new(r1 * r2 - i1 * i2, i1 * r2 + r1 * i2)
   end
 
