@@ -34,7 +34,7 @@ defmodule Complex do
 
   def to_string(%Complex{re: re, im: im}, imaginary_constant \\ "i") do
     if im < 0 do
-      "#{re} - #{im}#{imaginary_constant}"
+      "#{re} - #{abs(im)}#{imaginary_constant}"
     else
       "#{re} + #{im}#{imaginary_constant}"
     end
