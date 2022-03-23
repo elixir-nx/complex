@@ -1330,7 +1330,7 @@ defmodule Complex do
   defp as_complex(%Complex{} = x), do: x
   defp as_complex(x) when is_number(x), do: new(x)
 
-  defp as_boolean(0), do: false
+  defp as_boolean(n) when n == 0, do: false
   defp as_boolean(%Complex{re: re, im: im}) when re == 0 and im == 0, do: false
   defp as_boolean(_), do: true
 end
