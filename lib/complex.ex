@@ -669,7 +669,7 @@ defmodule Complex do
   provided parameter.
 
   #### See also
-  [tan/1](#tan/1)
+  [tan/1](#tan/1), [atan2/2](#atan2/2)
 
   #### Examples
       iex> Complex.atan( Complex.from_polar(2,:math.pi) )
@@ -689,6 +689,36 @@ defmodule Complex do
     t2 = subtract(new(1.0, 0.0), multiply(i, z))
     t3 = add(new(1.0, 0.0), multiply(i, z))
     multiply(t1, subtract(ln(t2), ln(t3)))
+  end
+
+  @doc """
+  Returns the phase of the complex number `b + i*a`.
+
+  #### See also
+  [tan/1](#tan/1), [atan/1](#atan/1)
+
+  #### Examples
+      iex> phase = Complex.atan2(2, 2)
+      iex> phase == :math.pi() / 4
+      true
+
+      iex> phase = Complex.atan2(2, Complex.new(0))
+      iex> phase == Complex.new(:math.pi() / 2, 0)
+      true
+  """
+  def atan2(a, b) when is_number(a) and is_number(b), do: :math.atan2(a, b)
+
+  def atan2(a, b) do
+    a = as_complex(a)
+    b = as_complex(b)
+
+    if a.im != 0 or b.im != 0 do
+      raise ArithmeticError, "Complex.atan2 only accepts real numbers as arguments"
+    end
+
+    a.re
+    |> :math.atan2(b.re)
+    |> Complex.new()
   end
 
   @doc """
