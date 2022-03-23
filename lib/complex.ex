@@ -26,6 +26,19 @@ defmodule Complex do
   @type complex :: %Complex{re: number, im: number}
   defstruct re: 0, im: 0
 
+  defimpl Inspect do
+    def inspect(val, opts),
+      do: Complex.to_string(val, opts.custom_options[:imaginary_constant] || "i")
+  end
+
+  def to_string(%Complex{re: re, im: im}, imaginary_constant \\ "i") do
+    if im < 0 do
+      "#{re} - #{im}#{imaginary_constant}"
+    else
+      "#{re} + #{im}#{imaginary_constant}"
+    end
+  end
+
   @doc """
   Returns a new complex with specified real and imaginary components.  The
   imaginary part defaults to zero so a "real" number can be created with new/1
