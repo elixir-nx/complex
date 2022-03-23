@@ -908,7 +908,7 @@ defmodule Complex do
     end
   else
     def asinh(n) when is_number(n) do
-      :math.log(x + :math.sqrt(1 + x * x))
+      :math.log(n + :math.sqrt(1 + n * n))
     end
   end
 
@@ -1157,16 +1157,13 @@ defmodule Complex do
   @doc """
   Calculates erf(x) of the argument
   """
+
   if math_fun_supported?(:erf, 1) do
     def erf(x) when is_number(x) do
       :math.erf(x)
     end
   else
     def erf(x) when is_number(x) do
-      erf_impl(x)
-    end
-
-    defp erf_impl(x) do
       x = x |> max(-4.0) |> min(4.0)
       x2 = x * x
 
