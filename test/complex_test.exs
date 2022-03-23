@@ -102,7 +102,7 @@ defmodule ComplexTest do
     assert_close Complex.ln(a), %Complex{re: 0.8047189562170503, im: 1.1071487177940904}
     assert_close Complex.log10(a), %Complex{re: 0.3494850021680094, im: 0.480828578784234}
     assert_close Complex.log2(a), %Complex{re: 1.1609640474436813, im: 1.5972779646881088}
-    assert_close Complex.pow(a, b), %Complex{re: 0.129009594074467, im: 0.03392409290517014}
+    assert_close Complex.power(a, b), %Complex{re: 0.129009594074467, im: 0.03392409290517014}
   end
 
   test "Exp and logs (no upcasts)" do
@@ -112,7 +112,7 @@ defmodule ComplexTest do
     assert_close Complex.ln(a), :math.log(a)
     assert_close Complex.log10(a), :math.log10(a)
     assert_close Complex.log2(a), :math.log2(a)
-    assert_close Complex.pow(a, b), :math.pow(a, b)
+    assert_close Complex.power(a, b), :math.pow(a, b)
   end
 
   test "Trig functions" do

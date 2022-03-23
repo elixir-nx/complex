@@ -499,17 +499,17 @@ defmodule Complex do
   [ln/1](#ln/1), [log10/1](#log10/1)
 
   #### Examples
-      iex> Complex.pow( Complex.from_polar(2,:math.pi), Complex.imag() )
+      iex> Complex.power( Complex.from_polar(2,:math.pi), Complex.imag() )
       %Complex{im: 0.027612020368333014, re: 0.03324182700885666}
   """
-  @spec pow(complex, complex) :: complex
-  @spec pow(number, complex) :: complex
-  @spec pow(complex, number) :: complex
-  @spec pow(number, number) :: number
+  @spec power(complex, complex) :: complex
+  @spec power(number, complex) :: complex
+  @spec power(complex, number) :: complex
+  @spec power(number, number) :: number
 
-  def pow(x, y) when is_number(x) and is_number(y), do: :math.pow(x, y)
+  def power(x, y) when is_number(x) and is_number(y), do: :math.pow(x, y)
 
-  def pow(x, y) do
+  def power(x, y) do
     x = as_complex(x)
     y = as_complex(y)
 
@@ -1146,6 +1146,78 @@ defmodule Complex do
     multiply(0.5, subtract(ln(t2), ln(t3)))
   end
 
+  ### Logical Operations
+  @doc "Logical equality between two numbers"
+  def equal?(a, b), do: a == b
+
+  @doc "Logical difference between two numbers"
+  def not_equal?(a, b), do: a != b
+
+  @doc """
+  Logical AND between two numbers.
+
+  Zero is false, everything else is true.
+  """
+  def logical_and(a, b), do: as_boolean(a) and as_boolean(b)
+
+  @doc """
+  Logical OR between two numbers.
+
+  Zero is false, everything else is true.
+  """
+  def logical_or(a, b), do: as_boolean(a) or as_boolean(b)
+
+  @doc """
+  Logical XOR between two numbers.
+
+  Zero is false, everything else is true.
+  """
+  def logical_xor(a, b), do: as_boolean(a) != as_boolean(b)
+
+  @doc """
+  Component-wise `>` between two complex numbers.
+  """
+  def greater(a, b) do
+    %{re: a_re, im: a_im} = as_complex(a)
+    %{re: b_re, im: b_im} = as_complex(b)
+
+    a_re > b_re and a_im > b_im
+  end
+
+  @doc """
+  Component-wise `<` between two complex numbers.
+  """
+  def less(a, b) do
+    %{re: a_re, im: a_im} = as_complex(a)
+    %{re: b_re, im: b_im} = as_complex(b)
+
+    a_re < b_re and a_im < b_im
+  end
+
+  @doc """
+  Component-wise `>=` between two complex numbers.
+  """
+  def greater_equal(a, b) do
+    %{re: a_re, im: a_im} = as_complex(a)
+    %{re: b_re, im: b_im} = as_complex(b)
+
+    a_re >= b_re and a_im >= b_im
+  end
+
+  @doc """
+  Component-wise `<=` between two complex numbers.
+  """
+  def less_equal(a, b) do
+    %{re: a_re, im: a_im} = as_complex(a)
+    %{re: b_re, im: b_im} = as_complex(b)
+
+    a_re <= b_re and a_im <= b_im
+  end
+
   defp as_complex(%Complex{} = x), do: x
   defp as_complex(x) when is_number(x), do: new(x)
+
+  defp as_boolean(0), do: false
+  defp as_boolean(%Complex{re: 0, im: 0}), do: false
+  defp as_boolean(_), do: true
 end
