@@ -18,8 +18,6 @@ defmodule Complex do
 
   @vsn 2
 
-  @two_over_sqrt_pi 2 / :math.sqrt(:math.pi())
-
   import Kernel, except: [abs: 1]
   import Complex.CompileTimeChecks
 
