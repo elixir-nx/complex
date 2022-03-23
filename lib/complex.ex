@@ -1282,6 +1282,8 @@ defmodule Complex do
   @doc """
   Component-wise `>` between two complex numbers.
   """
+  def greater?(a, b) when is_number(a) and is_number(b), do: a > b
+
   def greater?(a, b) do
     %{re: a_re, im: a_im} = as_complex(a)
     %{re: b_re, im: b_im} = as_complex(b)
@@ -1292,6 +1294,8 @@ defmodule Complex do
   @doc """
   Component-wise `<` between two complex numbers.
   """
+  def less?(a, b) when is_number(a) and is_number(b), do: a < b
+
   def less?(a, b) do
     %{re: a_re, im: a_im} = as_complex(a)
     %{re: b_re, im: b_im} = as_complex(b)
@@ -1302,6 +1306,8 @@ defmodule Complex do
   @doc """
   Component-wise `>=` between two complex numbers.
   """
+  def greater_equal?(a, b) when is_number(a) and is_number(b), do: a >= b
+
   def greater_equal?(a, b) do
     %{re: a_re, im: a_im} = as_complex(a)
     %{re: b_re, im: b_im} = as_complex(b)
@@ -1312,6 +1318,8 @@ defmodule Complex do
   @doc """
   Component-wise `<=` between two complex numbers.
   """
+  def less_equal?(a, b) when is_number(a) and is_number(b), do: a <= b
+
   def less_equal?(a, b) do
     %{re: a_re, im: a_im} = as_complex(a)
     %{re: b_re, im: b_im} = as_complex(b)
