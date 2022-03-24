@@ -20,16 +20,13 @@ defmodule ComplexTest do
   end
 
   test "Parse from string" do
-    assert_close Complex.parse("1.0+1.0i"), %Complex{re: 1.0, im: 1.0}
-    # Test various spacing
-    assert_close Complex.parse("1.0 +1.0i"), %Complex{re: 1.0, im: 1.0}
-    assert_close Complex.parse("1.0+ 1.0i"), %Complex{re: 1.0, im: 1.0}
-    assert_close Complex.parse("1.0 + 1.0i"), %Complex{re: 1.0, im: 1.0}
+    assert_close Complex.parse("1.0+1.0i") |> elem(0), %Complex{re: 1.0, im: 1.0}
+    assert_close Complex.parse("-1+1.0i") |> elem(0), %Complex{re: -1.0, im: 1.0}
+    assert_close Complex.parse("1.+1.0i") |> elem(0), %Complex{re: 1.0, im: 1.0}
+    assert_close Complex.parse("1-1.0i") |> elem(0), %Complex{re: 1.0, im: -1.0}
 
-    # We don't handle integer values for re and im
-    assert_raise MatchError, fn -> Complex.parse("1+1i") end
-    assert_raise MatchError, fn -> Complex.parse("1+1.0i") end
-    assert_raise MatchError, fn -> Complex.parse("1.0+1i") end
+    assert :error == Complex.parse("123")
+    assert_close Complex.parse("1+1i") |> elem(0), %Complex{re: 1.0, im: 1.0}
   end
 
   test "Arithmetic" do
