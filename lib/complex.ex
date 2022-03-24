@@ -10,7 +10,7 @@ defmodule Complex do
 
   ## Examples
       iex> Complex.new(3, 4)
-      %Complex{im: 4, re: 3}
+      %Complex{im: 4.0, re: 3.0}
 
       iex> Complex.imag()
       %Complex{im: 1.0, re: 0.0}
@@ -49,13 +49,13 @@ defmodule Complex do
 
   #### Examples
       iex> Complex.new(3, 4)
-      %Complex{im: 4, re: 3}
+      %Complex{im: 4.0, re: 3.0}
 
       iex> Complex.new(2)
-      %Complex{im: 0, re: 2}
+      %Complex{im: 0.0, re: 2.0}
   """
   @spec new(number, number) :: complex
-  def new(re, im \\ 0), do: %Complex{re: re, im: im}
+  def new(re, im \\ 0), do: %Complex{re: re * 1.0, im: im * 1.0}
 
   @doc """
   Parses a complex number from a string.  The values of the real and imaginary
@@ -166,10 +166,10 @@ defmodule Complex do
         %Complex{im: 2.0, re: 1.2246467991473532e-16}
 
         iex> Complex.add( Complex.new(4, 4), 1 )
-        %Complex{im: 4, re: 5}
+        %Complex{im: 4.0, re: 5.0}
 
         iex> Complex.add( 2, Complex.new(4, 3) )
-        %Complex{im: 3, re: 6}
+        %Complex{im: 3.0, re: 6.0}
 
         iex> Complex.add(2, 3)
         5
@@ -198,13 +198,13 @@ defmodule Complex do
 
     #### Examples
         iex> Complex.subtract( Complex.new(1,2), Complex.new(3,4) )
-        %Complex{im: -2, re: 0-2}
+        %Complex{im: -2.0, re: -2.0}
 
         iex> Complex.subtract( Complex.new(1, 2), 3 )
-        %Complex{im: 2, re: -2}
+        %Complex{im: 2.0, re: -2.0}
 
         iex> Complex.subtract( 10, Complex.new(1, 2) )
-        %Complex{im: -2, re: 9}
+        %Complex{im: -2.0, re: 9.0}
   """
   @spec subtract(complex, complex) :: complex
   @spec subtract(number, complex) :: complex
@@ -227,16 +227,16 @@ defmodule Complex do
 
   #### Examples
       iex> Complex.multiply( Complex.new(1,2), Complex.new(3,4) )
-      %Complex{im: 10, re: -5}
+      %Complex{im: 10.0, re: -5.0}
 
       iex> Complex.multiply( Complex.imag(), Complex.imag() )
       %Complex{im: 0.0, re: -1.0}
 
       iex> Complex.multiply(Complex.new(1, 2), 3 )
-      %Complex{im: 6, re: 3}
+      %Complex{im: 6.0, re: 3.0}
 
       iex> Complex.multiply( 3, Complex.new(1, 2) )
-      %Complex{im: 6, re: 3}
+      %Complex{im: 6.0, re: 3.0}
   """
   @spec multiply(complex, complex) :: complex
   @spec multiply(number, complex) :: complex
@@ -359,7 +359,7 @@ defmodule Complex do
 
   #### Examples
       iex> Complex.conjugate( Complex.new(1,2) )
-      %Complex{im: -2, re: 1}
+      %Complex{im: -2.0, re: 1.0}
   """
   @spec conjugate(complex) :: complex
   @spec conjugate(number) :: number
@@ -568,7 +568,7 @@ defmodule Complex do
 
   #### Examples
       iex> Complex.negate( Complex.new(3,5) )
-      %Complex{im: -5, re: -3}
+      %Complex{im: -5.0, re: -3.0}
   """
   @spec negate(complex) :: complex
   @spec negate(number) :: number
