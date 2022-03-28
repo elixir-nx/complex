@@ -539,6 +539,7 @@ defmodule Complex do
   @spec power(complex, number) :: complex
   @spec power(number, number) :: number
 
+  def power(x, y) when is_integer(x) and is_integer(y) and y >= 0, do: Integer.pow(x, y)
   def power(x, y) when is_number(x) and is_number(y), do: :math.pow(x, y)
 
   def power(x, y) do
