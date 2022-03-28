@@ -101,27 +101,45 @@ defmodule Complex do
 
       iex> Complex.parse("1e-4-3e-3i")
       {%Complex{im: -3.0e-3, re: 1.0e-4}, ""}
+
+      iex> Complex.parse("2i")
+      {%Complex{im: 2.0, re: 0.0}, ""}
+
+      iex> Complex.parse("-3.0i")
+      {%Complex{im: -3.0, re: 0.0}, ""}
   """
   @spec parse(String.t()) :: {complex, String.t()} | :error
   def parse(str) do
-    case Regex.run(
-           ~r/([\-\+]?\d+(?:\.?\d*|e[\+\-]?\d+))([\-\+]\d+(?:\.?\d*|e[\+\-]?\d+))i(.*)/,
-           str,
-           capture: :all_but_first
-         ) do
-      [real, imag, tail] ->
-        {Complex.new(parse_component(real), parse_component(imag)), tail}
-
+    with {real_part, sign_multiplier, tail} <- parse_real(str),
+         {imag_part, tail} <- parse_imag(tail) do
+      {new(real_part, sign_multiplier * imag_part), tail}
+    else
       _ ->
-        :error
+        case parse_imag(str) do
+          :error -> :error
+          {val, tail} -> {new(0, val), tail}
+        end
     end
   end
 
-  defp parse_component(str) do
+  def parse_real(str) do
     case Float.parse(str) do
-      {val, ""} -> val
-      {val, "."} -> val
-      _ -> raise ArgumentError, "invalid complex number representation"
+      {val, ".+" <> tail} -> {val, 1, tail}
+      {val, ".-" <> tail} -> {val, -1, tail}
+      {val, "+" <> tail} -> {val, 1, tail}
+      {val, "-" <> tail} -> {val, -1, tail}
+      _ -> :error
+    end
+  end
+
+  def parse_imag("i"), do: {1, ""}
+  def parse_imag("i" <> tail), do: {1, tail}
+
+  def parse_imag(str) do
+    case Float.parse(str) do
+      {val, ".i" <> tail} -> {val, tail}
+      {val, "i" <> tail} -> {val, tail}
+      _ -> :error
     end
   end
 
