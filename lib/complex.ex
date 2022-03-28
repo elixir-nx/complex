@@ -81,8 +81,8 @@ defmodule Complex do
   def imag(), do: %Complex{re: 0.0, im: 1.0}
 
   @doc """
-  Returns a new complex number described by the supplied polar coordinates.  
-  That is, the complex (real and imaginary) will have radius (magnitude) r 
+  Returns a new complex number described by the supplied polar coordinates.
+  That is, the complex (real and imaginary) will have radius (magnitude) r
   and angle (phase) phi.
 
   #### See also
@@ -504,10 +504,10 @@ defmodule Complex do
 
   #### Examples
       iex> Complex.asin( Complex.fromPolar(2,:math.pi) )
-      %Complex{im: 1.3169578969248164, re: -1.5707963267948963}
+      %Complex{im: 1.3169578969248164, re: -1.5707963267948966}
 
       iex> Complex.sin( Complex.asin(Complex.new(2,3)) )
-      %Complex{im: 3.000000000000001, re: 1.9999999999999991}
+      %Complex{im: 3.0000000000000004, re: 1.9999999999999991}
   """
   @spec asin(complex) :: complex
   def asin(z = %Complex{}) do
@@ -549,7 +549,7 @@ defmodule Complex do
       %Complex{im: 1.3169578969248164, re: -3.141592653589793}
 
       iex> Complex.cos( Complex.acos(Complex.new(2,3)) )
-      %Complex{im: 3.0, re: 2.0000000000000004}
+      %Complex{im: 2.9999999999999996, re: 2.0000000000000004}
   """
   @spec acos(complex) :: complex
   def acos(z = %Complex{}) do
@@ -627,7 +627,7 @@ defmodule Complex do
       %Complex{im: -9.71445146547012e-17, re: -0.46364760900080615}
 
       iex> Complex.cot( Complex.acot(Complex.new(2,3)) )
-      %Complex{im: 2.9999999999999996, re: 1.9999999999999991}
+      %Complex{im: 3.0, re: 1.9999999999999991}
   """
   @spec acot(complex) :: complex
   def acot(z = %Complex{}) do
@@ -666,7 +666,7 @@ defmodule Complex do
       %Complex{im: 0.0, re: 2.0943951023931957}
 
       iex> Complex.sec( Complex.asec(Complex.new(2,3)) )
-      %Complex{im: 2.9999999999999987, re: 1.9999999999999987}
+      %Complex{im: 2.9999999999999982, re: 1.9999999999999987}
   """
   @spec asec(complex) :: complex
   def asec(z = %Complex{}) do
@@ -711,7 +711,7 @@ defmodule Complex do
       %Complex{im: 0.0, re: -0.5235987755982988}
 
       iex> Complex.csc( Complex.acsc(Complex.new(2,3)) )
-      %Complex{im: 2.9999999999999996, re: 1.9999999999999993}
+      %Complex{im: 2.9999999999999996, re: 1.9999999999999991}
   """
   @spec acsc(complex) :: complex
   def acsc(z = %Complex{}) do
@@ -756,7 +756,7 @@ defmodule Complex do
       %Complex{im: 1.0953573965284052e-16, re: -1.4436354751788099}
 
       iex> Complex.sinh( Complex.asinh(Complex.new(2,3)) )
-      %Complex{im: 3.0, re: 2.000000000000001}
+      %Complex{im: 3.0, re: 2.0000000000000004}
   """
   @spec asinh(complex) :: complex
   def asinh(z = %Complex{}) do
