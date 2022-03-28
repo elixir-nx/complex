@@ -19,7 +19,25 @@ defmodule Complex do
   @vsn 2
 
   import Kernel, except: [abs: 1]
-  import Complex.CompileTimeChecks
+
+  math_fun_supported? = fn fun, arity ->
+    Code.ensure_loaded?(:math) and
+      try do
+        args =
+          case {fun, arity} do
+            {:atan, 1} -> [3.14]
+            {:atanh, 1} -> [0.9]
+            {_, 1} -> [1.0]
+            {_, 2} -> [1.0, 1.0]
+          end
+
+        _ = apply(:math, fun, args)
+        true
+      rescue
+        UndefinedFunctionError ->
+          false
+      end
+  end
 
   @typedoc """
   General type for complex numbers
@@ -934,7 +952,7 @@ defmodule Complex do
   @spec asinh(complex) :: complex
   @spec asinh(number) :: number
 
-  if math_fun_supported?(:asinh, 1) do
+  if math_fun_supported?.(:asinh, 1) do
     def asinh(n) when is_number(n) do
       :math.asinh(n)
     end
@@ -987,7 +1005,7 @@ defmodule Complex do
   # Windows apparently doesn't support :math.acosh
   @spec acosh(complex) :: complex
   @spec acosh(number) :: number
-  if math_fun_supported?(:acosh, 1) do
+  if math_fun_supported?.(:acosh, 1) do
     def acosh(n) when is_number(n), do: :math.acosh(n)
   else
     def acosh(n) when is_number(n) do
@@ -1039,7 +1057,7 @@ defmodule Complex do
   """
   @spec atanh(complex) :: complex
   @spec atanh(number) :: number
-  if math_fun_supported?(:atanh, 1) do
+  if math_fun_supported?.(:atanh, 1) do
     def atanh(n) when is_number(n), do: :math.atanh(n)
   else
     def atanh(n) when is_number(n) do
@@ -1190,7 +1208,7 @@ defmodule Complex do
   Calculates erf(x) of the argument
   """
 
-  if math_fun_supported?(:erf, 1) do
+  if math_fun_supported?.(:erf, 1) do
     def erf(x) when is_number(x) do
       :math.erf(x)
     end
@@ -1229,7 +1247,7 @@ defmodule Complex do
     Complex.new(erf(re))
   end
 
-  if math_fun_supported?(:erfc, 1) do
+  if math_fun_supported?.(:erfc, 1) do
     def erfc(z) when is_number(z), do: :math.erfc(z)
   end
 
