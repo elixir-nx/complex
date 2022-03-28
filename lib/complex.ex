@@ -46,15 +46,15 @@ defmodule Complex do
   defstruct re: 0, im: 0
 
   defimpl Inspect do
-    def inspect(val, opts),
-      do: Complex.to_string(val, opts.custom_options[:imaginary_constant] || "i")
+    def inspect(val, _opts),
+      do: Complex.to_string(val)
   end
 
-  def to_string(%Complex{re: re, im: im}, imaginary_constant \\ "i") do
+  def to_string(%Complex{re: re, im: im}) do
     if im < 0 do
-      "#{re} - #{abs(im)}#{imaginary_constant}"
+      "#{re}-#{abs(im)}i"
     else
-      "#{re} + #{im}#{imaginary_constant}"
+      "#{re}+#{im}i"
     end
   end
 
