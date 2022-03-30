@@ -1405,8 +1405,9 @@ defmodule Complex do
 
   ### Examples
 
-      iex> Complex.erf(0.5)
-      0.5204998778130465
+      iex> x = Complex.erf(0.5)
+      iex> Float.round(x, 5)
+      0.52050
 
       iex> z = Complex.erf(Complex.new(-0.5))
       iex> z.im
