@@ -1466,11 +1466,15 @@ defmodule Complex do
 
   ### Examples
 
-      iex> Complex.erfc(0.5)
-      0.4795001221869535
+      iex> x = Complex.erfc(0.5)
+      iex> Float.round(x, 5)
+      0.47950
 
-      iex> Complex.erfc(Complex.new(-0.5))
-      %Complex{im: 0.0, re: 1.5204998778130465}
+      iex> z = Complex.erfc(Complex.new(-0.5))
+      iex> z.im
+      0.0
+      iex> Float.round(z.re, 5)
+      1.52050
 
       iex> Complex.erfc(Complex.new(1, 1))
       ** (ArithmeticError) erfc not implemented for non-real numbers
