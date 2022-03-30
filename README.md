@@ -34,9 +34,9 @@ This will generate the HTML documentation and place it into the `doc` subdirecto
 ## Examples
 ```elixir
 iex> Complex.new(3, 4)
-%Complex{im: 4, re: 3}
+%Complex{im: 4.0, re: 3.0}
 
-iex> Complex.imag()
+iex> Complex.new(0, 1)
 %Complex{im: 1.0, re: 0.0}
 ```
 
