@@ -1,18 +1,22 @@
 defmodule Complex do
   @moduledoc """
-  *Complex* is a library for types and mathematical functions for complex
-  numbers.
+  *Complex* is a library that brings complex number support to Elixir.
 
-  Each complex number is represented as a structure holding the real and
-  imaginary part.  There are functions for creation and manipulation of
-  them.  Unfortunately since there is no operator overloading in Elixir the
-  math functions (add, subtract, etc.) are implemented as add/2, subtract/2, etc.
+  Each complex number is represented as a `%Complex{}` struct, that holds
+  the real and imaginary parts. There are functions for the creation and
+  manipulation of complex numbers.
 
-  ## Examples
+  This module implements mathematical functions such as `add/2`, `subtract/2`,
+  `divide/2`, and `multiply/2` that subtitute the `+`, `-`, `/` and `*` operators.
+
+  Operator overloading is provided through `Complex.Kernel`
+
+  ### Examples
+
       iex> Complex.new(3, 4)
       %Complex{im: 4.0, re: 3.0}
 
-      iex> Complex.imag()
+      iex> Complex.new(0, 1)
       %Complex{im: 1.0, re: 0.0}
   """
 
@@ -40,9 +44,9 @@ defmodule Complex do
   end
 
   @typedoc """
-  General type for complex numbers
+  A complex number represented as a `%Complex{}` struct.
   """
-  @type complex :: %Complex{re: number, im: number}
+  @type t :: %Complex{re: number, im: number}
   defstruct re: 0, im: 0
 
   defimpl Inspect do
@@ -50,6 +54,13 @@ defmodule Complex do
       do: Complex.to_string(val)
   end
 
+  defimpl String.Chars do
+    def to_string(%Complex{} = z), do: Complex.to_string(z)
+  end
+
+  @doc """
+  Conveniency function that is used to implement the `String.Chars` and `Inspect` protocols.
+  """
   def to_string(%Complex{re: re, im: im}) do
     if im < 0 do
       "#{re}-#{abs(im)}i"
@@ -59,20 +70,23 @@ defmodule Complex do
   end
 
   @doc """
-  Returns a new complex with specified real and imaginary components.  The
-  imaginary part defaults to zero so a "real" number can be created with new/1
+  Returns a new complex with specified real and imaginary components. The
+  imaginary part defaults to zero so a real number can be created with `new/1`.
 
-  #### See also
-  [imag/0](#imag/0) [from_polar/2](#from_polar/2)
+  ### See also
 
-  #### Examples
+  `from_polar/2`
+
+  ### Examples
+
       iex> Complex.new(3, 4)
       %Complex{im: 4.0, re: 3.0}
 
       iex> Complex.new(2)
       %Complex{im: 0.0, re: 2.0}
+
   """
-  @spec new(number, number) :: complex
+  @spec new(number, number) :: t
   def new(re, im \\ 0), do: %Complex{re: re * 1.0, im: im * 1.0}
 
   @doc """
@@ -80,10 +94,12 @@ defmodule Complex do
   parts must be represented by a float, including decimal and at least one
   trailing digit (e.g. 1.2, 0.4).
 
-  #### See also
-  [new/2](#new/2)
+  ### See also
 
-  #### Examples
+  `new/2`
+
+  ### Examples
+
       iex> Complex.parse("1.1+2.2i")
       {%Complex{im: 2.2, re: 1.1}, ""}
 
@@ -107,8 +123,9 @@ defmodule Complex do
 
       iex> Complex.parse("-3.0i")
       {%Complex{im: -3.0, re: 0.0}, ""}
+
   """
-  @spec parse(String.t()) :: {complex, String.t()} | :error
+  @spec parse(String.t()) :: {t, String.t()} | :error
   def parse(str) do
     with {real_part, sign_multiplier, tail} <- parse_real(str),
          {imag_part, tail} <- parse_imag(tail) do
@@ -143,39 +160,28 @@ defmodule Complex do
     end
   end
 
-  @doc """
-  Returns a new complex representing the pure imaginary number sqrt(-1).
+  @doc ~S"""
+  Turns a representation in polar coordinates $r\phase\phi$, into
+  the complex number $z = r.cos(\phi) + r.sin(\phi) i$
 
-  #### See also
-  [new/2](#new/2) [from_polar/2](#from_polar/2)
+  ### See also
 
-  #### Examples
-      iex> Complex.imag()
-      %Complex{im: 1.0, re: 0.0}
-  """
-  @spec imag() :: complex
-  def imag(), do: %Complex{re: 0.0, im: 1.0}
+  `new/2`
 
-  @doc """
-  Returns a new complex number described by the supplied polar coordinates.
-  That is, the complex (real and imaginary) will have radius (magnitude) r
-  and angle (phase) phi.
+  ### Examples
 
-  #### See also
-  [new/2](#new/2) [imag/0](#imag/0)
-
-  #### Examples
       iex> Complex.from_polar(1, :math.pi/2)
       %Complex{im: 1.0, re: 6.123233995736766e-17}
 
       iex> polar = Complex.to_polar(%Complex{re: 6, im: 20})
       iex> Complex.from_polar(polar)
       %Complex{im: 20.0, re: 6.0}
+
   """
-  @spec from_polar({number, number}) :: complex
+  @spec from_polar({number, number}) :: t
   def from_polar({r, phi}), do: from_polar(r, phi)
 
-  @spec from_polar(number, number) :: complex
+  @spec from_polar(number, number) :: t
   def from_polar(r, phi) do
     new(r * :math.cos(phi), r * :math.sin(phi))
   end
@@ -183,15 +189,20 @@ defmodule Complex do
   @doc """
   Returns the phase angle of the supplied complex, in radians.
 
-  #### See also
-  [new/2](#new/2) [from_polar/2](#from_polar/2)
+  ### See also
 
-  #### Examples
-      iex> Complex.phase( Complex.from_polar(1,:math.pi/2) )
+  `new/2`, `from_polar/2`
+
+  ### Examples
+
+      iex> Complex.phase(Complex.from_polar(1,:math.pi/2))
       1.5707963267948966
+
   """
-  @spec phase(complex) :: float
+  @spec phase(t) :: float
   @spec phase(number) :: number
+  def phase(z)
+
   def phase(n) when n < 0, do: :math.pi()
   def phase(n) when is_number(n), do: 0
 
@@ -203,15 +214,18 @@ defmodule Complex do
   Returns the polar coordinates of the supplied complex.  That is, the
   returned tuple {r,phi} is the magnitude and phase (in radians) of z.
 
-  #### See also
-  [from_polar/2](#from_polar/2)
+  ### See also
 
-  #### Examples
-      iex> Complex.to_polar( Complex.from_polar(1,:math.pi/2) )
+  `from_polar/2`
+
+  ### Examples
+
+      iex> Complex.to_polar(Complex.from_polar(1,:math.pi/2))
       {1.0, 1.5707963267948966}
+
   """
-  @spec to_polar(complex) :: {float, float}
-  def to_polar(complex)
+  @spec to_polar(t) :: {float, float}
+  def to_polar(t)
 
   def to_polar(z = %Complex{}) do
     {abs(z), phase(z)}
@@ -222,31 +236,34 @@ defmodule Complex do
   def to_polar(n), do: {n, 0}
 
   @doc """
-    Returns a new complex that is the sum of the provided complex numbers.  Also
-    supports a mix of complex and number.
+  Returns a new complex that is the sum of the provided complex numbers.  Also
+  supports a mix of complex and number.
 
-    #### See also
-    [div/2](#div/2), [multiply/2](#multiply/2), [subtract/2](#subtract/2)
+  ### See also
 
-    #### Examples
-        iex> Complex.add( Complex.from_polar(1, :math.pi/2), Complex.from_polar(1, :math.pi/2) )
-        %Complex{im: 2.0, re: 1.2246467991473532e-16}
+  `div/2`, `multiply/2`, `subtract/2`
 
-        iex> Complex.add( Complex.new(4, 4), 1 )
-        %Complex{im: 4.0, re: 5.0}
+  ### Examples
 
-        iex> Complex.add( 2, Complex.new(4, 3) )
-        %Complex{im: 3.0, re: 6.0}
+      iex> Complex.add(Complex.from_polar(1, :math.pi/2), Complex.from_polar(1, :math.pi/2))
+      %Complex{im: 2.0, re: 1.2246467991473532e-16}
 
-        iex> Complex.add(2, 3)
-        5
+      iex> Complex.add(Complex.new(4, 4), 1)
+      %Complex{im: 4.0, re: 5.0}
 
-        iex> Complex.add(2.0, 2)
-        4.0
+      iex> Complex.add(2, Complex.new(4, 3))
+      %Complex{im: 3.0, re: 6.0}
+
+      iex> Complex.add(2, 3)
+      5
+
+      iex> Complex.add(2.0, 2)
+      4.0
+
   """
-  @spec add(complex, complex) :: complex
-  @spec add(number, complex) :: complex
-  @spec add(complex, number) :: complex
+  @spec add(t, t) :: t
+  @spec add(number, t) :: t
+  @spec add(t, number) :: t
   @spec add(number, number) :: number
   def add(left, right) when is_number(left) and is_number(right), do: left + right
 
@@ -257,25 +274,28 @@ defmodule Complex do
   end
 
   @doc """
-    Returns a new complex that is the difference of the provided complex numbers.
-    Also supports a mix of complex and number.
+  Returns a new complex that is the difference of the provided complex numbers.
+  Also supports a mix of complex and number.
 
-    #### See also
-    [add/2](#add/2), [div/2](#div/2), [multiply/2](#multiply/2)
+  ### See also
 
-    #### Examples
-        iex> Complex.subtract( Complex.new(1,2), Complex.new(3,4) )
-        %Complex{im: -2.0, re: -2.0}
+  `add/2`, `div/2`, `multiply/2`
 
-        iex> Complex.subtract( Complex.new(1, 2), 3 )
-        %Complex{im: 2.0, re: -2.0}
+  ### Examples
 
-        iex> Complex.subtract( 10, Complex.new(1, 2) )
-        %Complex{im: -2.0, re: 9.0}
+      iex> Complex.subtract(Complex.new(1,2), Complex.new(3,4))
+      %Complex{im: -2.0, re: -2.0}
+
+      iex> Complex.subtract(Complex.new(1, 2), 3)
+      %Complex{im: 2.0, re: -2.0}
+
+      iex> Complex.subtract(10, Complex.new(1, 2))
+      %Complex{im: -2.0, re: 9.0}
+
   """
-  @spec subtract(complex, complex) :: complex
-  @spec subtract(number, complex) :: complex
-  @spec subtract(complex, number) :: complex
+  @spec subtract(t, t) :: t
+  @spec subtract(number, t) :: t
+  @spec subtract(t, number) :: t
   @spec subtract(number, number) :: number
   def subtract(left, right) when is_number(left) and is_number(right), do: left - right
 
@@ -289,25 +309,28 @@ defmodule Complex do
   Returns a new complex that is the product of the provided complex numbers.
   Also supports a mix of complex and number.
 
-  #### See also
-  [add/2](#add/2), [div/2](#div/2), [subtract/2](#subtract/2)
+  ### See also
 
-  #### Examples
-      iex> Complex.multiply( Complex.new(1,2), Complex.new(3,4) )
+  `add/2`, `div/2`, `subtract/2`
+
+  ### Examples
+
+      iex> Complex.multiply(Complex.new(1,2), Complex.new(3,4))
       %Complex{im: 10.0, re: -5.0}
 
-      iex> Complex.multiply( Complex.imag(), Complex.imag() )
+      iex> Complex.multiply(Complex.new(0, 1), Complex.new(0, 1))
       %Complex{im: 0.0, re: -1.0}
 
-      iex> Complex.multiply(Complex.new(1, 2), 3 )
+      iex> Complex.multiply(Complex.new(1, 2), 3)
       %Complex{im: 6.0, re: 3.0}
 
-      iex> Complex.multiply( 3, Complex.new(1, 2) )
+      iex> Complex.multiply(3, Complex.new(1, 2))
       %Complex{im: 6.0, re: 3.0}
+
   """
-  @spec multiply(complex, complex) :: complex
-  @spec multiply(number, complex) :: complex
-  @spec multiply(complex, number) :: complex
+  @spec multiply(t, t) :: t
+  @spec multiply(number, t) :: t
+  @spec multiply(t, number) :: t
   @spec multiply(number, number) :: number
   def multiply(left, right) when is_number(left) and is_number(right), do: left * right
 
@@ -320,17 +343,20 @@ defmodule Complex do
   @doc """
   Returns a new complex that is the square of the provided complex number.
 
-  #### See also
-  [multiply/2](#multiply/2)
+  ### See also
 
-  #### Examples
-      iex> Complex.square( Complex.new(2.0, 0.0) )
+  `multiply/2`
+
+  ### Examples
+
+      iex> Complex.square(Complex.new(2.0, 0.0))
       %Complex{im: 0.0, re: 4.0}
 
-      iex> Complex.square( Complex.imag() )
+      iex> Complex.square(Complex.new(0, 1))
       %Complex{im: 0.0, re: -1.0}
+
   """
-  @spec square(complex) :: complex
+  @spec square(t) :: t
   @spec square(number) :: number
   def square(z), do: multiply(z, z)
 
@@ -338,16 +364,19 @@ defmodule Complex do
   Returns a new complex that is the ratio (division) of the provided complex
   numbers.
 
-  #### See also
-  [add/2](#add/2), [multiply/2](#multiply/2), [subtract/2](#subtract/2)
+  ### See also
 
-  #### Examples
-      iex> Complex.divide( Complex.from_polar(1, :math.pi/2), Complex.from_polar(1, :math.pi/2) )
+  `add/2`, `multiply/2`, `subtract/2`
+
+  ### Examples
+
+      iex> Complex.divide(Complex.from_polar(1, :math.pi/2), Complex.from_polar(1, :math.pi/2))
       %Complex{im: 0.0, re: 1.0}
+
   """
-  @spec divide(complex, complex) :: complex
-  @spec divide(number, complex) :: complex
-  @spec divide(complex, number) :: complex
+  @spec divide(t, t) :: t
+  @spec divide(number, t) :: t
+  @spec divide(t, number) :: t
   @spec divide(number, number) :: number
 
   def divide(x, y) when is_number(x) and is_number(y), do: x / y
@@ -370,15 +399,20 @@ defmodule Complex do
   @doc """
   Returns the magnitude (length) of the provided complex number.
 
-  #### See also
-  [new/2](#new/2), [phase/1](#phase/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.abs( Complex.from_polar(1, :math.pi/2) )
+  `new/2`, `phase/1`
+
+  ### Examples
+
+      iex> Complex.abs(Complex.from_polar(1, :math.pi/2))
       1.0
+
   """
-  @spec abs(complex) :: number
+  @spec abs(t) :: number
   @spec abs(number) :: number
+  def abs(z)
+
   def abs(n) when is_number(n), do: Kernel.abs(n)
 
   def abs(%Complex{re: r, im: i}) do
@@ -399,18 +433,23 @@ defmodule Complex do
 
   The square of the magnitude is faster to compute---no square roots!
 
-  #### See also
-  [new/2](#new/2), [abs/1](#abs/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.abs_squared( Complex.from_polar(1, :math.pi/2) )
+  `new/2`, `abs/1`
+
+  ### Examples
+
+      iex> Complex.abs_squared(Complex.from_polar(1, :math.pi/2))
       1.0
 
-      iex> Complex.abs_squared( Complex.from_polar(2, :math.pi/2) )
+      iex> Complex.abs_squared(Complex.from_polar(2, :math.pi/2))
       4.0
+
   """
-  @spec abs_squared(complex) :: number
+  @spec abs_squared(t) :: number
   @spec abs_squared(number) :: number
+  def abs_squared(z)
+
   def abs_squared(n) when is_number(n), do: n * n
 
   def abs_squared(%Complex{re: r, im: i}) do
@@ -421,15 +460,22 @@ defmodule Complex do
   Returns a new complex that is the complex conjugate of the provided complex
   number.
 
-  #### See also
-  [abs/2](#abs/2), [phase/1](#phase/1)
+  If $z = a + bi$, $conjugate(z) = z^* = a - bi$
 
-  #### Examples
-      iex> Complex.conjugate( Complex.new(1,2) )
+  ### See also
+
+  `abs/2`, `phase/1`
+
+  ### Examples
+
+      iex> Complex.conjugate(Complex.new(1,2))
       %Complex{im: -2.0, re: 1.0}
+
   """
-  @spec conjugate(complex) :: complex
+  @spec conjugate(t) :: t
   @spec conjugate(number) :: number
+  def conjugate(z)
+
   def conjugate(n) when is_number(n), do: n
 
   def conjugate(%Complex{re: r, im: i}) do
@@ -440,15 +486,19 @@ defmodule Complex do
   Returns a new complex that is the complex square root of the provided
   complex number.
 
-  #### See also
-  [abs/2](#abs/2), [phase/1](#phase/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.sqrt( Complex.from_polar(2,:math.pi) )
+  `abs/2`, `phase/1`
+
+  ### Examples
+
+      iex> Complex.sqrt(Complex.from_polar(2,:math.pi))
       %Complex{im: 1.4142135623730951, re: 8.659560562354933e-17}
+
   """
-  @spec sqrt(complex) :: complex
+  @spec sqrt(t) :: t
   @spec sqrt(number) :: number
+  def sqrt(z)
   def sqrt(n) when is_number(n), do: :math.sqrt(n)
 
   def sqrt(z = %Complex{re: r, im: i}) do
@@ -482,17 +532,21 @@ defmodule Complex do
 
   @doc """
   Returns a new complex that is the complex exponential of the provided
-  complex number.  That is, e raised to the power z.
+  complex number: $exp(z) = e^z$.
 
-  #### See also
-  [ln/1](#ln/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.exp( Complex.from_polar(2,:math.pi) )
+  `ln/1`
+
+  ### Examples
+
+      iex> Complex.exp(Complex.from_polar(2,:math.pi))
       %Complex{im: 3.3147584285483636e-17, re: 0.1353352832366127}
+
   """
-  @spec exp(complex) :: complex
+  @spec exp(t) :: t
   @spec exp(number) :: number
+  def exp(z)
   def exp(n) when is_number(n), do: :math.exp(n)
 
   def exp(z = %Complex{}) do
@@ -503,16 +557,20 @@ defmodule Complex do
 
   @doc """
   Returns a new complex that is the complex natural log of the provided
-  complex number.  That is, log base e of z.
+  complex number, $ln(z) = log_e(z)$.
 
-  #### See also
-  [exp/1](#exp/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.ln( Complex.from_polar(2,:math.pi) )
+  `exp/1`
+
+  ### Examples
+
+      iex> Complex.ln(Complex.from_polar(2,:math.pi))
       %Complex{im: 3.141592653589793, re: 0.6931471805599453}
+
   """
-  @spec ln(complex) :: complex
+  @spec ln(t) :: t
+  def ln(z)
   def ln(n) when is_number(n), do: :math.log(n)
 
   def ln(z = %Complex{}) do
@@ -523,15 +581,19 @@ defmodule Complex do
   Returns a new complex that is the complex log base 10 of the provided
   complex number.
 
-  #### See also
-  [ln/1](#ln/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.log10( Complex.from_polar(2,:math.pi) )
+  `ln/1`
+
+  ### Examples
+
+      iex> Complex.log10(Complex.from_polar(2,:math.pi))
       %Complex{im: 1.3643763538418412, re: 0.30102999566398114}
+
   """
-  @spec log10(complex) :: complex
+  @spec log10(t) :: t
   @spec log10(number) :: number
+  def log10(z)
 
   def log10(n) when is_number(n), do: :math.log10(n)
 
@@ -543,15 +605,19 @@ defmodule Complex do
   Returns a new complex that is the complex log base 2 of the provided
   complex number.
 
-  #### See also
-  [ln/1](#ln/1), [log10/1](#log10/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.log2( Complex.from_polar(2,:math.pi) )
+  `ln/1`, `log10/1`
+
+  ### Examples
+
+      iex> Complex.log2(Complex.from_polar(2,:math.pi))
       %Complex{im: 4.532360141827194, re: 1.0}
+
   """
-  @spec log2(complex) :: complex
+  @spec log2(t) :: t
   @spec log2(number) :: number
+  def log2(z)
 
   def log2(n) when is_number(n), do: :math.log2(n)
 
@@ -563,16 +629,19 @@ defmodule Complex do
   Returns a new complex that is the provided parameter a raised to the
   complex power b.
 
-  #### See also
-  [ln/1](#ln/1), [log10/1](#log10/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.power( Complex.from_polar(2,:math.pi), Complex.imag() )
+  `ln/1`, `log10/1`
+
+  ### Examples
+
+      iex> Complex.power(Complex.from_polar(2,:math.pi), Complex.new(0, 1))
       %Complex{im: 0.027612020368333014, re: 0.03324182700885666}
+
   """
-  @spec power(complex, complex) :: complex
-  @spec power(number, complex) :: complex
-  @spec power(complex, number) :: complex
+  @spec power(t, t) :: t
+  @spec power(number, t) :: t
+  @spec power(t, number) :: t
   @spec power(number, number) :: number
 
   def power(x, y) when is_integer(x) and is_integer(y) and y >= 0, do: Integer.pow(x, y)
@@ -608,15 +677,19 @@ defmodule Complex do
   @doc """
   Returns a new complex that is the sine of the provided parameter.
 
-  #### See also
-  [cos/1](#cos/1), [tan/1](#tan/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.sin( Complex.from_polar(2,:math.pi) )
+  `cos/1`, `tan/1`
+
+  ### Examples
+
+      iex> Complex.sin(Complex.from_polar(2,:math.pi))
       %Complex{im: -1.0192657827055095e-16, re: -0.9092974268256817}
+
   """
-  @spec sin(complex) :: complex
+  @spec sin(t) :: t
   @spec sin(number) :: number
+  def sin(z)
 
   def sin(n) when is_number(n), do: :math.sin(n)
 
@@ -631,15 +704,20 @@ defmodule Complex do
   Returns a new complex that is the "negation" of the provided parameter.
   That is, the real and imaginary parts are negated.
 
-  #### See also
-  [neq/2](#new/2), [imag/0](#imag/0)
+  ### See also
 
-  #### Examples
-      iex> Complex.negate( Complex.new(3,5) )
+  `new/2`
+
+  ### Examples
+
+      iex> Complex.negate(Complex.new(3,5))
       %Complex{im: -5.0, re: -3.0}
+
   """
-  @spec negate(complex) :: complex
+  @spec negate(t) :: t
   @spec negate(number) :: number
+  def negate(z)
+
   def negate(n) when is_number(n), do: -n
 
   def negate(z = %Complex{}) do
@@ -650,15 +728,20 @@ defmodule Complex do
   Returns a new complex that is the inverse sine (i.e., arcsine) of the
   provided parameter.
 
-  #### See also
-  [sin/1](#sin/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.asin( Complex.from_polar(2,:math.pi) )
+  `sin/1`
+
+  ### Examples
+
+      iex> Complex.asin(Complex.from_polar(2,:math.pi))
       %Complex{im: 1.3169578969248164, re: -1.5707963267948966}
+
   """
-  @spec asin(complex) :: complex
+  @spec asin(t) :: t
   @spec asin(number) :: number
+  def asin(z)
+
   def asin(n) when is_number(n), do: :math.asin(n)
 
   def asin(z = %Complex{}) do
@@ -673,15 +756,20 @@ defmodule Complex do
   @doc """
   Returns a new complex that is the cosine of the provided parameter.
 
-  #### See also
-  [sin/1](#sin/1), [tan/1](#tan/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.cos( Complex.from_polar(2,:math.pi) )
+  `sin/1`, `tan/1`
+
+  ### Examples
+
+      iex> Complex.cos(Complex.from_polar(2,:math.pi))
       %Complex{im: 2.2271363664699914e-16, re: -0.4161468365471424}
+
   """
-  @spec cos(complex) :: complex
+  @spec cos(t) :: t
   @spec cos(number) :: number
+  def cos(z)
+
   def cos(n) when is_number(n), do: :math.cos(n)
 
   def cos(z = %Complex{}) do
@@ -695,15 +783,20 @@ defmodule Complex do
   Returns a new complex that is the inverse cosine (i.e., arccosine) of the
   provided parameter.
 
-  #### See also
-  [cos/1](#cos/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.acos( Complex.from_polar(2,:math.pi) )
+  `cos/1`
+
+  ### Examples
+
+      iex> Complex.acos(Complex.from_polar(2,:math.pi))
       %Complex{im: 1.3169578969248164, re: -3.141592653589793}
+
   """
-  @spec acos(complex) :: complex
+  @spec acos(t) :: t
   @spec acos(number) :: number
+  def acos(z)
+
   def acos(n) when is_number(n), do: :math.acos(n)
 
   def acos(z = %Complex{}) do
@@ -718,15 +811,20 @@ defmodule Complex do
   @doc """
   Returns a new complex that is the tangent of the provided parameter.
 
-  #### See also
-  [sin/1](#sin/1), [cos/1](#cos/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.tan( Complex.from_polar(2,:math.pi) )
+  `sin/1`, `cos/1`
+
+  ### Examples
+
+      iex> Complex.tan(Complex.from_polar(2,:math.pi))
       %Complex{im: 1.4143199004457917e-15, re: 2.185039863261519}
+
   """
-  @spec tan(complex) :: complex
+  @spec tan(t) :: t
   @spec tan(number) :: number
+  def tan(z)
+
   def tan(n) when is_number(n), do: :math.tan(n)
 
   def tan(z = %Complex{}) do
@@ -737,18 +835,23 @@ defmodule Complex do
   Returns a new complex that is the inverse tangent (i.e., arctangent) of the
   provided parameter.
 
-  #### See also
-  [tan/1](#tan/1), [atan2/2](#atan2/2)
+  ### See also
 
-  #### Examples
-      iex> Complex.atan( Complex.from_polar(2,:math.pi) )
+  `tan/1`, `atan2/2`
+
+  ### Examples
+
+      iex> Complex.atan(Complex.from_polar(2,:math.pi))
       %Complex{im: 0.0, re: -1.1071487177940904}
 
-      iex> Complex.tan( Complex.atan(Complex.new(2,3)) )
+      iex> Complex.tan(Complex.atan(Complex.new(2,3)))
       %Complex{im: 3.0, re: 2.0}
+
   """
-  @spec atan(complex) :: complex
+  @spec atan(t) :: t
   @spec atan(number) :: number
+  def atan(z)
+
   def atan(n) when is_number(n), do: :math.atan(n)
 
   def atan(z = %Complex{}) do
@@ -761,12 +864,14 @@ defmodule Complex do
   end
 
   @doc """
-  Returns the phase of the complex number `b + i*a`.
+  $atan2(b, a)$ returns the phase of the complex number $a + bi$.
 
-  #### See also
-  [tan/1](#tan/1), [atan/1](#atan/1)
+  ### See also
 
-  #### Examples
+  `tan/1`, `atan/1`
+
+  ### Examples
+
       iex> phase = Complex.atan2(2, 2)
       iex> phase == :math.pi() / 4
       true
@@ -774,34 +879,40 @@ defmodule Complex do
       iex> phase = Complex.atan2(2, Complex.new(0))
       iex> phase == Complex.new(:math.pi() / 2, 0)
       true
-  """
-  def atan2(a, b) when is_number(a) and is_number(b), do: :math.atan2(a, b)
 
-  def atan2(a, b) do
+  """
+  def atan2(b, a) when is_number(a) and is_number(b), do: :math.atan2(b, a)
+
+  def atan2(b, a) do
     a = as_complex(a)
     b = as_complex(b)
 
-    if a.im != 0 or b.im != 0 do
+    if b.im != 0 or a.im != 0 do
       raise ArithmeticError, "Complex.atan2 only accepts real numbers as arguments"
     end
 
-    a.re
-    |> :math.atan2(b.re)
+    b.re
+    |> :math.atan2(a.re)
     |> Complex.new()
   end
 
   @doc """
   Returns a new complex that is the cotangent of the provided parameter.
 
-  #### See also
-  [sin/1](#sin/1), [cos/1](#cos/1), [tan/1](#tan/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.cot( Complex.from_polar(2,:math.pi) )
+  `sin/1`, `cos/1`, `tan/1`
+
+  ### Examples
+
+      iex> Complex.cot(Complex.from_polar(2,:math.pi))
       %Complex{im: -2.9622992129532336e-16, re: 0.45765755436028577}
+
   """
-  @spec cot(complex) :: complex
+  @spec cot(t) :: t
   @spec cot(number) :: number
+  def cot(z)
+
   def cot(n) when is_number(n), do: 1 / :math.tan(n)
 
   def cot(z = %Complex{}) do
@@ -812,18 +923,23 @@ defmodule Complex do
   Returns a new complex that is the inverse cotangent (i.e., arccotangent) of
   the provided parameter.
 
-  #### See also
-  [cot/1](#cot/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.acot( Complex.from_polar(2,:math.pi) )
+  `cot/1`
+
+  ### Examples
+
+      iex> Complex.acot(Complex.from_polar(2,:math.pi))
       %Complex{im: -9.71445146547012e-17, re: -0.46364760900080615}
 
-      iex> Complex.cot( Complex.acot(Complex.new(2,3)) )
+      iex> Complex.cot(Complex.acot(Complex.new(2,3)))
       %Complex{im: 3.0, re: 1.9999999999999991}
+
   """
-  @spec acot(complex) :: complex
+  @spec acot(t) :: t
   @spec acot(number) :: number
+  def acot(z)
+
   def acot(n) when is_number(n), do: :math.atan(1 / n)
 
   def acot(z = %Complex{}) do
@@ -838,14 +954,17 @@ defmodule Complex do
   @doc """
   Returns a new complex that is the secant of the provided parameter.
 
-  #### See also
-  [sin/1](#sin/1), [cos/1](#cos/1), [tan/1](#tan/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.sec( Complex.from_polar(2,:math.pi) )
+  `sin/1`, `cos/1`, `tan/1`
+
+  ### Examples
+
+      iex> Complex.sec(Complex.from_polar(2,:math.pi))
       %Complex{im: -1.2860374461837126e-15, re: -2.402997961722381}
+
   """
-  @spec sec(complex) :: complex
+  @spec sec(t) :: t
   @spec sec(number) :: number
   def sec(z) do
     divide(1, cos(z))
@@ -855,18 +974,23 @@ defmodule Complex do
   Returns a new complex that is the inverse secant (i.e., arcsecant) of
   the provided parameter.
 
-  #### See also
-  [sec/1](#sec/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.asec( Complex.from_polar(2,:math.pi) )
+  `sec/1`
+
+  ### Examples
+
+      iex> Complex.asec(Complex.from_polar(2,:math.pi))
       %Complex{im: 0.0, re: 2.0943951023931957}
 
-      iex> Complex.sec( Complex.asec(Complex.new(2,3)) )
+      iex> Complex.sec(Complex.asec(Complex.new(2,3)))
       %Complex{im: 2.9999999999999982, re: 1.9999999999999987}
+
   """
-  @spec asec(complex) :: complex
+  @spec asec(t) :: t
   @spec asec(number) :: number
+  def asec(z)
+
   def asec(n) when is_number(n) do
     :math.acos(1 / n)
   end
@@ -887,14 +1011,17 @@ defmodule Complex do
   @doc """
   Returns a new complex that is the cosecant of the provided parameter.
 
-  #### See also
-  [sec/1](#sec/1), [sin/1](#sin/1), [cos/1](#cos/1), [tan/1](#tan/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.csc( Complex.from_polar(2,:math.pi) )
+  `sec/1`, `sin/1`, `cos/1`, `tan/1`
+
+  ### Examples
+
+      iex> Complex.csc(Complex.from_polar(2,:math.pi))
       %Complex{im: 1.2327514463765779e-16, re: -1.0997501702946164}
+
   """
-  @spec csc(complex) :: complex
+  @spec csc(t) :: t
   @spec csc(number) :: number
   def csc(z) do
     divide(1, sin(z))
@@ -904,18 +1031,23 @@ defmodule Complex do
   Returns a new complex that is the inverse cosecant (i.e., arccosecant) of
   the provided parameter.
 
-  #### See also
-  [sec/1](#sec/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.acsc( Complex.from_polar(2,:math.pi) )
+  `sec/1`
+
+  ### Examples
+
+      iex> Complex.acsc(Complex.from_polar(2,:math.pi))
       %Complex{im: 0.0, re: -0.5235987755982988}
 
-      iex> Complex.csc( Complex.acsc(Complex.new(2,3)) )
+      iex> Complex.csc(Complex.acsc(Complex.new(2,3)))
       %Complex{im: 2.9999999999999996, re: 1.9999999999999991}
+
   """
-  @spec acsc(complex) :: complex
+  @spec acsc(t) :: t
   @spec acsc(number) :: number
+  def acsc(z)
+
   def acsc(n) when is_number(n), do: :math.asin(1 / n)
 
   def acsc(z = %Complex{}) do
@@ -935,15 +1067,20 @@ defmodule Complex do
   @doc """
   Returns a new complex that is the hyperbolic sine of the provided parameter.
 
-  #### See also
-  [cosh/1](#cosh/1), [tanh/1](#tanh/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.sinh( Complex.from_polar(2,:math.pi) )
+  `cosh/1`, `tanh/1`
+
+  ### Examples
+
+      iex> Complex.sinh(Complex.from_polar(2,:math.pi))
       %Complex{im: 9.214721821703068e-16, re: -3.626860407847019}
+
   """
-  @spec sinh(complex) :: complex
+  @spec sinh(t) :: t
   @spec sinh(number) :: number
+  def sinh(z)
+
   def sinh(n) when is_number(n), do: :math.sinh(n)
 
   def sinh(z = %Complex{}) do
@@ -957,18 +1094,22 @@ defmodule Complex do
   Returns a new complex that is the inverse hyperbolic sine (i.e., arcsinh) of
   the provided parameter.
 
-  #### See also
-  [sinh/1](#sinh/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.asinh( Complex.from_polar(2,:math.pi) )
+  `sinh/1`
+
+  ### Examples
+
+      iex> Complex.asinh(Complex.from_polar(2,:math.pi))
       %Complex{im: 1.0953573965284052e-16, re: -1.4436354751788099}
 
-      iex> Complex.sinh( Complex.asinh(Complex.new(2,3)) )
+      iex> Complex.sinh(Complex.asinh(Complex.new(2,3)))
       %Complex{im: 3.0, re: 2.0000000000000004}
+
   """
-  @spec asinh(complex) :: complex
+  @spec asinh(t) :: t
   @spec asinh(number) :: number
+  def asinh(z)
 
   if math_fun_supported?.(:asinh, 1) do
     def asinh(n) when is_number(n) do
@@ -993,14 +1134,17 @@ defmodule Complex do
   Returns a new complex that is the hyperbolic cosine of the provided
   parameter.
 
-  #### See also
-  [sinh/1](#sinh/1), [tanh/1](#tanh/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.cosh( Complex.from_polar(2,:math.pi) )
+  `sinh/1`, `tanh/1`
+
+  ### Examples
+
+      iex> Complex.cosh(Complex.from_polar(2,:math.pi))
       %Complex{im: -8.883245978848233e-16, re: 3.7621956910836314}
+
   """
-  @spec cosh(complex) :: complex
+  @spec cosh(t) :: t
   @spec cosh(number) :: number
   def cosh(z) do
     z
@@ -1013,16 +1157,20 @@ defmodule Complex do
   Returns a new complex that is the inverse hyperbolic cosine (i.e., arccosh)
   of the provided parameter.
 
-  #### See also
-  [cosh/1](#cosh/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.acosh( Complex.from_polar(2,:math.pi) )
+  `cosh/1`
+
+  ### Examples
+
+      iex> Complex.acosh(Complex.from_polar(2,:math.pi))
       %Complex{im: -3.141592653589793, re: -1.3169578969248164}
+
   """
-  # Windows apparently doesn't support :math.acosh
-  @spec acosh(complex) :: complex
+  @spec acosh(t) :: t
   @spec acosh(number) :: number
+  def acosh(z)
+
   if math_fun_supported?.(:acosh, 1) do
     def acosh(n) when is_number(n), do: :math.acosh(n)
   else
@@ -1044,15 +1192,20 @@ defmodule Complex do
   Returns a new complex that is the hyperbolic tangent of the provided
   parameter.
 
-  #### See also
-  [sinh/1](#sinh/1), [cosh/1](#cosh/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.tanh( Complex.from_polar(2,:math.pi) )
+  `sinh/1`, `cosh/1`
+
+  ### Examples
+
+      iex> Complex.tanh(Complex.from_polar(2,:math.pi))
       %Complex{im: 1.7304461302709572e-17, re: -0.964027580075817}
+
   """
-  @spec tanh(complex) :: complex
+  @spec tanh(t) :: t
   @spec tanh(number) :: number
+  def tanh(z)
+
   def tanh(n) when is_number(n), do: :math.tanh(n)
 
   def tanh(z = %Complex{}) do
@@ -1063,18 +1216,23 @@ defmodule Complex do
   Returns a new complex that is the inverse hyperbolic tangent (i.e., arctanh)
   of the provided parameter.
 
-  #### See also
-  [tanh/1](#tanh/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.atanh( Complex.from_polar(2,:math.pi) )
+  `tanh/1`
+
+  ### Examples
+
+      iex> Complex.atanh(Complex.from_polar(2,:math.pi))
       %Complex{im: 1.5707963267948966, re: -0.5493061443340549}
 
-      iex> Complex.tanh( Complex.atanh(Complex.new(2,3)) )
+      iex> Complex.tanh(Complex.atanh(Complex.new(2,3)))
       %Complex{im: 2.999999999999999, re: 1.9999999999999987}
+
   """
-  @spec atanh(complex) :: complex
+  @spec atanh(t) :: t
   @spec atanh(number) :: number
+  def atanh(z)
+
   if math_fun_supported?.(:atanh, 1) do
     def atanh(n) when is_number(n), do: :math.atanh(n)
   else
@@ -1099,14 +1257,17 @@ defmodule Complex do
   Returns a new complex that is the hyperbolic secant of the provided
   parameter.
 
-  #### See also
-  [sinh/1](#sinh/1), [cosh/1](#cosh/1), [tanh/1](#tanh/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.sech( Complex.from_polar(2,:math.pi) )
+  `sinh/1`, `cosh/1`, `tanh/1`
+
+  ### Examples
+
+      iex> Complex.sech(Complex.from_polar(2,:math.pi))
       %Complex{im: 6.27608655779184e-17, re: 0.2658022288340797}
+
   """
-  @spec sech(complex) :: complex
+  @spec sech(t) :: t
   @spec sech(number) :: number
   def sech(z) do
     divide(1, cosh(z))
@@ -1116,17 +1277,20 @@ defmodule Complex do
   Returns a new complex that is the inverse hyperbolic secant (i.e., arcsech)
   of the provided parameter.
 
-  #### See also
-  [sech/1](#sech/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.asech( Complex.from_polar(2,:math.pi) )
+  `sech/1`
+
+  ### Examples
+
+      iex> Complex.asech(Complex.from_polar(2,:math.pi))
       %Complex{im: -2.0943951023931953, re: 0.0}
 
-      iex> Complex.sech( Complex.asech(Complex.new(2,3)) )
+      iex> Complex.sech(Complex.asech(Complex.new(2,3)))
       %Complex{im: 2.999999999999999, re: 2.0}
+
   """
-  @spec asech(complex) :: complex
+  @spec asech(t) :: t
   @spec asech(number) :: number
   def asech(z) do
     # result = ln(1/z+sqrt(1/z+1)*sqrt(1/z-1))
@@ -1142,14 +1306,17 @@ defmodule Complex do
   Returns a new complex that is the hyperbolic cosecant of the provided
   parameter.
 
-  #### See also
-  [sinh/1](#sinh/1), [cosh/1](#cosh/1), [tanh/1](#tanh/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.csch( Complex.from_polar(2,:math.pi) )
+  `sinh/1`, `cosh/1`, `tanh/1`
+
+  ### Examples
+
+      iex> Complex.csch(Complex.from_polar(2,:math.pi))
       %Complex{im: -7.00520014334671e-17, re: -0.2757205647717832}
+
   """
-  @spec csch(complex) :: complex
+  @spec csch(t) :: t
   @spec csch(number) :: number
   def csch(z), do: divide(1, sinh(z))
 
@@ -1157,17 +1324,20 @@ defmodule Complex do
   Returns a new complex that is the inverse hyperbolic cosecant (i.e., arccsch)
   of the provided parameter.
 
-  #### See also
-  [csch/1](#csch/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.acsch( Complex.from_polar(2,:math.pi) )
+  `csch/1`
+
+  ### Examples
+
+      iex> Complex.acsch(Complex.from_polar(2,:math.pi))
       %Complex{im: -5.4767869826420256e-17, re: -0.48121182505960336}
 
-      iex> Complex.csch( Complex.acsch(Complex.new(2,3)) )
+      iex> Complex.csch(Complex.acsch(Complex.new(2,3)))
       %Complex{im: 3.0000000000000018, re: 1.9999999999999982}
+
   """
-  @spec acsch(complex) :: complex
+  @spec acsch(t) :: t
   @spec acsch(number) :: number
   def acsch(z) do
     # result = ln(1/z+sqrt(1/(z*z)+1))
@@ -1183,14 +1353,17 @@ defmodule Complex do
   Returns a new complex that is the hyperbolic cotangent of the provided
   parameter.
 
-  #### See also
-  [sinh/1](#sinh/1), [cosh/1](#cosh/1), [tanh/1](#tanh/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.coth( Complex.from_polar(2,:math.pi) )
+  `sinh/1`, `cosh/1`, `tanh/1`
+
+  ### Examples
+
+      iex> Complex.coth(Complex.from_polar(2,:math.pi))
       %Complex{im: -1.8619978115303632e-17, re: -1.037314720727548}
+
   """
-  @spec coth(complex) :: complex
+  @spec coth(t) :: t
   @spec coth(number) :: number
   def coth(z) do
     divide(cosh(z), sinh(z))
@@ -1200,17 +1373,20 @@ defmodule Complex do
   Returns a new complex that is the inverse hyperbolic cotangent (i.e., arccoth)
   of the provided parameter.
 
-  #### See also
-  [coth/1](#coth/1)
+  ### See also
 
-  #### Examples
-      iex> Complex.acoth( Complex.from_polar(2,:math.pi) )
+  `coth/1`
+
+  ### Examples
+
+      iex> Complex.acoth(Complex.from_polar(2,:math.pi))
       %Complex{im: -8.164311994315688e-17, re: -0.5493061443340548}
 
-      iex> Complex.coth( Complex.acoth(Complex.new(2,3)) )
+      iex> Complex.coth(Complex.acoth(Complex.new(2,3)))
       %Complex{im: 2.999999999999998, re: 2.000000000000001}
+
   """
-  @spec acoth(complex) :: complex
+  @spec acoth(t) :: t
   @spec acoth(number) :: number
   def acoth(z) do
     # result = 0.5*(ln(1+1/z)-ln(1-1/z))
@@ -1222,8 +1398,26 @@ defmodule Complex do
     multiply(0.5, subtract(ln(t2), ln(t3)))
   end
 
-  @doc """
-  Calculates erf(x) of the argument
+  @doc ~S"""
+  Calculates $erf(z)$ of the argument, as defined by:
+
+  $$erf(z) = \frac{2}{\sqrt{\pi}} \int_{0}^{z} e^{-t^2}$$
+
+  ### Examples
+
+      iex> x = Complex.erf(0.5)
+      iex> Float.round(x, 5)
+      0.52050
+
+      iex> z = Complex.erf(Complex.new(-0.5))
+      iex> z.im
+      0.0
+      iex> Float.round(z.re, 5)
+      -0.52050
+
+      iex> Complex.erf(Complex.new(1, 1))
+      ** (ArithmeticError) erf not implemented for non-real numbers
+
   """
 
   if math_fun_supported?.(:erf, 1) do
@@ -1265,12 +1459,58 @@ defmodule Complex do
     Complex.new(erf(re))
   end
 
+  @doc ~S"""
+  Calculates $erfc(z)$ of the argument, as defined by:
+
+  $$erfc(z) = 1 - erf(z)$$
+
+  ### Examples
+
+      iex> x = Complex.erfc(0.5)
+      iex> Float.round(x, 5)
+      0.47950
+
+      iex> z = Complex.erfc(Complex.new(-0.5))
+      iex> z.im
+      0.0
+      iex> Float.round(z.re, 5)
+      1.52050
+
+      iex> Complex.erfc(Complex.new(1, 1))
+      ** (ArithmeticError) erfc not implemented for non-real numbers
+
+  """
+  def erfc(z)
+
   if math_fun_supported?.(:erfc, 1) do
     def erfc(z) when is_number(z), do: :math.erfc(z)
   end
 
-  def erfc(z), do: subtract(1, erf(z))
+  def erfc(z) do
+    if is_struct(z, Complex) and z.im != 0 do
+      raise ArithmeticError, "erfc not implemented for non-real numbers"
+    end
 
+    subtract(1, erf(z))
+  end
+
+  @doc ~S"""
+  Calculates $erf^-1(z)$ of the argument, as defined by:
+
+  $$erf(erf^-1(z)) = z$$
+
+  ### Examples
+
+      iex> Complex.erf_inv(0.5204998778130465)
+      0.5000000069276399
+
+      iex> Complex.erf_inv(Complex.new(-0.5204998778130465))
+      %Complex{im: 0.0, re: -0.5000000069276399}
+
+      iex> Complex.erf_inv(Complex.new(1, 1))
+      ** (ArithmeticError) erf_inv not implemented for non-real numbers
+
+  """
   def erf_inv(z) when is_number(z) do
     w = -:math.log((1 - z) * (1 + z))
     erf_inv_p(w) * z
