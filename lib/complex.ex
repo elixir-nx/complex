@@ -1408,8 +1408,11 @@ defmodule Complex do
       iex> Complex.erf(0.5)
       0.5204998778130465
 
-      iex> Complex.erf(Complex.new(-0.5))
-      %Complex{im: 0.0, re: -0.5204998778130465}
+      iex> z = Complex.erf(Complex.new(-0.5))
+      iex> z.im
+      0.0
+      iex> Float.round(z.re, 5)
+      -0.52050
 
       iex> Complex.erf(Complex.new(1, 1))
       ** (ArithmeticError) erf not implemented for non-real numbers
