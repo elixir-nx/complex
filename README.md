@@ -5,7 +5,7 @@ numbers.
 
 Each complex number is represented as a structure holding the real and
 imaginary part.  There are functions for creation and manipulation of
-them.  Unfortunately since there is n operator overloading in Elixir the
+them.  Unfortunately since there is no operator overloading in Elixir the
 math functions (add, subtract, etc.) are implemented as add/2, sub/2, etc.
 
 ## Installation
