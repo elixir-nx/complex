@@ -7,7 +7,7 @@ defmodule Complex.Mixfile do
       version: "0.3.0",
       description: description(),
       package: package(),
-      elixir: "~> 1.1",
+      elixir: "~> 1.12",
       deps: deps(),
       docs: [extras: [], before_closing_body_tag: &before_closing_body_tag/1]
     ]

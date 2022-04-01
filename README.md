@@ -5,8 +5,8 @@ numbers.
 
 Each complex number is represented as a structure holding the real and
 imaginary part.  There are functions for creation and manipulation of
-them.  Unfortunately since there is no operator overloading in Elixir the
-math functions (add, subtract, etc.) are implemented as add/2, sub/2, etc.
+them. Users can `use Complex.Kernel` to get operators to work on a mix
+of real and complex numbers.
 
 ## Installation
 
@@ -14,9 +14,10 @@ Add *complex* as a dependency in your `mix.exs` file.
 
 ```elixir
 def deps do
-  [ { :complex, "~> 0.2.0" } ]
+  [{:complex, "~> 0.3.0"}]
 end
 ```
+
 After you are done, run `mix deps.get` in your shell to fetch and compile
 Complex. Start an interactive Elixir shell with `iex -S mix` and try the examples
 in the [examples section](#examples).
@@ -26,12 +27,15 @@ in the [examples section](#examples).
 Documentation for the package is available online via Hex at
 [http://hexdocs.pm/complex](http://hexdocs.pm/complex).  You can also generate
 local docs via the mix task
+
 ```elixir
 mix docs
 ```
+
 This will generate the HTML documentation and place it into the `doc` subdirectory.
 
 ## Examples
+
 ```elixir
 iex> Complex.new(3, 4)
 %Complex{im: 4.0, re: 3.0}
