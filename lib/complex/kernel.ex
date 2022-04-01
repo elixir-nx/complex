@@ -1,7 +1,7 @@
 defmodule Complex.Kernel do
   @moduledoc """
   Provides operator overloading for Elixir operators.
-  
+
   When you `use Complex.Kernel`, be aware that the normal operators won't work in clause guards. For that you need to use the fully qualified functions (i.e.: `when Kernel.+(a, b) == 1`) instead.
   """
 
