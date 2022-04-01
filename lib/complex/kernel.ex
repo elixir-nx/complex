@@ -6,19 +6,10 @@ defmodule Complex.Kernel do
   # This is defined as such so that Elixir 1.12 formatters don't complain
   # and Elixir 1.13+ formatters don't remove the quotes from :"**" that
   # would make this work in Elixir <= 1.12
-
   @pow_atom String.to_atom("**")
+
   defmacro __using__(_) do
-    has_pow_operator = function_exported?(Kernel, @pow_atom, 2)
-
-    operators = [+: 2, -: 2, /: 2, *: 2]
-
-    operators =
-      if has_pow_operator do
-        [{@pow_atom, 2} | operators]
-      else
-        operators
-      end
+    operators = [{@pow_atom, 2}, +: 2, -: 2, /: 2, *: 2]
 
     quote do
       import Kernel, except: unquote(operators)
