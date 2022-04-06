@@ -63,6 +63,14 @@ defmodule ComplexTest do
     assert_close Complex.abs_squared(b), 25
     assert_close Complex.abs_squared(c), 5
     assert_close Complex.abs_squared(d), 25
+    assert Complex.real(a) == 1
+    assert Complex.real(b) == 3.0
+    assert Complex.real(c) == -1.0
+    assert Complex.real(d) == 3.0
+    assert Complex.imag(a) == 2.0
+    assert Complex.imag(b) == 4.0
+    assert Complex.imag(c) == 2.0
+    assert Complex.imag(d) == -4.0
     assert_close Complex.phase(a), 1.1071487177940904
     assert_close Complex.conjugate(a), %Complex{re: 1.0, im: -2.0}
     assert_close Complex.square(a), Complex.multiply(a, a)
@@ -85,6 +93,14 @@ defmodule ComplexTest do
     assert_close Complex.abs_squared(b), 4
     assert_close Complex.abs_squared(c), 9
     assert_close Complex.abs_squared(d), 16
+    assert Complex.real(a) == 1
+    assert Complex.real(b) == 2
+    assert Complex.real(c) == 3
+    assert Complex.real(d) == 4
+    assert Complex.imag(a) == 0
+    assert Complex.imag(b) == 0
+    assert Complex.imag(c) == 0
+    assert Complex.imag(d) == 0
     assert_close Complex.phase(a), 0
     assert_close Complex.phase(-a), :math.pi()
     assert_close Complex.conjugate(a), a

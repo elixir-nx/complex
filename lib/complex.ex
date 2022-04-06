@@ -457,6 +457,54 @@ defmodule Complex do
   end
 
   @doc """
+  Returns the real part of the provided complex number.
+
+  ### See also
+
+  `imag/1`
+
+  ### Examples
+
+      iex> Complex.real(Complex.new(1, 2))
+      1.0
+
+      iex> Complex.real(1)
+      1
+  """
+  @spec real(t) :: number
+  @spec real(number) :: number
+  def real(z)
+
+  def real(n) when is_number(n), do: n
+
+  def real(%Complex{re: r, im: _i}), do: r
+
+  @doc """
+  Returns the imaginary part of the provided complex number.
+  If a real number is provided, 0 is returned.
+
+  ### See also
+
+  `real/1`
+
+  ### Examples
+
+      iex> Complex.imag(Complex.new(1, 2))
+      2.0
+
+      iex> Complex.imag(1)
+      0
+  """
+
+  @spec imag(t) :: number
+  @spec imag(number) :: number
+  def imag(z)
+
+  def imag(n) when is_number(n), do: 0
+
+  def imag(%Complex{re: _r, im: i}), do: i
+
+  @doc """
   Returns a new complex that is the complex conjugate of the provided complex
   number.
 
