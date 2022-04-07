@@ -500,7 +500,7 @@ defmodule Complex do
   @spec imag(number) :: number
   def imag(z)
 
-  def imag(n) when is_number(n), do: 0
+  def imag(n) when is_number(n), do: n * 0
 
   def imag(%Complex{re: _r, im: i}), do: i
 
