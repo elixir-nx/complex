@@ -62,10 +62,16 @@ defmodule Complex do
   Conveniency function that is used to implement the `String.Chars` and `Inspect` protocols.
   """
   def to_string(%Complex{re: re, im: im}) do
-    if im < 0 do
-      "#{re}-#{abs(im)}i"
-    else
-      "#{re}+#{im}i"
+    cond do
+      im < 0 ->
+        "#{re}-#{abs(im)}i"
+
+      im == 0 ->
+        # This is so we deal with -0.0 properly
+        "#{re}+0.0i"
+
+      :otherwise ->
+        "#{re}+#{im}i"
     end
   end
 

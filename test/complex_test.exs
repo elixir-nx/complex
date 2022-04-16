@@ -192,6 +192,27 @@ defmodule ComplexTest do
     assert_close Complex.acoth(1.0049698), a
   end
 
+  for {m, f} <- [{Kernel, :inspect}, {String.Chars.Complex, :to_string}, {Complex, :to_string}] do
+    test "#{m}.#{f}/1" do
+      assert "1.0+1.0i" == apply(unquote(m), unquote(f), [Complex.new(1.0, 1.0)])
+      assert "1.0-1.0i" == apply(unquote(m), unquote(f), [Complex.new(1.0, -1.0)])
+      assert "1.0+0.0i" == apply(unquote(m), unquote(f), [Complex.new(1.0, 0.0)])
+      assert "1.0+0.0i" == apply(unquote(m), unquote(f), [Complex.new(1.0, -0.0)])
+
+      assert "1.0-1.0i" ==
+               apply(unquote(m), unquote(f), [Complex.new(1.0, 1.0) |> Complex.conjugate()])
+
+      assert "1.0+1.0i" ==
+               apply(unquote(m), unquote(f), [Complex.new(1.0, -1.0) |> Complex.conjugate()])
+
+      assert "1.0+0.0i" ==
+               apply(unquote(m), unquote(f), [Complex.new(1.0, 0.0) |> Complex.conjugate()])
+
+      assert "1.0+0.0i" ==
+               apply(unquote(m), unquote(f), [Complex.new(1.0, -0.0) |> Complex.conjugate()])
+    end
+  end
+
   defp assert_close(left, right, opts \\ []) do
     eps = opts[:eps] || 1.0e-5
 
