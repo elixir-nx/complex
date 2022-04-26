@@ -9,7 +9,12 @@ defmodule Complex.Mixfile do
       package: package(),
       elixir: "~> 1.12",
       deps: deps(),
-      docs: [extras: [], before_closing_body_tag: &before_closing_body_tag/1]
+      docs: [
+        main: "Complex",
+        authors: package()[:maintainers],
+        extras: [],
+        before_closing_body_tag: &before_closing_body_tag/1
+      ]
     ]
   end
 
@@ -36,10 +41,10 @@ defmodule Complex.Mixfile do
 
   defp package do
     [
-      maintainers: ["Tom Krauss"],
+      maintainers: ["Tom Krauss", "Paulo Valente", "José Valim"],
       licenses: ["Apache 2.0"],
       links: %{
-        "GitHub" => "https://github.com/twist-vector/elixir-complex.git",
+        "GitHub" => "https://github.com/elixir-nx/complex.git",
         "Docs" => "http://hexdocs.pm/complex"
       }
     ]
