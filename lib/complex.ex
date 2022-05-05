@@ -632,8 +632,7 @@ defmodule Complex do
       iex> Complex.real(1)
       1
   """
-  @spec real(t) :: number
-  @spec real(number) :: number
+  @spec real(t | number | non_finite_number) :: number | non_finite_number
   def real(z)
 
   def real(n) when is_number(n) or is_non_finite_number(n), do: n
@@ -657,8 +656,7 @@ defmodule Complex do
       0
   """
 
-  @spec imag(t) :: number
-  @spec imag(number) :: number
+  @spec imag(t | number | non_finite_number) :: number | non_finite_number
   def imag(z)
 
   def imag(n) when is_number(n), do: n * 0
@@ -682,8 +680,7 @@ defmodule Complex do
       %Complex{im: -2.0, re: 1.0}
 
   """
-  @spec conjugate(t) :: t
-  @spec conjugate(number) :: number
+  @spec conjugate(t | number | non_finite_number) :: t | number | non_finite_number
   def conjugate(z)
 
   def conjugate(n) when is_number(n), do: n
@@ -710,8 +707,7 @@ defmodule Complex do
       %Complex{im: 1.4142135623730951, re: 8.659560562354933e-17}
 
   """
-  @spec sqrt(t) :: t
-  @spec sqrt(number) :: number
+  @spec sqrt(t | number | non_finite_number) :: t | number | non_finite_number
   def sqrt(z)
   def sqrt(n) when is_number(n), do: :math.sqrt(n)
 
@@ -758,8 +754,7 @@ defmodule Complex do
       %Complex{im: 3.3147584285483636e-17, re: 0.1353352832366127}
 
   """
-  @spec exp(t) :: t
-  @spec exp(number) :: number
+  @spec exp(t | number | non_finite_number) :: t | number | non_finite_number
   def exp(z)
 
   def exp(:infinity), do: :infinity
@@ -795,7 +790,7 @@ defmodule Complex do
       %Complex{im: 3.141592653589793, re: 0.6931471805599453}
 
   """
-  @spec ln(t) :: t
+  @spec ln(t | number | non_finite_number) :: t | number | non_finite_number
   def ln(z)
   def ln(:infinity), do: :infinity
   def ln(:neg_infinity), do: new(:infinity, :math.pi())
@@ -820,8 +815,7 @@ defmodule Complex do
       %Complex{im: 1.3643763538418412, re: 0.30102999566398114}
 
   """
-  @spec log10(t) :: t
-  @spec log10(number) :: number
+  @spec log10(t | number | non_finite_number) :: t | number | non_finite_number
   def log10(z)
 
   def log10(:infinity), do: :infinity
@@ -848,8 +842,7 @@ defmodule Complex do
       %Complex{im: 4.532360141827194, re: 1.0}
 
   """
-  @spec log2(t) :: t
-  @spec log2(number) :: number
+  @spec log2(t | number | non_finite_number) :: t | number | non_finite_number
   def log2(z)
 
   def log2(:infinity), do: :infinity
@@ -947,8 +940,7 @@ defmodule Complex do
       %Complex{im: -1.0192657827055095e-16, re: -0.9092974268256817}
 
   """
-  @spec sin(t) :: t
-  @spec sin(number) :: number
+  @spec sin(t | number | non_finite_number) :: t | number | non_finite_number
   def sin(z)
 
   def sin(n) when is_number(n), do: :math.sin(n)
@@ -984,8 +976,7 @@ defmodule Complex do
       %Complex{im: -5.0, re: -3.0}
 
   """
-  @spec negate(t) :: t
-  @spec negate(number) :: number
+  @spec negate(t | number | non_finite_number) :: t | number | non_finite_number
   def negate(z)
 
   def negate(:nan), do: :nan
@@ -1013,8 +1004,7 @@ defmodule Complex do
       %Complex{im: 1.3169578969248164, re: -1.5707963267948966}
 
   """
-  @spec asin(t) :: t
-  @spec asin(number) :: number
+  @spec asin(t | number | non_finite_number) :: t | number | non_finite_number
   def asin(z)
 
   def asin(n) when is_number(n), do: :math.asin(n)
@@ -1041,8 +1031,7 @@ defmodule Complex do
       %Complex{im: 2.2271363664699914e-16, re: -0.4161468365471424}
 
   """
-  @spec cos(t) :: t
-  @spec cos(number) :: number
+  @spec cos(t | number | non_finite_number) :: t | number | non_finite_number
   def cos(z)
 
   def cos(n) when is_number(n), do: :math.cos(n)
@@ -1077,8 +1066,7 @@ defmodule Complex do
       %Complex{im: 1.3169578969248164, re: -3.141592653589793}
 
   """
-  @spec acos(t) :: t
-  @spec acos(number) :: number
+  @spec acos(t | number | non_finite_number) :: t | number | non_finite_number
   def acos(z)
 
   def acos(n) when is_number(n), do: :math.acos(n)
@@ -1105,8 +1093,7 @@ defmodule Complex do
       %Complex{im: 1.4143199004457917e-15, re: 2.185039863261519}
 
   """
-  @spec tan(t) :: t
-  @spec tan(number) :: number
+  @spec tan(t | number | non_finite_number) :: t | number | non_finite_number
   def tan(z)
 
   def tan(n) when is_number(n), do: :math.tan(n)
@@ -1132,8 +1119,7 @@ defmodule Complex do
       %Complex{im: 3.0, re: 2.0}
 
   """
-  @spec atan(t) :: t
-  @spec atan(number) :: number
+  @spec atan(t | number | non_finite_number) :: t | number | non_finite_number
   def atan(z)
 
   def atan(:infinity), do: :math.pi() / 2
@@ -1252,8 +1238,7 @@ defmodule Complex do
       %Complex{im: -1.2860374461837126e-15, re: -2.402997961722381}
 
   """
-  @spec sec(t) :: t
-  @spec sec(number) :: number
+  @spec sec(t | number | non_finite_number) :: t | number | non_finite_number
   def sec(z) do
     divide(1, cos(z))
   end
@@ -1397,8 +1382,7 @@ defmodule Complex do
       %Complex{im: 3.0, re: 2.0000000000000004}
 
   """
-  @spec asinh(t) :: t
-  @spec asinh(number) :: number
+  @spec asinh(t | number | non_finite_number) :: t | number | non_finite_number
   def asinh(z)
 
   if math_fun_supported?.(:asinh, 1) do
@@ -1434,8 +1418,7 @@ defmodule Complex do
       %Complex{im: -8.883245978848233e-16, re: 3.7621956910836314}
 
   """
-  @spec cosh(t) :: t
-  @spec cosh(number) :: number
+  @spec cosh(t | number | non_finite_number) :: t | number | non_finite_number
 
   def cosh(:infinity), do: :infinity
   def cosh(:neg_infinity), do: :infinity
@@ -1462,8 +1445,7 @@ defmodule Complex do
       %Complex{im: -3.141592653589793, re: -1.3169578969248164}
 
   """
-  @spec acosh(t) :: t
-  @spec acosh(number) :: number
+  @spec acosh(t | number | non_finite_number) :: t | number | non_finite_number
   def acosh(z)
 
   if math_fun_supported?.(:acosh, 1) do
@@ -1474,7 +1456,7 @@ defmodule Complex do
     end
   end
 
-  def acosh(z = %Complex{}) do
+  def acosh(z) do
     # result = ln(z+sqrt(z*z-1))
     # result = ln(z+sqrt(t1))
     # result = ln(t2)
@@ -1497,13 +1479,12 @@ defmodule Complex do
       %Complex{im: 1.7304461302709572e-17, re: -0.964027580075817}
 
   """
-  @spec tanh(t) :: t
-  @spec tanh(number) :: number
+  @spec tanh(t | number | non_finite_number) :: t | number | non_finite_number
   def tanh(z)
 
   def tanh(n) when is_number(n), do: :math.tanh(n)
 
-  def tanh(z = %Complex{}) do
+  def tanh(z) do
     divide(sinh(z), cosh(z))
   end
 
@@ -1524,8 +1505,7 @@ defmodule Complex do
       %Complex{im: 2.999999999999999, re: 1.9999999999999987}
 
   """
-  @spec atanh(t) :: t
-  @spec atanh(number) :: number
+  @spec atanh(t | number | non_finite_number) :: t | number | non_finite_number
   def atanh(z)
 
   if math_fun_supported?.(:atanh, 1) do
@@ -1536,7 +1516,7 @@ defmodule Complex do
     end
   end
 
-  def atanh(z = %Complex{}) do
+  def atanh(z) do
     one = new(1.0, 0.0)
     p5 = new(0.5, 0.0)
     # result = 0.5*(ln((1+z)/(1-z)))
@@ -1562,8 +1542,7 @@ defmodule Complex do
       %Complex{im: 6.27608655779184e-17, re: 0.2658022288340797}
 
   """
-  @spec sech(t) :: t
-  @spec sech(number) :: number
+  @spec sech(t | number | non_finite_number) :: t | number | non_finite_number
   def sech(z) do
     divide(1, cosh(z))
   end
@@ -1585,8 +1564,7 @@ defmodule Complex do
       %Complex{im: 2.999999999999999, re: 2.0}
 
   """
-  @spec asech(t) :: t
-  @spec asech(number) :: number
+  @spec asech(t | number | non_finite_number) :: t | number | non_finite_number
   def asech(z) do
     # result = ln(1/z+sqrt(1/z+1)*sqrt(1/z-1))
     # result = ln(t1+sqrt(t1+1)*sqrt(t1-1))
@@ -1611,8 +1589,7 @@ defmodule Complex do
       %Complex{im: -7.00520014334671e-17, re: -0.2757205647717832}
 
   """
-  @spec csch(t) :: t
-  @spec csch(number) :: number
+  @spec csch(t | number | non_finite_number) :: t | number | non_finite_number
   def csch(z), do: divide(1, sinh(z))
 
   @doc """
@@ -1632,8 +1609,7 @@ defmodule Complex do
       %Complex{im: 3.0000000000000018, re: 1.9999999999999982}
 
   """
-  @spec acsch(t) :: t
-  @spec acsch(number) :: number
+  @spec acsch(t | number | non_finite_number) :: t | number | non_finite_number
   def acsch(z) do
     # result = ln(1/z+sqrt(1/(z*z)+1))
     # result = ln(t1+sqrt(t2+1))
@@ -1658,8 +1634,7 @@ defmodule Complex do
       %Complex{im: -1.8619978115303632e-17, re: -1.037314720727548}
 
   """
-  @spec coth(t) :: t
-  @spec coth(number) :: number
+  @spec coth(t | number | non_finite_number) :: t | number | non_finite_number
   def coth(z) do
     divide(cosh(z), sinh(z))
   end
@@ -1681,8 +1656,7 @@ defmodule Complex do
       %Complex{im: 2.999999999999998, re: 2.000000000000001}
 
   """
-  @spec acoth(t) :: t
-  @spec acoth(number) :: number
+  @spec acoth(t | number | non_finite_number) :: t | number | non_finite_number
   def acoth(z) do
     # result = 0.5*(ln(1+1/z)-ln(1-1/z))
     # result = 0.5*(ln(1+t1)-ln(1-t1))
@@ -1714,6 +1688,7 @@ defmodule Complex do
       ** (ArithmeticError) erf not implemented for non-real numbers
 
   """
+  @spec erf(t | number | non_finite_number) :: t | number | non_finite_number
 
   if math_fun_supported?.(:erf, 1) do
     def erf(x) when is_number(x) do
@@ -1779,6 +1754,7 @@ defmodule Complex do
       ** (ArithmeticError) erfc not implemented for non-real numbers
 
   """
+  @spec erfc(t | number | non_finite_number) :: t | number | non_finite_number
   def erfc(z)
 
   if math_fun_supported?.(:erfc, 1) do
@@ -1810,9 +1786,22 @@ defmodule Complex do
       ** (ArithmeticError) erf_inv not implemented for non-real numbers
 
   """
+  @spec erf_inv(t | number | non_finite_number) :: t | number | non_finite_number
   def erf_inv(z) when is_number(z) do
-    w = -:math.log((1 - z) * (1 + z))
-    erf_inv_p(w) * z
+    cond do
+      z == 1 ->
+        :infinity
+
+      z == -1 ->
+        :neg_infinity
+
+      z == 0 ->
+        0
+
+      :otherwise ->
+        w = -:math.log((1 - z) * (1 + z))
+        erf_inv_p(w) * z
+    end
   end
 
   def erf_inv(n) when is_non_finite_number(n), do: :nan
