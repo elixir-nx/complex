@@ -973,14 +973,19 @@ defmodule Complex do
   def sin(n) when is_number(n), do: :math.sin(n)
   def sin(n) when is_non_finite_number(n), do: :nan
 
-  def sin(%Complex{re: re, im: _}) when is_non_finite_number(re), do: :nan
+  def sin(%Complex{re: re, im: im}) when is_non_finite_number(re) and is_number(im),
+    do: Complex.new(:nan, :nan)
 
-  def sin(%Complex{re: re, im: im}) when is_number(re) and is_non_finite_number(im),
-    do:
-      new(
-        multiply(:math.sin(re), cosh(im)),
-        multiply(:math.sin(re), sinh(im))
-      )
+  def sin(%Complex{im: :nan}), do: Complex.new(:nan, :nan)
+  def sin(%Complex{re: :nan}), do: Complex.new(:nan, :nan)
+
+  def sin(%Complex{re: re, im: im}) when is_number(re) and is_non_finite_number(im) do
+    Complex.new(multiply(re, im), im)
+  end
+
+  def sin(%Complex{re: re, im: im}) when is_non_finite_number(re) and is_non_finite_number(im) do
+    Complex.new(:nan, :nan)
+  end
 
   def sin(z = %Complex{}) do
     new(
@@ -1065,11 +1070,18 @@ defmodule Complex do
 
   def cos(n) when is_non_finite_number(n), do: :nan
 
+  def cos(%Complex{re: re, im: im}) when is_non_finite_number(re) and is_number(im),
+    do: Complex.new(:nan, :nan)
+
+  def cos(%Complex{im: :nan}), do: Complex.new(:nan, :nan)
+  def cos(%Complex{re: :nan}), do: Complex.new(:nan, :nan)
+
   def cos(%Complex{re: re, im: im}) when is_number(re) and is_non_finite_number(im) do
-    new(
-      multiply(:math.cos(re), cosh(im)),
-      multiply(:math.sin(-re), sinh(im))
-    )
+    Complex.new(:infinity, -1 |> multiply(im) |> multiply(re))
+  end
+
+  def cos(%Complex{re: re, im: im}) when is_non_finite_number(re) and is_non_finite_number(im) do
+    Complex.new(:nan, :nan)
   end
 
   def cos(z = %Complex{}) do
