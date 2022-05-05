@@ -602,6 +602,34 @@ defmodule ComplexTest do
     assert_close Complex.acsc(7.086167), :math.pi() - a
   end
 
+  test "sin (non-finite)" do
+    assert Complex.sin(Complex.new(:nan)) == Complex.new(:nan, :nan)
+    assert Complex.sin(Complex.new(:infinity)) == Complex.new(:nan, :nan)
+    assert Complex.sin(Complex.new(:neg_infinity)) == Complex.new(:nan, :nan)
+    assert Complex.sin(Complex.new(0, :nan)) == Complex.new(:nan, :nan)
+    assert Complex.sin(Complex.new(0, :infinity)) == Complex.new(:nan, :infinity)
+    assert Complex.sin(Complex.new(0, :neg_infinity)) == Complex.new(:nan, :neg_infinity)
+
+    assert Complex.sin(Complex.new(-1, :infinity)) == Complex.new(:neg_infinity, :infinity)
+    assert Complex.sin(Complex.new(1, :infinity)) == Complex.new(:infinity, :infinity)
+    assert Complex.sin(Complex.new(-1, :neg_infinity)) == Complex.new(:infinity, :neg_infinity)
+    assert Complex.sin(Complex.new(1, :neg_infinity)) == Complex.new(:neg_infinity, :neg_infinity)
+  end
+
+  test "cos (non-finite)" do
+    assert Complex.cos(Complex.new(:nan)) == Complex.new(:nan, :nan)
+    assert Complex.cos(Complex.new(:infinity)) == Complex.new(:nan, :nan)
+    assert Complex.cos(Complex.new(:neg_infinity)) == Complex.new(:nan, :nan)
+    assert Complex.cos(Complex.new(0, :nan)) == Complex.new(:nan, :nan)
+    assert Complex.cos(Complex.new(0, :infinity)) == Complex.new(:infinity, :nan)
+    assert Complex.cos(Complex.new(0, :neg_infinity)) == Complex.new(:infinity, :nan)
+
+    assert Complex.cos(Complex.new(-1, :infinity)) == Complex.new(:infinity, :infinity)
+    assert Complex.cos(Complex.new(1, :infinity)) == Complex.new(:infinity, :neg_infinity)
+    assert Complex.cos(Complex.new(-1, :neg_infinity)) == Complex.new(:infinity, :neg_infinity)
+    assert Complex.cos(Complex.new(1, :neg_infinity)) == Complex.new(:infinity, :infinity)
+  end
+
   test "Hyperbolic functions" do
     a = Complex.new(1.0, 2.0)
     assert_close Complex.sinh(a), %Complex{re: -0.48905625904129363, im: 1.4031192506220405}
