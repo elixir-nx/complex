@@ -17,6 +17,13 @@ defmodule ComplexTest do
       re: 6.123233995736766e-17,
       im: 1.0
     }
+
+    assert Complex.from_polar({:infinity, :neg_infinity}) == %Complex{re: :nan, im: :nan}
+    assert Complex.from_polar({:infinity, 0}) == %Complex{re: :infinity, im: 0}
+    assert Complex.from_polar({:infinity, :math.pi()}) == %Complex{re: :neg_infinity, im: 0}
+
+    assert Complex.from_polar({:infinity, :math.pi() / 2}) == %Complex{re: 0, im: :infinity}
+    assert Complex.from_polar({:infinity, -:math.pi() / 2}) == %Complex{re: 0, im: :neg_infinity}
   end
 
   test "Parse from string" do
@@ -27,9 +34,16 @@ defmodule ComplexTest do
 
     tail = "12345"
     assert {%Complex{re: :infinity, im: :nan}, tail} == Complex.parse("+Inf-NaNi" <> tail)
-    assert {%Complex{re: :neg_infinity, im: :infinity}, tail} == Complex.parse("-Inf+Infi" <> tail)
+
+    assert {%Complex{re: :neg_infinity, im: :infinity}, tail} ==
+             Complex.parse("-Inf+Infi" <> tail)
+
     assert {%Complex{re: :infinity, im: :neg_infinity}, tail} == Complex.parse("Inf-Infi" <> tail)
     assert {%Complex{re: :nan, im: :nan}, tail} == Complex.parse("NaN+NaNi" <> tail)
+
+    assert :error == Complex.parse("Inf")
+    assert :error == Complex.parse("-Inf")
+    assert :error == Complex.parse("NaN")
 
     assert :error == Complex.parse("123")
     assert_close Complex.parse("1+1i") |> elem(0), %Complex{re: 1.0, im: 1.0}

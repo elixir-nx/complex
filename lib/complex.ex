@@ -51,7 +51,10 @@ defmodule Complex do
 
   @type non_finite_number :: :infinity | :neg_infinity | :nan
 
-  @non_finite_numbers [:infinity, :nef_infinity, :nan]
+  @non_finite_numbers [:infinity, :neg_infinity, :nan]
+
+  @sin_pi :math.sin(:math.pi())
+  @cos_pi_on_2 :math.cos(:math.pi() / 2)
 
   defguardp is_non_finite_number(x) when x in @non_finite_numbers
 
@@ -238,12 +241,30 @@ defmodule Complex do
       %Complex{im: 20.0, re: 6.0}
 
   """
-  @spec from_polar({number, number}) :: t
+  @spec from_polar({number | non_finite_number, number | non_finite_number}) :: t
   def from_polar({r, phi}), do: from_polar(r, phi)
 
-  @spec from_polar(number, number) :: t
+  @spec from_polar(number | non_finite_number, number | non_finite_number) :: t
+  def from_polar(r, phi) when phi == 0, do: new(r, 0)
+
   def from_polar(r, phi) do
-    new(multiply(r, cos(phi)), multiply(r, sin(phi)))
+    s = sin(phi)
+    c = cos(phi)
+
+    # treat pure imaginary and pure real cases
+    cond do
+      s == @sin_pi and (r == :infinity or r == :neg_infinity) ->
+        new(multiply(r, c), 0)
+
+      c == @cos_pi_on_2 and (r == :infinity or r == :neg_infinity) ->
+        new(0, multiply(r, s))
+
+      c == -@cos_pi_on_2 and (r == :infinity or r == :neg_infinity) ->
+        new(0, multiply(r, s))
+
+      :otherwise ->
+        multiply(r, new(c, s))
+    end
   end
 
   @doc """
@@ -438,6 +459,10 @@ defmodule Complex do
   def multiply(:neg_infinity, :infinity), do: :neg_infinity
   def multiply(:infinity, :neg_infinity), do: :neg_infinity
   def multiply(:infinity, :infinity), do: :infinity
+
+  def multiply(x, %Complex{re: re, im: im}) when is_non_finite_number(x) do
+    new(multiply(re, x), multiply(im, x))
+  end
 
   def multiply(left, right) when is_number(left) and is_number(right), do: left * right
 
