@@ -226,12 +226,67 @@ defmodule ComplexTest do
     assert Complex.real(b) == 3.0
     assert Complex.real(c) == -1.0
     assert Complex.real(d) == 3.0
+    assert Complex.real(:infinity) == :infinity
+    assert Complex.real(:neg_infinity) == :neg_infinity
+    assert Complex.real(:nan) == :nan
+    assert Complex.real(Complex.new(:infinity)) == :infinity
+    assert Complex.real(Complex.new(:neg_infinity)) == :neg_infinity
+    assert Complex.real(Complex.new(:nan)) == :nan
+
     assert Complex.imag(a) == 2.0
     assert Complex.imag(b) == 4.0
     assert Complex.imag(c) == 2.0
     assert Complex.imag(d) == -4.0
+    assert Complex.imag(:infinity) == 0
+    assert Complex.imag(:neg_infinity) == 0
+    assert Complex.imag(:nan) == 0
+    assert Complex.imag(Complex.new(1, :infinity)) == :infinity
+    assert Complex.imag(Complex.new(1, :neg_infinity)) == :neg_infinity
+    assert Complex.imag(Complex.new(1, :nan)) == :nan
     assert_close Complex.phase(a), 1.1071487177940904
     assert_close Complex.conjugate(a), %Complex{re: 1.0, im: -2.0}
+
+    assert Complex.conjugate(Complex.new(:infinity, :infinity)) == %Complex{
+             re: :infinity,
+             im: :neg_infinity
+           }
+
+    assert Complex.conjugate(Complex.new(:infinity, :neg_infinity)) == %Complex{
+             re: :infinity,
+             im: :infinity
+           }
+
+    assert Complex.conjugate(Complex.new(:infinity, :nan)) == %Complex{
+             re: :infinity,
+             im: :nan
+           }
+
+    assert Complex.conjugate(Complex.new(:neg_infinity, :infinity)) == %Complex{
+             re: :neg_infinity,
+             im: :neg_infinity
+           }
+
+    assert Complex.conjugate(Complex.new(:neg_infinity, :neg_infinity)) == %Complex{
+             re: :neg_infinity,
+             im: :infinity
+           }
+
+    assert Complex.conjugate(Complex.new(:neg_infinity, :nan)) == %Complex{
+             re: :neg_infinity,
+             im: :nan
+           }
+
+    assert Complex.conjugate(Complex.new(:nan, :infinity)) == %Complex{
+             re: :nan,
+             im: :neg_infinity
+           }
+
+    assert Complex.conjugate(Complex.new(:nan, :neg_infinity)) == %Complex{
+             re: :nan,
+             im: :infinity
+           }
+
+    assert Complex.conjugate(Complex.new(:nan, :nan)) == %Complex{re: :nan, im: :nan}
     assert_close Complex.square(a), Complex.multiply(a, a)
     assert_close Complex.square(b), Complex.multiply(b, b)
     assert_close Complex.square(c), Complex.multiply(c, c)
@@ -283,6 +338,25 @@ defmodule ComplexTest do
     assert_close Complex.conjugate(a), a
     assert_close Complex.square(a), a * a
     assert_close Complex.square(d), d * d
+  end
+
+  test "abs (non finite)" do
+    assert Complex.abs(:nan) == :nan
+    assert Complex.abs(:infinity) == :infinity
+    assert Complex.abs(:neg_infinity) == :infinity
+    assert Complex.abs(Complex.new(:nan, :nan)) == :nan
+
+    assert Complex.abs_squared(:nan) == :nan
+    assert Complex.abs_squared(:infinity) == :infinity
+    assert Complex.abs_squared(:neg_infinity) == :infinity
+    assert Complex.abs_squared(Complex.new(:nan, :nan)) == :nan
+
+    values = [:infinity, :neg_infinity, 0, 1, -1]
+
+    for x <- values, y <- values, is_atom(x) or is_atom(y) do
+      assert Complex.abs(Complex.new(x, y)) == :infinity
+      assert Complex.abs_squared(Complex.new(x, y)) == :infinity
+    end
   end
 
   test "Exp and logs" do
