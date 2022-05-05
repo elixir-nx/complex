@@ -111,6 +111,11 @@ defmodule Complex do
       iex> Complex.new(2)
       %Complex{im: 0.0, re: 2.0}
 
+      iex> Complex.new(:infinity)
+      %Complex{im: 0.0, re: :infinity}
+
+      iex> Complex.new(:nan, :neg_infinity)
+      %Complex{im: :neg_infinity, re: :nan}
   """
   @spec new(number | non_finite_number, number | non_finite_number) :: t
   def new(re, im \\ 0)
@@ -831,19 +836,17 @@ defmodule Complex do
       %Complex{im: 0.027612020368333014, re: 0.03324182700885666}
 
   """
-  @spec power(t, t) :: t
-  @spec power(number, t) :: t
-  @spec power(t, number) :: t
-  @spec power(number, number) :: number
+  @spec power(t | non_finite_number | number, t | non_finite_number | number) ::
+          t | non_finite_number | number
 
   def power(:nan, _), do: :nan
   def power(_, :nan), do: :nan
 
-  def power(:infinity, y) when is_number(y) and y >= 0, do: :infinity
-  def power(:infinity, 0), do: 1
+  def power(:infinity, y) when is_number(y) and y > 0, do: :infinity
+  def power(:infinity, y) when y == 0, do: 1
   def power(:infinity, y) when is_number(y) and y < 0, do: 0
 
-  def power(:neg_infinity, y) when is_number(y) and y >= 0 do
+  def power(:neg_infinity, y) when is_number(y) and y > 0 do
     if rem(y, 2) == 0 do
       :infinity
     else
@@ -851,9 +854,11 @@ defmodule Complex do
     end
   end
 
-  def power(:neg_infinity, 0), do: 1
+  def power(:neg_infinity, y) when y == 0, do: 1
   def power(:neg_infinity, y) when is_number(y) and y < 0, do: 0
 
+  def power(x, :infinity) when x == 0, do: 0
+  def power(x, :neg_infinity) when x == 0, do: :infinity
   def power(_, :neg_infinity), do: 0
   def power(_, :infinity), do: :infinity
 
@@ -879,11 +884,11 @@ defmodule Complex do
         divide(new(1.0, 0.0), x)
 
       true ->
-        rho = abs(x)
-        theta = phase(x)
-        s = power(rho, y.re) * exp(multiply(multiply(-1, y.im), theta))
-        r = multiply(add(multiply(y.re, theta), y.im), ln(rho))
-        new(multiply(s, cos(r)), multiply(s, sin(r)))
+        rho = :math.sqrt(x.re * x.re + x.im * x.im)
+        theta = :math.atan2(x.im, x.re)
+        s = :math.pow(rho, y.re) * :math.exp(-y.im * theta)
+        r = y.re * theta + y.im * :math.log(rho)
+        new(s * :math.cos(r), s * :math.sin(r))
     end
   end
 

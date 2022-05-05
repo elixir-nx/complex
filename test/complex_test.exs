@@ -128,6 +128,31 @@ defmodule ComplexTest do
     assert_close Complex.power(a, b), :math.pow(a, b)
   end
 
+  test "power (non-finite)" do
+    assert Complex.power(:nan, :rand.uniform()) == :nan
+    assert Complex.power(:rand.uniform(), :nan) == :nan
+
+    assert Complex.power(:infinity, 2) == :infinity
+    assert Complex.power(:infinity, 0) == 1
+    assert Complex.power(:infinity, 0.0) == 1
+    assert Complex.power(:infinity, -2) == 0
+
+    assert Complex.power(:neg_infinity, 2) == :infinity
+    assert Complex.power(:neg_infinity, 3) == :neg_infinity
+    assert Complex.power(:neg_infinity, 0) == 1
+    assert Complex.power(:neg_infinity, 0.0) == 1
+    assert Complex.power(:neg_infinity, -2) == 0
+
+    assert Complex.power(10, :infinity) == :infinity
+    assert Complex.power(:infinity, :infinity) == :infinity
+    assert Complex.power(:neg_infinity, :infinity) == :infinity
+    assert Complex.power(10, :neg_infinity) == 0
+    assert Complex.power(:infinity, :neg_infinity) == 0
+    assert Complex.power(:neg_infinity, :neg_infinity) == 0
+    assert Complex.power(0, :neg_infinity) == :infinity
+    assert Complex.power(0, :infinity) == 0
+  end
+
   test "Trig functions" do
     a = Complex.new(1.0, 2.0)
     assert_close Complex.sin(a), %Complex{re: 3.165778513216168, im: 1.9596010414216063}
