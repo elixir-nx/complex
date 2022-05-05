@@ -70,16 +70,22 @@ defmodule Complex do
   def to_string(%Complex{re: re, im: im}) do
     cond do
       im < 0 ->
-        "#{re}-#{abs(im)}i"
+        "#{to_string_abs(re)}-#{to_string_abs(im)}i"
 
       im == 0 ->
         # This is so we deal with -0.0 properly
-        "#{re}+0.0i"
+        "#{to_string_abs(re)}+0.0i"
 
       :otherwise ->
-        "#{re}+#{im}i"
+        "#{to_string_abs(re)}+#{to_string_abs(im)}i"
     end
   end
+
+  defp to_string_abs(:infinity), do: "Inf"
+  defp to_string_abs(:neg_infinity), do: "Inf"
+  defp to_string_abs(:nan), do: "NaN"
+  defp to_string_abs(n) when is_integer(n), do: Integer.to_string(abs(n))
+  defp to_string_abs(n) when is_float(n), do: Float.to_string(abs(n))
 
   @doc """
   Returns a new complex with specified real and imaginary components. The
@@ -98,14 +104,12 @@ defmodule Complex do
       %Complex{im: 0.0, re: 2.0}
 
   """
-  @spec new(number) :: t
-  @spec new(non_finite_number) :: non_finite_number
-  @spec new(number, number) :: t
+  @spec new(number | non_finite_number, number | non_finite_number) :: t
   def new(re, im \\ 0)
 
   def new(re, im) do
-    re_f = multiply(re, 1.0)
-    im_f = multiply(im, 1.0)
+    re_f = as_float(re)
+    im_f = as_float(im)
 
     %Complex{re: re_f, im: im_f}
   end
@@ -226,7 +230,7 @@ defmodule Complex do
 
   @spec from_polar(number, number) :: t
   def from_polar(r, phi) do
-    new(r * :math.cos(phi), r * :math.sin(phi))
+    new(multiply(r, cos(phi)), multiply(r, sin(phi)))
   end
 
   @doc """
@@ -473,7 +477,7 @@ defmodule Complex do
     %Complex{re: r1, im: i1} = as_complex(x)
     %Complex{re: r2, im: i2} = as_complex(y)
 
-    if Kernel.abs(r2) < Kernel.abs(i2) do
+    if is_number(r2) and is_number(i2) and Kernel.abs(r2) < Kernel.abs(i2) do
       r = divide(r2, i2)
       den = add(i2, multiply(r, r2))
       new(divide(add(multiply(r1, r), i1), den), divide(subtract(multiply(i1, r), r1), den))
@@ -658,7 +662,6 @@ defmodule Complex do
   def sqrt(z)
   def sqrt(n) when is_number(n), do: :math.sqrt(n)
 
-  # TO-DO: support non_finite_numbers in sqrt
   def sqrt(z = %Complex{re: r, im: i}) do
     if r == 0.0 and i == 0.0 do
       new(r, i)
@@ -1092,8 +1095,6 @@ defmodule Complex do
     t3 = add(new(1.0, 0.0), multiply(i, z))
     multiply(t1, subtract(ln(t2), ln(t3)))
   end
-
-  # TO-DO: support atan2 non_finite_numbers
 
   @doc """
   $atan2(b, a)$ returns the phase of the complex number $a + bi$.
@@ -1804,4 +1805,9 @@ defmodule Complex do
   defp as_complex(%Complex{} = x), do: x
   defp as_complex(x) when is_number(x), do: new(x)
   defp as_complex(x) when x in @non_finite_numbers, do: new(x)
+
+  defp as_float(:infinity), do: :infinity
+  defp as_float(:neg_infinity), do: :neg_infinity
+  defp as_float(:nan), do: :nan
+  defp as_float(n), do: 1.0 * n
 end
