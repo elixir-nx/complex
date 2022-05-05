@@ -788,7 +788,10 @@ defmodule Complex do
 
   def exp(%Complex{re: :neg_infinity, im: _}), do: 0
   def exp(%Complex{re: :infinity, im: :nan}), do: new(:infinity, :nan)
-  def exp(%Complex{re: :infinity, im: _}), do: :infinity
+
+  def exp(%Complex{re: :infinity, im: im}) when is_number(im),
+    do: new(:infinity, multiply(:infinity, im))
+
   def exp(%Complex{re: _, im: :neg_infinity}), do: new(:nan, :nan)
   def exp(%Complex{re: _, im: :infinity}), do: new(:nan, :nan)
   def exp(%Complex{re: :nan, im: _}), do: new(:nan, :nan)

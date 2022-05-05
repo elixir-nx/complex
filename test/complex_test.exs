@@ -425,6 +425,27 @@ defmodule ComplexTest do
              Complex.new(:infinity, :neg_infinity)
   end
 
+  test "exp (non-finite)" do
+    assert Complex.exp(:infinity) == :infinity
+    assert Complex.exp(:neg_infinity) == 0
+    assert Complex.exp(:nan) == :nan
+
+    for x <- [:infinity, :neg_infinity, :nan, -1, 0, 1] do
+      assert Complex.exp(Complex.new(:neg_infinity, x)) == 0
+    end
+
+    assert Complex.exp(Complex.new(:infinity, :nan)) == Complex.new(:infinity, :nan)
+    assert Complex.exp(Complex.new(:infinity, -1)) == Complex.new(:infinity, :neg_infinity)
+    assert Complex.exp(Complex.new(:infinity, 0)) == Complex.new(:infinity, :nan)
+    assert Complex.exp(Complex.new(:infinity, 1)) == Complex.new(:infinity, :infinity)
+
+    for x <- [:infinity, :neg_infinity, :nan] do
+      assert Complex.exp(Complex.new(0, x)) == Complex.new(:nan, :nan)
+    end
+
+    assert Complex.exp(Complex.new(:nan, 1)) == Complex.new(:nan, :nan)
+  end
+
   test "Trig functions" do
     a = Complex.new(1.0, 2.0)
     assert_close Complex.sin(a), %Complex{re: 3.165778513216168, im: 1.9596010414216063}
