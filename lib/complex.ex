@@ -300,7 +300,7 @@ defmodule Complex do
   def phase(n) when is_number(n), do: 0
 
   def phase(z = %Complex{}) do
-    :math.atan2(z.im, z.re)
+    atan2(z.im, z.re)
   end
 
   @doc """
@@ -409,7 +409,7 @@ defmodule Complex do
   def subtract(left, right) do
     %Complex{re: re_left, im: im_left} = as_complex(left)
     %Complex{re: re_right, im: im_right} = as_complex(right)
-    new(re_left - re_right, im_left - im_right)
+    new(subtract(re_left, re_right), subtract(im_left, im_right))
   end
 
   @doc """
