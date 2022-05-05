@@ -1183,6 +1183,17 @@ defmodule Complex do
 
   """
   def atan2(b, a) when is_number(a) and is_number(b), do: :math.atan2(b, a)
+  def atan2(:infinity, :infinity), do: :math.pi() / 4
+  def atan2(:infinity, :neg_infinity), do: 3 * :math.pi() / 4
+  def atan2(:infinity, :nan), do: :nan
+  def atan2(:infinity, _), do: :math.pi() / 2
+  def atan2(:neg_infinity, :infinity), do: -:math.pi() / 4
+  def atan2(:neg_infinity, :neg_infinity), do: -3 * :math.pi() / 4
+  def atan2(:neg_infinity, :nan), do: :nan
+  def atan2(:neg_infinity, _), do: -:math.pi() / 2
+  def atan2(:nan, _), do: :nan
+  def atan2(_, :infinity), do: 0
+  def atan2(_, :neg_infinity), do: :math.pi()
 
   def atan2(b, a) do
     a = as_complex(a)
@@ -1193,7 +1204,7 @@ defmodule Complex do
     end
 
     b.re
-    |> :math.atan2(a.re)
+    |> atan2(a.re)
     |> Complex.new()
   end
 

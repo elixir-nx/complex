@@ -406,6 +406,130 @@ defmodule ComplexTest do
     assert Complex.power(Complex.new(0, 0), :infinity) == 0
   end
 
+  test "ln, log10, log2 (non-finite)" do
+    assert Complex.ln(:infinity) == :infinity
+    assert Complex.ln(:neg_infinity) == Complex.new(:infinity, :math.pi())
+    assert Complex.ln(:nan) == :nan
+
+    assert Complex.ln(Complex.new(:infinity, :infinity)) ==
+             Complex.new(:infinity, :math.pi() / 4)
+
+    assert Complex.ln(Complex.new(:infinity, :neg_infinity)) ==
+             Complex.new(:infinity, -:math.pi() / 4)
+
+    assert Complex.ln(Complex.new(:neg_infinity, :infinity)) ==
+             Complex.new(:infinity, 3 * :math.pi() / 4)
+
+    assert Complex.ln(Complex.new(:neg_infinity, :neg_infinity)) ==
+             Complex.new(:infinity, -3 * :math.pi() / 4)
+
+    assert Complex.ln(Complex.new(:infinity, 1)) ==
+             Complex.new(:infinity, 0)
+
+    assert Complex.ln(Complex.new(:infinity, 0)) ==
+             Complex.new(:infinity, 0)
+
+    assert Complex.ln(Complex.new(:infinity, -1)) ==
+             Complex.new(:infinity, 0)
+
+    assert Complex.ln(Complex.new(:neg_infinity, 1)) ==
+             Complex.new(:infinity, :math.pi())
+
+    assert Complex.ln(Complex.new(:neg_infinity, 0)) ==
+             Complex.new(:infinity, :math.pi())
+
+    assert Complex.ln(Complex.new(:neg_infinity, -1)) ==
+             Complex.new(:infinity, :math.pi())
+
+    assert Complex.log10(:infinity) == :infinity
+    assert Complex.log10(:neg_infinity) == Complex.new(:infinity, :math.pi() / :math.log(10))
+    assert Complex.log10(:nan) == :nan
+
+    assert Complex.log10(Complex.new(:infinity, :infinity)) ==
+             Complex.new(:infinity, :math.pi() / 4 / :math.log(10))
+
+    assert Complex.log10(Complex.new(:infinity, :neg_infinity)) ==
+             Complex.new(:infinity, -:math.pi() / 4 / :math.log(10))
+
+    assert Complex.log10(Complex.new(:neg_infinity, :infinity)) ==
+             Complex.new(:infinity, 3 * :math.pi() / 4 / :math.log(10))
+
+    assert Complex.log10(Complex.new(:neg_infinity, :neg_infinity)) ==
+             Complex.new(:infinity, -3 * :math.pi() / 4 / :math.log(10))
+
+    assert Complex.log10(Complex.new(:infinity, 1)) ==
+             Complex.new(:infinity, 0)
+
+    assert Complex.log10(Complex.new(:infinity, 0)) ==
+             Complex.new(:infinity, 0)
+
+    assert Complex.log10(Complex.new(:infinity, -1)) ==
+             Complex.new(:infinity, 0)
+
+    assert Complex.log10(Complex.new(:neg_infinity, 1)) ==
+             Complex.new(:infinity, :math.pi() / :math.log(10))
+
+    assert Complex.log10(Complex.new(:neg_infinity, 0)) ==
+             Complex.new(:infinity, :math.pi() / :math.log(10))
+
+    assert Complex.log10(Complex.new(:neg_infinity, -1)) ==
+             Complex.new(:infinity, :math.pi() / :math.log(10))
+
+    assert Complex.log2(:infinity) == :infinity
+    assert Complex.log2(:neg_infinity) == Complex.new(:infinity, :math.pi() / :math.log(2))
+    assert Complex.log2(:nan) == :nan
+
+    assert Complex.log2(Complex.new(:infinity, :infinity)) ==
+             Complex.new(:infinity, :math.pi() / 4 / :math.log(2))
+
+    assert Complex.log2(Complex.new(:infinity, :neg_infinity)) ==
+             Complex.new(:infinity, -:math.pi() / 4 / :math.log(2))
+
+    assert Complex.log2(Complex.new(:neg_infinity, :infinity)) ==
+             Complex.new(:infinity, 3 * :math.pi() / 4 / :math.log(2))
+
+    assert Complex.log2(Complex.new(:neg_infinity, :neg_infinity)) ==
+             Complex.new(:infinity, -3 * :math.pi() / 4 / :math.log(2))
+
+    assert Complex.log2(Complex.new(:infinity, 1)) ==
+             Complex.new(:infinity, 0)
+
+    assert Complex.log2(Complex.new(:infinity, 0)) ==
+             Complex.new(:infinity, 0)
+
+    assert Complex.log2(Complex.new(:infinity, -1)) ==
+             Complex.new(:infinity, 0)
+
+    assert Complex.log2(Complex.new(:neg_infinity, 1)) ==
+             Complex.new(:infinity, :math.pi() / :math.log(2))
+
+    assert Complex.log2(Complex.new(:neg_infinity, 0)) ==
+             Complex.new(:infinity, :math.pi() / :math.log(2))
+
+    assert Complex.log2(Complex.new(:neg_infinity, -1)) ==
+             Complex.new(:infinity, :math.pi() / :math.log(2))
+  end
+
+  test "atan2 (non-finite)" do
+    assert Complex.atan2(:infinity, :infinity) == :math.pi() / 4
+    assert Complex.atan2(:infinity, :neg_infinity) == 3 * :math.pi() / 4
+    assert Complex.atan2(:infinity, :nan) == :nan
+    assert Complex.atan2(:infinity, -1) == :math.pi() / 2
+    assert Complex.atan2(:infinity, 0) == :math.pi() / 2
+    assert Complex.atan2(:infinity, 1) == :math.pi() / 2
+    assert Complex.atan2(:neg_infinity, :infinity) == -:math.pi() / 4
+    assert Complex.atan2(:neg_infinity, :neg_infinity) == -3 * :math.pi() / 4
+    assert Complex.atan2(:neg_infinity, :nan) == :nan
+    assert Complex.atan2(:neg_infinity, -1) == -:math.pi() / 2
+    assert Complex.atan2(:neg_infinity, 0) == -:math.pi() / 2
+    assert Complex.atan2(:neg_infinity, 1) == -:math.pi() / 2
+    assert Complex.atan2(:nan, :infinity) == :nan
+    assert Complex.atan2(:nan, :neg_infinity) == :nan
+    assert Complex.atan2(:nan, -1) == :nan
+    assert Complex.atan2(:nan, 0) == :nan
+    assert Complex.atan2(:nan, 1) == :nan
+  end
+
   test "sqrt (non-finite)" do
     assert Complex.sqrt(:infinity) == :infinity
     assert Complex.sqrt(:neg_infinity) == Complex.new(0, :infinity)
