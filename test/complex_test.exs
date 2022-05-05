@@ -151,6 +151,8 @@ defmodule ComplexTest do
     assert Complex.power(:neg_infinity, :neg_infinity) == 0
     assert Complex.power(0, :neg_infinity) == :infinity
     assert Complex.power(0, :infinity) == 0
+    assert Complex.power(Complex.new(0, 0), :neg_infinity) == :infinity
+    assert Complex.power(Complex.new(0, 0), :infinity) == 0
   end
 
   test "Trig functions" do

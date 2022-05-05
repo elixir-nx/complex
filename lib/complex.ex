@@ -858,7 +858,9 @@ defmodule Complex do
   def power(:neg_infinity, y) when is_number(y) and y < 0, do: 0
 
   def power(x, :infinity) when x == 0, do: 0
+  def power(%Complex{re: re, im: im}, :infinity) when re == 0 and im == 0, do: 0
   def power(x, :neg_infinity) when x == 0, do: :infinity
+  def power(%Complex{re: re, im: im}, :neg_infinity) when re == 0 and im == 0, do: :infinity
   def power(_, :neg_infinity), do: 0
   def power(_, :infinity), do: :infinity
 
