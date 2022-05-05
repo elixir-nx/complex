@@ -163,6 +163,51 @@ defmodule ComplexTest do
     assert Complex.square(Complex.new(:infinity, 1)) == Complex.new(:infinity, :infinity)
   end
 
+  test "divide (non finite)" do
+    for x <- [:infinity, :neg_infinity, :nan], y <- [:infinity, :neg_infinity, :nan] do
+      assert Complex.divide(x, y) == :nan
+      assert Complex.divide(x, 0) == x
+      assert Complex.divide(x, 1) == x
+
+      if y == :nan do
+        assert Complex.divide(Complex.new(x), Complex.new(y)) == Complex.new(:nan, :nan)
+      else
+        assert Complex.divide(Complex.new(x), Complex.new(y)) == Complex.new(:nan)
+      end
+
+      assert Complex.divide(Complex.new(x), 0) == Complex.new(x, :nan)
+      assert Complex.divide(Complex.new(x), 1) == Complex.new(x)
+    end
+
+    assert Complex.divide(:nan, 1) == :nan
+    assert Complex.divide(1, :nan) == :nan
+
+    assert Complex.divide(Complex.new(:nan), 1) == Complex.new(:nan, 0)
+    assert Complex.divide(1, Complex.new(:nan)) == Complex.new(:nan, :nan)
+
+    assert Complex.divide(:infinity, -1) == :neg_infinity
+    assert Complex.divide(:neg_infinity, -1) == :infinity
+
+    assert Complex.divide(Complex.new(:infinity), -1) == Complex.new(:neg_infinity, 0)
+    assert Complex.divide(Complex.new(:neg_infinity), -1) == Complex.new(:infinity, 0)
+
+    assert Complex.divide(-1, :infinity) == 0
+    assert Complex.divide(0, :infinity) == 0
+    assert Complex.divide(1, :infinity) == 0
+
+    assert Complex.divide(-1, :neg_infinity) == 0
+    assert Complex.divide(0, :neg_infinity) == 0
+    assert Complex.divide(1, :neg_infinity) == 0
+
+    assert Complex.divide(-1, Complex.new(:infinity)) == Complex.new(0)
+    assert Complex.divide(0, Complex.new(:infinity)) == Complex.new(0)
+    assert Complex.divide(1, Complex.new(:infinity)) == Complex.new(0)
+
+    assert Complex.divide(-1, Complex.new(:neg_infinity)) == Complex.new(0)
+    assert Complex.divide(0, Complex.new(:neg_infinity)) == Complex.new(0)
+    assert Complex.divide(1, Complex.new(:neg_infinity)) == Complex.new(0)
+  end
+
   test "Math functions" do
     a = Complex.new(1.0, 2.0)
     b = Complex.new(3.0, 4.0)
@@ -379,25 +424,6 @@ defmodule ComplexTest do
     end
   end
 
-  defp assert_close(left, right, opts \\ []) do
-    eps = opts[:eps] || 1.0e-5
-
-    left
-    |> Complex.subtract(right)
-    |> Complex.abs()
-    |> case do
-      val when val <= eps ->
-        true
-
-      _ ->
-        flunk("""
-        Expected the two values to be close.
-        left: #{inspect(left)}
-        right: #{inspect(right)}
-        """)
-    end
-  end
-
   test "erf" do
     assert Complex.erf(-1) == -0.8427007929497149
     assert Complex.erf(0) == 0
@@ -423,5 +449,24 @@ defmodule ComplexTest do
     assert Complex.erf_inv(:nan) == :nan
     assert Complex.erf_inv(1) == :infinity
     assert Complex.erf_inv(-1) == :neg_infinity
+  end
+
+  defp assert_close(left, right, opts \\ []) do
+    eps = opts[:eps] || 1.0e-5
+
+    left
+    |> Complex.subtract(right)
+    |> Complex.abs()
+    |> case do
+      val when val <= eps ->
+        true
+
+      _ ->
+        flunk("""
+        Expected the two values to be close.
+        left: #{inspect(left)}
+        right: #{inspect(right)}
+        """)
+    end
   end
 end

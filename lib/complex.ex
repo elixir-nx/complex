@@ -523,21 +523,35 @@ defmodule Complex do
   @spec divide(t | number | non_finite_number, t | number | non_finite_number) ::
           t | number | non_finite_number
 
-  def divide(x, y) when is_non_finite_number(x) or is_non_finite_number(y), do: :nan
+  def divide(x, y) when is_non_finite_number(x) and is_non_finite_number(y), do: :nan
+  def divide(x, y) when is_non_finite_number(x) and is_number(y) and y >= 0, do: x
+  def divide(x, y) when x == 0 and y == 0, do: :nan
+  def divide(:nan, _), do: :nan
+  def divide(_, :nan), do: :nan
+  def divide(:infinity, y) when is_number(y) and y < 0, do: :neg_infinity
+  def divide(:neg_infinity, y) when is_number(y) and y < 0, do: :infinity
+  def divide(_, :infinity), do: 0
+  def divide(_, :neg_infinity), do: 0
+
   def divide(x, y) when is_number(x) and is_number(y), do: x / y
 
   def divide(x, y) do
     %Complex{re: r1, im: i1} = as_complex(x)
     %Complex{re: r2, im: i2} = as_complex(y)
 
-    if is_number(r2) and is_number(i2) and Kernel.abs(r2) < Kernel.abs(i2) do
-      r = divide(r2, i2)
-      den = add(i2, multiply(r, r2))
-      new(divide(add(multiply(r1, r), i1), den), divide(subtract(multiply(i1, r), r1), den))
-    else
-      r = divide(i2, r2)
-      den = add(r2, multiply(r, i2))
-      new(divide(add(r1, multiply(r, i1)), den), divide(subtract(i1, multiply(r, r1)), den))
+    cond do
+      i2 == 0 ->
+        new(divide(r1, r2), divide(i1, r2))
+
+      r2 == 0 ->
+        new(divide(i1, i2), negate(divide(r1, i2)))
+
+      true ->
+        num_re = add(multiply(r1, r2), multiply(i1, i2))
+        num_im = subtract(multiply(i1, r2), multiply(r1, i2))
+        den = add(square(r2), square(i2))
+
+        new(divide(num_re, den), divide(num_im, den))
     end
   end
 
@@ -1090,7 +1104,7 @@ defmodule Complex do
   ### Examples
 
       iex> Complex.tan(Complex.from_polar(2,:math.pi))
-      %Complex{im: 1.4143199004457917e-15, re: 2.185039863261519}
+      %Complex{im: 1.4143199004457915e-15, re: 2.185039863261519}
 
   """
   @spec tan(t | number | non_finite_number) :: t | number | non_finite_number
@@ -1116,7 +1130,7 @@ defmodule Complex do
       %Complex{im: 0.0, re: -1.1071487177940904}
 
       iex> Complex.tan(Complex.atan(Complex.new(2,3)))
-      %Complex{im: 3.0, re: 2.0}
+      %Complex{im: 2.9999999999999996, re: 2.0}
 
   """
   @spec atan(t | number | non_finite_number) :: t | number | non_finite_number
@@ -1180,7 +1194,7 @@ defmodule Complex do
   ### Examples
 
       iex> Complex.cot(Complex.from_polar(2,:math.pi))
-      %Complex{im: -2.9622992129532336e-16, re: 0.45765755436028577}
+      %Complex{im: -2.962299212953233e-16, re: 0.45765755436028577}
 
   """
   @spec cot(t) :: t
@@ -1207,7 +1221,7 @@ defmodule Complex do
       %Complex{im: -9.71445146547012e-17, re: -0.46364760900080615}
 
       iex> Complex.cot(Complex.acot(Complex.new(2,3)))
-      %Complex{im: 3.0, re: 1.9999999999999991}
+      %Complex{im: 2.9999999999999996, re: 1.9999999999999993}
 
   """
   @spec acot(t) :: t
@@ -1314,7 +1328,7 @@ defmodule Complex do
       %Complex{im: 0.0, re: -0.5235987755982988}
 
       iex> Complex.csc(Complex.acsc(Complex.new(2,3)))
-      %Complex{im: 2.9999999999999996, re: 1.9999999999999991}
+      %Complex{im: 3.0, re: 1.9999999999999993}
 
   """
   @spec acsc(t) :: t
@@ -1476,7 +1490,7 @@ defmodule Complex do
   ### Examples
 
       iex> Complex.tanh(Complex.from_polar(2,:math.pi))
-      %Complex{im: 1.7304461302709572e-17, re: -0.964027580075817}
+      %Complex{im: 1.7304461302709575e-17, re: -0.9640275800758169}
 
   """
   @spec tanh(t | number | non_finite_number) :: t | number | non_finite_number
@@ -1502,7 +1516,7 @@ defmodule Complex do
       %Complex{im: 1.5707963267948966, re: -0.5493061443340549}
 
       iex> Complex.tanh(Complex.atanh(Complex.new(2,3)))
-      %Complex{im: 2.999999999999999, re: 1.9999999999999987}
+      %Complex{im: 3.0, re: 1.9999999999999993}
 
   """
   @spec atanh(t | number | non_finite_number) :: t | number | non_finite_number
@@ -1539,7 +1553,7 @@ defmodule Complex do
   ### Examples
 
       iex> Complex.sech(Complex.from_polar(2,:math.pi))
-      %Complex{im: 6.27608655779184e-17, re: 0.2658022288340797}
+      %Complex{im: 6.27608655779184e-17, re: 0.26580222883407967}
 
   """
   @spec sech(t | number | non_finite_number) :: t | number | non_finite_number
@@ -1606,7 +1620,7 @@ defmodule Complex do
       %Complex{im: -5.4767869826420256e-17, re: -0.48121182505960336}
 
       iex> Complex.csch(Complex.acsch(Complex.new(2,3)))
-      %Complex{im: 3.0000000000000018, re: 1.9999999999999982}
+      %Complex{im: 3.0000000000000018, re: 1.9999999999999984}
 
   """
   @spec acsch(t | number | non_finite_number) :: t | number | non_finite_number
@@ -1631,7 +1645,7 @@ defmodule Complex do
   ### Examples
 
       iex> Complex.coth(Complex.from_polar(2,:math.pi))
-      %Complex{im: -1.8619978115303632e-17, re: -1.037314720727548}
+      %Complex{im: -1.8619978115303644e-17, re: -1.037314720727548}
 
   """
   @spec coth(t | number | non_finite_number) :: t | number | non_finite_number
