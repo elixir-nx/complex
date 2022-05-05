@@ -67,25 +67,33 @@ defmodule Complex do
   @doc """
   Conveniency function that is used to implement the `String.Chars` and `Inspect` protocols.
   """
+  @spec to_string(t) :: String.t()
   def to_string(%Complex{re: re, im: im}) do
-    cond do
-      im < 0 ->
-        "#{to_string_abs(re)}-#{to_string_abs(im)}i"
+    "#{to_string_real(re)}#{to_string_component(im)}i"
+  end
 
-      im == 0 ->
-        # This is so we deal with -0.0 properly
-        "#{to_string_abs(re)}+0.0i"
-
-      :otherwise ->
-        "#{to_string_abs(re)}+#{to_string_abs(im)}i"
+  defp to_string_real(n) do
+    case to_string_component(n) do
+      "-" <> _ = s -> s
+      "+" <> s -> s
     end
   end
 
-  defp to_string_abs(:infinity), do: "Inf"
-  defp to_string_abs(:neg_infinity), do: "Inf"
-  defp to_string_abs(:nan), do: "NaN"
-  defp to_string_abs(n) when is_integer(n), do: Integer.to_string(abs(n))
-  defp to_string_abs(n) when is_float(n), do: Float.to_string(abs(n))
+  defp to_string_component(:infinity), do: "+Inf"
+  defp to_string_component(:neg_infinity), do: "-Inf"
+  defp to_string_component(:nan), do: "+NaN"
+
+  defp to_string_component(n) when n == 0, do: "+0.0"
+
+  defp to_string_component(n) do
+    abs_s = Kernel.to_string(abs(n))
+
+    if n >= 0 do
+      "+#{abs_s}"
+    else
+      "-#{abs_s}"
+    end
+  end
 
   @doc """
   Returns a new complex with specified real and imaginary components. The

@@ -199,6 +199,13 @@ defmodule ComplexTest do
       assert "1.0+0.0i" == apply(unquote(m), unquote(f), [Complex.new(1.0, 0.0)])
       assert "1.0+0.0i" == apply(unquote(m), unquote(f), [Complex.new(1.0, -0.0)])
 
+      assert "Inf+0.0i" == apply(unquote(m), unquote(f), [Complex.new(:infinity, -0.0)])
+      assert "-Inf+0.0i" == apply(unquote(m), unquote(f), [Complex.new(:neg_infinity, -0.0)])
+      assert "NaN+0.0i" == apply(unquote(m), unquote(f), [Complex.new(:nan, -0.0)])
+      assert "0.0+Infi" == apply(unquote(m), unquote(f), [Complex.new(0.0, :infinity)])
+      assert "0.0-Infi" == apply(unquote(m), unquote(f), [Complex.new(0.0, :neg_infinity)])
+      assert "0.0+NaNi" == apply(unquote(m), unquote(f), [Complex.new(0.0, :nan)])
+
       assert "1.0-1.0i" ==
                apply(unquote(m), unquote(f), [Complex.new(1.0, 1.0) |> Complex.conjugate()])
 
