@@ -25,6 +25,12 @@ defmodule ComplexTest do
     assert_close Complex.parse("1.+1.0i") |> elem(0), %Complex{re: 1.0, im: 1.0}
     assert_close Complex.parse("1-1.0i") |> elem(0), %Complex{re: 1.0, im: -1.0}
 
+    tail = "12345"
+    assert {%Complex{re: :infinity, im: :nan}, tail} == Complex.parse("+Inf-NaNi" <> tail)
+    assert {%Complex{re: :neg_infinity, im: :infinity}, tail} == Complex.parse("-Inf+Infi" <> tail)
+    assert {%Complex{re: :infinity, im: :neg_infinity}, tail} == Complex.parse("Inf-Infi" <> tail)
+    assert {%Complex{re: :nan, im: :nan}, tail} == Complex.parse("NaN+NaNi" <> tail)
+
     assert :error == Complex.parse("123")
     assert_close Complex.parse("1+1i") |> elem(0), %Complex{re: 1.0, im: 1.0}
   end
