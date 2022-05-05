@@ -45,6 +45,13 @@ defmodule ComplexTest do
     assert :error == Complex.parse("-Inf")
     assert :error == Complex.parse("NaN")
 
+    assert {%Complex{re: 0, im: :infinity}, ""} == Complex.parse("Infi")
+    assert {%Complex{re: 0, im: :infinity}, ""} == Complex.parse("+Infi")
+    assert {%Complex{re: 0, im: :neg_infinity}, ""} == Complex.parse("-Infi")
+    assert {%Complex{re: 0, im: :nan}, ""} == Complex.parse("NaNi")
+    assert {%Complex{re: 0, im: :nan}, ""} == Complex.parse("+NaNi")
+    assert {%Complex{re: 0, im: :nan}, ""} == Complex.parse("-NaNi")
+
     assert :error == Complex.parse("123")
     assert_close Complex.parse("1+1i") |> elem(0), %Complex{re: 1.0, im: 1.0}
   end

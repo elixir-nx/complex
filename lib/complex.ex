@@ -213,7 +213,11 @@ defmodule Complex do
 
   defp parse_imag("i" <> tail), do: {1, tail}
   defp parse_imag("Infi" <> tail), do: {:infinity, tail}
+  defp parse_imag("+Infi" <> tail), do: {:infinity, tail}
+  defp parse_imag("-Infi" <> tail), do: {:neg_infinity, tail}
   defp parse_imag("NaNi" <> tail), do: {:nan, tail}
+  defp parse_imag("+NaNi" <> tail), do: {:nan, tail}
+  defp parse_imag("-NaNi" <> tail), do: {:nan, tail}
 
   defp parse_imag(str) do
     case Float.parse(str) do
