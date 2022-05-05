@@ -130,6 +130,24 @@ defmodule ComplexTest do
     assert Complex.imag(d) == 0
     assert_close Complex.phase(a), 0
     assert_close Complex.phase(-a), :math.pi()
+
+    assert_close Complex.phase(:infinity), 0
+    assert_close Complex.phase(:neg_infinity), :math.pi()
+    assert Complex.phase(:nan) == :nan
+
+    for im <- [0, 0.0],
+        {re, phase} <- [{:infinity, 0}, {:neg_infinity, :math.pi()}, {:nan, :nan}] do
+      assert Complex.phase(Complex.new(re, im)) == phase
+    end
+
+    for re <- [:infinity, :neg_infinity], im <- [:infinity, :nan, :neg_infinity, -1, 1] do
+      assert Complex.phase(Complex.new(re, im)) == :nan
+    end
+
+    assert Complex.phase(Complex.new(1, :infinity)) == :math.pi() / 2
+    assert Complex.phase(Complex.new(1, :neg_infinity)) == -:math.pi() / 2
+    assert Complex.phase(Complex.new(1, :nan)) == :nan
+
     assert_close Complex.conjugate(a), a
     assert_close Complex.square(a), a * a
     assert_close Complex.square(d), d * d

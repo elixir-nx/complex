@@ -300,6 +300,10 @@ defmodule Complex do
   def phase(%Complex{re: :infinity}), do: :nan
   def phase(%Complex{re: :neg_infinity}), do: :nan
 
+  def phase(%Complex{im: :infinity}), do: :math.pi() / 2
+  def phase(%Complex{im: :neg_infinity}), do: -:math.pi() / 2
+  def phase(%Complex{im: :nan}), do: :nan
+
   def phase(n) when n < 0, do: :math.pi()
   def phase(n) when is_number(n), do: 0
 
