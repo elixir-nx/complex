@@ -295,6 +295,11 @@ defmodule Complex do
   def phase(%Complex{re: :infinity, im: im}) when im == 0, do: 0
   def phase(%Complex{re: :neg_infinity, im: im}) when im == 0, do: :math.pi()
 
+  def phase(%Complex{re: :infinity, im: :infinity}), do: :math.pi() / 4
+  def phase(%Complex{re: :neg_infinity, im: :infinity}), do: 3 * :math.pi() / 4
+  def phase(%Complex{re: :neg_infinity, im: :neg_infinity}), do: 5 * :math.pi() / 4
+  def phase(%Complex{re: :infinity, im: :neg_infinity}), do: -:math.pi() / 4
+
   def phase(%Complex{re: :infinity}), do: :nan
   def phase(%Complex{re: :neg_infinity}), do: :nan
 
@@ -1033,21 +1038,39 @@ defmodule Complex do
   ### Examples
 
       iex> Complex.asin(Complex.from_polar(2,:math.pi))
-      %Complex{im: 1.3169578969248164, re: -1.5707963267948966}
+      %Complex{im: 1.3169578969248164, re: -1.5707963267948972}
 
   """
   @spec asin(t | number | non_finite_number) :: t | number | non_finite_number
   def asin(z)
 
   def asin(n) when is_number(n), do: :math.asin(n)
+  def asin(n) when is_non_finite_number(n), do: :nan
 
-  def asin(z = %Complex{}) do
-    i = new(0.0, 1.0)
-    # result = -i*ln(i*z + sqrt(1.0-z*z))
-    # result = -i*ln(t1 + sqrt(t2))
-    t1 = multiply(i, z)
-    t2 = subtract(new(1.0, 0.0), multiply(z, z))
-    multiply(negate(i), ln(add(t1, sqrt(t2))))
+  def asin(%Complex{re: re, im: im}) when is_non_finite_number(re) and im == 0,
+    do: new(:nan, :nan)
+
+  def asin(%Complex{re: re, im: im}) when is_non_finite_number(im) and re == 0,
+    do: new(:nan, :nan)
+
+  def asin(%Complex{im: :infinity}), do: new(:nan, :nan)
+
+  def asin(%Complex{} = z) do
+    w = subtract(1, multiply(z, z))
+
+    phi = phase(w)
+
+    r = sqrt(abs(w))
+
+    result =
+      ln(
+        add(
+          new(negate(z.im), z.re),
+          multiply(r, exp(new(0, multiply(phi, 0.5))))
+        )
+      )
+
+    Complex.new(result.im, negate(result.re))
   end
 
   @doc """
@@ -1102,7 +1125,7 @@ defmodule Complex do
   ### Examples
 
       iex> Complex.acos(Complex.from_polar(2,:math.pi))
-      %Complex{im: 1.3169578969248164, re: -3.141592653589793}
+      %Complex{im: 1.3169578969248164, re: 3.141592653589793}
 
   """
   @spec acos(t | number | non_finite_number) :: t | number | non_finite_number

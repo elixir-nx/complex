@@ -327,9 +327,10 @@ defmodule ComplexTest do
       assert Complex.phase(Complex.new(re, im)) == phase
     end
 
-    for re <- [:infinity, :neg_infinity], im <- [:infinity, :nan, :neg_infinity, -1, 1] do
-      assert Complex.phase(Complex.new(re, im)) == :nan
-    end
+    assert Complex.phase(Complex.new(:infinity, :infinity)) == :math.pi() / 4
+    assert Complex.phase(Complex.new(:neg_infinity, :infinity)) == :math.pi() - :math.pi() / 4
+    assert Complex.phase(Complex.new(:neg_infinity, :neg_infinity)) == :math.pi() + :math.pi() / 4
+    assert Complex.phase(Complex.new(:infinity, :neg_infinity)) == -:math.pi() / 4
 
     assert Complex.phase(Complex.new(1, :infinity)) == :math.pi() / 2
     assert Complex.phase(Complex.new(1, :neg_infinity)) == -:math.pi() / 2
@@ -628,6 +629,28 @@ defmodule ComplexTest do
     assert Complex.cos(Complex.new(1, :infinity)) == Complex.new(:infinity, :neg_infinity)
     assert Complex.cos(Complex.new(-1, :neg_infinity)) == Complex.new(:infinity, :neg_infinity)
     assert Complex.cos(Complex.new(1, :neg_infinity)) == Complex.new(:infinity, :infinity)
+  end
+
+  test "asin (non-finite)" do
+    for n <- [:infinity, :neg_infinity, :nan] do
+      assert Complex.asin(n) == :nan
+      assert Complex.asin(Complex.new(n)) == Complex.new(:nan, :nan)
+      assert Complex.asin(Complex.new(0, n)) == Complex.new(:nan, :nan)
+    end
+
+    assert Complex.asin(Complex.new(:infinity, :infinity)) == Complex.new(:nan, :nan)
+
+    assert Complex.asin(Complex.new(-10, :neg_infinity)) ==
+             Complex.new(-:math.pi() / 4, :neg_infinity)
+
+    assert Complex.asin(Complex.new(10, :neg_infinity)) ==
+             Complex.new(:math.pi() / 4, :neg_infinity)
+
+    assert Complex.asin(Complex.new(-10, :infinity)) ==
+             Complex.new(:nan, :nan)
+
+    assert Complex.asin(Complex.new(10, :infinity)) ==
+             Complex.new(:nan, :nan)
   end
 
   test "Hyperbolic functions" do
