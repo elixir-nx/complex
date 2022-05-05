@@ -723,9 +723,19 @@ defmodule Complex do
   """
   @spec sqrt(t | number | non_finite_number) :: t | number | non_finite_number
   def sqrt(z)
+  def sqrt(:infinity), do: :infinity
+  def sqrt(:neg_infinity), do: Complex.new(0, :infinity)
+  def sqrt(:nan), do: :nan
   def sqrt(n) when is_number(n), do: :math.sqrt(n)
 
-  def sqrt(z = %Complex{re: r, im: i}) do
+  def sqrt(%Complex{re: :nan}), do: Complex.new(:nan, :nan)
+  def sqrt(%Complex{im: :nan}), do: Complex.new(:nan, :nan)
+  def sqrt(%Complex{im: :infinity}), do: Complex.new(:infinity, :infinity)
+  def sqrt(%Complex{im: :neg_infinity}), do: Complex.new(:infinity, :neg_infinity)
+  def sqrt(%Complex{re: :infinity}), do: Complex.new(:infinity)
+  def sqrt(%Complex{re: :neg_infinity}), do: Complex.new(0, :infinity)
+
+  def sqrt(%Complex{re: r, im: i}) do
     if r == 0.0 and i == 0.0 do
       new(r, i)
     else
@@ -739,17 +749,17 @@ defmodule Complex do
           :math.sqrt(y) * :math.sqrt(0.5 * (x / y + :math.sqrt(1.0 + x / y * (x / y))))
         end
 
-      if z.re >= 0.0 do
-        new(w, z.im / (2 * w))
+      if r >= 0.0 do
+        new(w, i / (2 * w))
       else
         i2 =
-          if z.im >= 0.0 do
+          if i >= 0.0 do
             w
           else
             -w
           end
 
-        new(z.im / (2 * i2), i2)
+        new(i / (2 * i2), i2)
       end
     end
   end

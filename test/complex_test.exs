@@ -406,6 +406,25 @@ defmodule ComplexTest do
     assert Complex.power(Complex.new(0, 0), :infinity) == 0
   end
 
+  test "sqrt (non-finite)" do
+    assert Complex.sqrt(:infinity) == :infinity
+    assert Complex.sqrt(:neg_infinity) == Complex.new(0, :infinity)
+    assert Complex.sqrt(:nan) == :nan
+
+    assert Complex.sqrt(Complex.new(:infinity, 1)) == Complex.new(:infinity)
+    assert Complex.sqrt(Complex.new(:neg_infinity, 1)) == Complex.new(0, :infinity)
+    assert Complex.sqrt(Complex.new(:infinity, :infinity)) == Complex.new(:infinity, :infinity)
+
+    assert Complex.sqrt(Complex.new(:neg_infinity, :infinity)) ==
+             Complex.new(:infinity, :infinity)
+
+    assert Complex.sqrt(Complex.new(:infinity, :neg_infinity)) ==
+             Complex.new(:infinity, :neg_infinity)
+
+    assert Complex.sqrt(Complex.new(:neg_infinity, :neg_infinity)) ==
+             Complex.new(:infinity, :neg_infinity)
+  end
+
   test "Trig functions" do
     a = Complex.new(1.0, 2.0)
     assert_close Complex.sin(a), %Complex{re: 3.165778513216168, im: 1.9596010414216063}
