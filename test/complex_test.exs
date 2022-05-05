@@ -672,9 +672,9 @@ defmodule ComplexTest do
   end
 
   test "erfc" do
-    assert_close(Complex.erfc(-1) == 1.8427)
+    assert_close Complex.erfc(-1), 1.8427
     assert Complex.erfc(0) == 1
-    assert_close(Complex.erfc(1) == 0.15730)
+    assert_close Complex.erfc(1), 0.15730
     assert Complex.erfc(:nan) == :nan
     assert Complex.erfc(:infinity) == 0
     assert Complex.erfc(:neg_infinity) == 2
