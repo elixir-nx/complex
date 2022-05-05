@@ -13,6 +13,10 @@ defmodule ComplexTest do
     assert_close r, 2.23606797749979
     assert_close theta, 1.1071487177940904
 
+    assert {:infinity, 0} == Complex.to_polar(:infinity)
+    assert {:infinity, :math.pi()} == Complex.to_polar(:neg_infinity)
+    assert {:nan, :nan} == Complex.to_polar(:nan)
+
     assert_close Complex.from_polar(1.0, :math.pi() / 2), %Complex{
       re: 6.123233995736766e-17,
       im: 1.0
@@ -74,6 +78,43 @@ defmodule ComplexTest do
     assert_close Complex.multiply(a, b), 6
     assert_close Complex.divide(a, b), 0.666666
     assert_close Complex.divide(b, a), 1.5
+  end
+
+  test "Arithmetic (non finite)" do
+    for x <- [:nan, 1, -1, 0, :infinity, :neg_infinity] do
+      assert Complex.add(:nan, x) == :nan
+      assert Complex.add(x, :nan) == :nan
+      assert Complex.subtract(:nan, x) == :nan
+      assert Complex.subtract(x, :nan) == :nan
+    end
+
+    assert Complex.add(:infinity, :infinity) == :infinity
+    assert Complex.add(:infinity, :neg_infinity) == :nan
+    assert Complex.add(:neg_infinity, :infinity) == :nan
+    assert Complex.add(:neg_infinity, :neg_infinity) == :neg_infinity
+
+    assert Complex.subtract(:infinity, :infinity) == :nan
+    assert Complex.subtract(:infinity, :neg_infinity) == :infinity
+    assert Complex.subtract(:neg_infinity, :infinity) == :neg_infinity
+    assert Complex.subtract(:neg_infinity, :neg_infinity) == :nan
+
+    for x <- [-1, 0, 1] do
+      assert Complex.add(:infinity, x) == :infinity
+      assert Complex.add(:neg_infinity, x) == :neg_infinity
+      assert Complex.subtract(:infinity, x) == :infinity
+      assert Complex.subtract(:neg_infinity, x) == :neg_infinity
+    end
+
+    # property test
+    values = [:infinity, :neg_infinity, :nan, -1, 0, 1]
+
+    for re1 <- values, im1 <- values, re2 <- values, im2 <- values do
+      assert Complex.add(Complex.new(re1, im1), Complex.new(re2, im2)) ==
+               Complex.new(Complex.add(re1, re2), Complex.add(im1, im2))
+
+      assert Complex.subtract(Complex.new(re1, im1), Complex.new(re2, im2)) ==
+               Complex.new(Complex.subtract(re1, re2), Complex.subtract(im1, im2))
+    end
   end
 
   test "Math functions" do

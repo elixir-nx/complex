@@ -284,9 +284,7 @@ defmodule Complex do
       1.5707963267948966
 
   """
-  @spec phase(t) :: float
-  @spec phase(number) :: number
-  @spec phase(non_finite_number) :: number | non_finite_number
+  @spec phase(t | number | non_finite_number) :: float | non_finite_number
   def phase(z)
 
   def phase(:nan), do: :nan
@@ -325,7 +323,8 @@ defmodule Complex do
       {1.0, 1.5707963267948966}
 
   """
-  @spec to_polar(t) :: {float, float}
+  @spec to_polar(t | number | non_finite_number) ::
+          {float | non_finite_number, float | non_finite_number}
   def to_polar(t)
 
   def to_polar(z = %Complex{}) do
@@ -334,7 +333,10 @@ defmodule Complex do
 
   def to_polar(n) when n < 0, do: {n, :math.pi()}
   def to_polar(n) when is_number(n), do: {n, 0}
-  def to_polar(n) when is_non_finite_number(n), do: to_polar(new(n))
+
+  def to_polar(:infinity), do: {:infinity, 0}
+  def to_polar(:neg_infinity), do: {:infinity, :math.pi()}
+  def to_polar(:nan), do: {:nan, :nan}
 
   @doc """
   Returns a new complex that is the sum of the provided complex numbers.  Also
@@ -369,10 +371,12 @@ defmodule Complex do
   def add(_, :nan), do: :nan
 
   def add(:infinity, :neg_infinity), do: :nan
-  def add(:infinity, _), do: :infinity
-
   def add(:neg_infinity, :infinity), do: :nan
+  def add(:infinity, _), do: :infinity
+  def add(_, :infinity), do: :infinity
+
   def add(:neg_infinity, _), do: :neg_infinity
+  def add(_, :neg_infinity), do: :neg_infinity
 
   def add(left, right) when is_number(left) and is_number(right), do: left + right
 
@@ -408,9 +412,12 @@ defmodule Complex do
   def subtract(:nan, _), do: :nan
   def subtract(_, :nan), do: :nan
   def subtract(:infinity, :infinity), do: :nan
-  def subtract(:infinity, _), do: :infinity
   def subtract(:neg_infinity, :neg_infinity), do: :nan
+
+  def subtract(:infinity, _), do: :infinity
+  def subtract(_, :infinity), do: :neg_infinity
   def subtract(:neg_infinity, _), do: :neg_infinity
+  def subtract(_, :neg_infinity), do: :infinity
 
   def subtract(left, right) when is_number(left) and is_number(right), do: left - right
 
