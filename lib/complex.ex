@@ -49,6 +49,12 @@ defmodule Complex do
   @type t :: %Complex{re: number, im: number}
   defstruct re: 0, im: 0
 
+  @type non_finite_number :: :infinity | :neg_infinity | :nan
+
+  @non_finite_numbers [:infinity, :nef_infinity, :nan]
+
+  defguardp is_non_finite_number(x) when x in @non_finite_numbers
+
   defimpl Inspect do
     def inspect(val, _opts),
       do: Complex.to_string(val)
@@ -92,8 +98,17 @@ defmodule Complex do
       %Complex{im: 0.0, re: 2.0}
 
   """
+  @spec new(number) :: t
+  @spec new(non_finite_number) :: non_finite_number
   @spec new(number, number) :: t
-  def new(re, im \\ 0), do: %Complex{re: re * 1.0, im: im * 1.0}
+  def new(re, im \\ 0)
+
+  def new(re, im) do
+    re_f = multiply(re, 1.0)
+    im_f = multiply(im, 1.0)
+
+    %Complex{re: re_f, im: im_f}
+  end
 
   @doc """
   Parses a complex number from a string.  The values of the real and imaginary
@@ -130,12 +145,20 @@ defmodule Complex do
       iex> Complex.parse("-3.0i")
       {%Complex{im: -3.0, re: 0.0}, ""}
 
+      iex> Complex.parse("NaN+Infi")
+      {%Complex{im: :infinity, re: :nan}, ""}
+
+      iex> Complex.parse("-Inf+NaNi")
+      {%Complex{im: :nan, re: :neg_infinity}, ""}
+
+      iex> Complex.parse("Inf-NaNi")
+      {%Complex{im: :nan, re: :infinity}, ""}
   """
   @spec parse(String.t()) :: {t, String.t()} | :error
   def parse(str) do
     with {real_part, sign_multiplier, tail} <- parse_real(str),
          {imag_part, tail} <- parse_imag(tail) do
-      {new(real_part, sign_multiplier * imag_part), tail}
+      {new(real_part, multiply(sign_multiplier, imag_part)), tail}
     else
       _ ->
         case parse_imag(str) do
@@ -145,7 +168,20 @@ defmodule Complex do
     end
   end
 
-  def parse_real(str) do
+  defp parse_real("Inf+" <> tail), do: {:infinity, 1, tail}
+  defp parse_real("+Inf+" <> tail), do: {:infinity, 1, tail}
+  defp parse_real("Inf-" <> tail), do: {:infinity, -1, tail}
+  defp parse_real("+Inf-" <> tail), do: {:infinity, -1, tail}
+  defp parse_real("-Inf+" <> tail), do: {:neg_infinity, 1, tail}
+  defp parse_real("-Inf-" <> tail), do: {:neg_infinity, -1, tail}
+  defp parse_real("NaN+" <> tail), do: {:nan, 1, tail}
+  defp parse_real("+NaN+" <> tail), do: {:nan, 1, tail}
+  defp parse_real("-NaN+" <> tail), do: {:nan, 1, tail}
+  defp parse_real("NaN-" <> tail), do: {:nan, -1, tail}
+  defp parse_real("+NaN-" <> tail), do: {:nan, -1, tail}
+  defp parse_real("-NaN-" <> tail), do: {:nan, -1, tail}
+
+  defp parse_real(str) do
     case Float.parse(str) do
       {val, ".+" <> tail} -> {val, 1, tail}
       {val, ".-" <> tail} -> {val, -1, tail}
@@ -155,10 +191,11 @@ defmodule Complex do
     end
   end
 
-  def parse_imag("i"), do: {1, ""}
-  def parse_imag("i" <> tail), do: {1, tail}
+  defp parse_imag("i" <> tail), do: {1, tail}
+  defp parse_imag("Infi" <> tail), do: {:infinity, tail}
+  defp parse_imag("NaNi" <> tail), do: {:nan, tail}
 
-  def parse_imag(str) do
+  defp parse_imag(str) do
     case Float.parse(str) do
       {val, ".i" <> tail} -> {val, tail}
       {val, "i" <> tail} -> {val, tail}
@@ -207,7 +244,19 @@ defmodule Complex do
   """
   @spec phase(t) :: float
   @spec phase(number) :: number
+  @spec phase(non_finite_number) :: number | non_finite_number
   def phase(z)
+
+  def phase(:nan), do: :nan
+  def phase(:infinity), do: 0
+  def phase(:neg_infinity), do: :math.pi()
+
+  def phase(%Complex{re: :nan, im: im}) when im == 0, do: :nan
+  def phase(%Complex{re: :infinity, im: im}) when im == 0, do: 0
+  def phase(%Complex{re: :neg_infinity, im: im}) when im == 0, do: :math.pi()
+
+  def phase(%Complex{re: :infinity}), do: :nan
+  def phase(%Complex{re: :neg_infinity}), do: :nan
 
   def phase(n) when n < 0, do: :math.pi()
   def phase(n) when is_number(n), do: 0
@@ -238,8 +287,8 @@ defmodule Complex do
   end
 
   def to_polar(n) when n < 0, do: {n, :math.pi()}
-
-  def to_polar(n), do: {n, 0}
+  def to_polar(n) when is_number(n), do: {n, 0}
+  def to_polar(n) when is_non_finite_number(n), do: to_polar(new(n))
 
   @doc """
   Returns a new complex that is the sum of the provided complex numbers.  Also
@@ -267,16 +316,24 @@ defmodule Complex do
       4.0
 
   """
-  @spec add(t, t) :: t
-  @spec add(number, t) :: t
-  @spec add(t, number) :: t
-  @spec add(number, number) :: number
+  @spec add(t | number | non_finite_number, t | number | non_finite_number) ::
+          t | number | non_finite_number
+
+  def add(:nan, _), do: :nan
+  def add(_, :nan), do: :nan
+
+  def add(:infinity, :neg_infinity), do: :nan
+  def add(:infinity, _), do: :infinity
+
+  def add(:neg_infinity, :infinity), do: :nan
+  def add(:neg_infinity, _), do: :neg_infinity
+
   def add(left, right) when is_number(left) and is_number(right), do: left + right
 
   def add(left, right) do
     %Complex{re: re_left, im: im_left} = as_complex(left)
     %Complex{re: re_right, im: im_right} = as_complex(right)
-    new(re_left + re_right, im_left + im_right)
+    new(add(re_left, re_right), add(im_left, im_right))
   end
 
   @doc """
@@ -299,10 +356,16 @@ defmodule Complex do
       %Complex{im: -2.0, re: 9.0}
 
   """
-  @spec subtract(t, t) :: t
-  @spec subtract(number, t) :: t
-  @spec subtract(t, number) :: t
-  @spec subtract(number, number) :: number
+  @spec subtract(t | number | non_finite_number, t | number | non_finite_number) ::
+          t | number | non_finite_number
+
+  def subtract(:nan, _), do: :nan
+  def subtract(_, :nan), do: :nan
+  def subtract(:infinity, :infinity), do: :nan
+  def subtract(:infinity, _), do: :infinity
+  def subtract(:neg_infinity, :neg_infinity), do: :nan
+  def subtract(:neg_infinity, _), do: :neg_infinity
+
   def subtract(left, right) when is_number(left) and is_number(right), do: left - right
 
   def subtract(left, right) do
@@ -334,16 +397,37 @@ defmodule Complex do
       %Complex{im: 6.0, re: 3.0}
 
   """
-  @spec multiply(t, t) :: t
-  @spec multiply(number, t) :: t
-  @spec multiply(t, number) :: t
-  @spec multiply(number, number) :: number
+  @spec multiply(t | number | non_finite_number, t | number | non_finite_number) ::
+          t | number | non_finite_number
+
+  def multiply(:infinity, right) when is_number(right) and right > 0, do: :infinity
+  def multiply(:infinity, right) when right == 0, do: :nan
+  def multiply(:infinity, right) when is_number(right) and right < 0, do: :neg_infinity
+  def multiply(left, :infinity) when is_number(left) and left > 0, do: :infinity
+  def multiply(left, :infinity) when left == 0, do: :nan
+  def multiply(left, :infinity) when is_number(left) and left < 0, do: :neg_infinity
+
+  def multiply(:neg_infinity, right) when is_number(right) and right > 0, do: :neg_infinity
+  def multiply(:neg_infinity, right) when right == 0, do: :nan
+  def multiply(:neg_infinity, right) when is_number(right) and right < 0, do: :infinity
+  def multiply(left, :neg_infinity) when is_number(left) and left > 0, do: :neg_infinity
+  def multiply(left, :neg_infinity) when left == 0, do: :nan
+  def multiply(left, :neg_infinity) when is_number(left) and left < 0, do: :infinity
+
+  def multiply(:nan, _), do: :nan
+  def multiply(_, :nan), do: :nan
+
+  def multiply(:neg_infinity, :neg_infinity), do: :infinity
+  def multiply(:neg_infinity, :infinity), do: :neg_infinity
+  def multiply(:infinity, :neg_infinity), do: :neg_infinity
+  def multiply(:infinity, :infinity), do: :infinity
+
   def multiply(left, right) when is_number(left) and is_number(right), do: left * right
 
   def multiply(left, right) do
     %Complex{re: r1, im: i1} = as_complex(left)
     %Complex{re: r2, im: i2} = as_complex(right)
-    new(r1 * r2 - i1 * i2, i1 * r2 + r1 * i2)
+    new(subtract(multiply(r1, r2), multiply(i1, i2)), add(multiply(i1, r2), multiply(r1, i2)))
   end
 
   @doc """
@@ -362,8 +446,7 @@ defmodule Complex do
       %Complex{im: 0.0, re: -1.0}
 
   """
-  @spec square(t) :: t
-  @spec square(number) :: number
+  @spec square(t | number | non_finite_number) :: t | number | non_finite_number
   def square(z), do: multiply(z, z)
 
   @doc """
@@ -380,11 +463,10 @@ defmodule Complex do
       %Complex{im: 0.0, re: 1.0}
 
   """
-  @spec divide(t, t) :: t
-  @spec divide(number, t) :: t
-  @spec divide(t, number) :: t
-  @spec divide(number, number) :: number
+  @spec divide(t | number | non_finite_number, t | number | non_finite_number) ::
+          t | number | non_finite_number
 
+  def divide(x, y) when is_non_finite_number(x) or is_non_finite_number(y), do: :nan
   def divide(x, y) when is_number(x) and is_number(y), do: x / y
 
   def divide(x, y) do
@@ -392,13 +474,13 @@ defmodule Complex do
     %Complex{re: r2, im: i2} = as_complex(y)
 
     if Kernel.abs(r2) < Kernel.abs(i2) do
-      r = r2 / i2
-      den = i2 + r * r2
-      new((r1 * r + i1) / den, (i1 * r - r1) / den)
+      r = divide(r2, i2)
+      den = add(i2, multiply(r, r2))
+      new(divide(add(multiply(r1, r), i1), den), divide(subtract(multiply(i1, r), r1), den))
     else
-      r = i2 / r2
-      den = r2 + r * i2
-      new((r1 + r * i1) / den, (i1 - r * r1) / den)
+      r = divide(i2, r2)
+      den = add(r2, multiply(r, i2))
+      new(divide(add(r1, multiply(r, i1)), den), divide(subtract(i1, multiply(r, r1)), den))
     end
   end
 
@@ -415,11 +497,19 @@ defmodule Complex do
       1.0
 
   """
-  @spec abs(t) :: number
-  @spec abs(number) :: number
+  @spec abs(t | number | non_finite_number) :: number | non_finite_number
   def abs(z)
 
+  def abs(:nan), do: :nan
+  def abs(:infinity), do: :infinity
+  def abs(:neg_infinity), do: :infinity
+
   def abs(n) when is_number(n), do: Kernel.abs(n)
+
+  def abs(%Complex{re: :nan, im: :nan}), do: :nan
+
+  def abs(%Complex{re: r, im: i}) when is_non_finite_number(r) or is_non_finite_number(i),
+    do: :infinity
 
   def abs(%Complex{re: r, im: i}) do
     # optimized by checking special cases (sqrt is expensive)
@@ -452,11 +542,19 @@ defmodule Complex do
       4.0
 
   """
-  @spec abs_squared(t) :: number
-  @spec abs_squared(number) :: number
+  @spec abs_squared(t | number | non_finite_number) :: number
   def abs_squared(z)
 
+  def abs_squared(:nan), do: :nan
+  def abs_squared(:infinity), do: :infinity
+  def abs_squared(:neg_infinity), do: :infinity
+
   def abs_squared(n) when is_number(n), do: n * n
+
+  def abs_squared(%Complex{re: :nan, im: :nan}), do: :nan
+
+  def abs_squared(%Complex{re: r, im: i}) when is_non_finite_number(r) or is_non_finite_number(i),
+    do: :infinity
 
   def abs_squared(%Complex{re: r, im: i}) do
     r * r + i * i
@@ -481,7 +579,7 @@ defmodule Complex do
   @spec real(number) :: number
   def real(z)
 
-  def real(n) when is_number(n), do: n
+  def real(n) when is_number(n) or is_non_finite_number(n), do: n
 
   def real(%Complex{re: r, im: _i}), do: r
 
@@ -507,6 +605,7 @@ defmodule Complex do
   def imag(z)
 
   def imag(n) when is_number(n), do: n * 0
+  def imag(n) when is_non_finite_number(n), do: 0
 
   def imag(%Complex{re: _r, im: i}), do: i
 
@@ -532,6 +631,10 @@ defmodule Complex do
 
   def conjugate(n) when is_number(n), do: n
 
+  def conjugate(%Complex{re: r, im: :neg_infinity}), do: new(r, :infinity)
+  def conjugate(%Complex{re: r, im: :infinity}), do: new(r, :neg_infinity)
+  def conjugate(%Complex{re: r, im: :nan}), do: new(r, :nan)
+
   def conjugate(%Complex{re: r, im: i}) do
     new(r, -i)
   end
@@ -555,9 +658,10 @@ defmodule Complex do
   def sqrt(z)
   def sqrt(n) when is_number(n), do: :math.sqrt(n)
 
+  # TO-DO: support non_finite_numbers in sqrt
   def sqrt(z = %Complex{re: r, im: i}) do
-    if z.re == 0.0 and z.im == 0.0 do
-      new(z.re, z.im)
+    if r == 0.0 and i == 0.0 do
+      new(r, i)
     else
       x = Kernel.abs(r)
       y = Kernel.abs(i)
@@ -601,7 +705,19 @@ defmodule Complex do
   @spec exp(t) :: t
   @spec exp(number) :: number
   def exp(z)
+
+  def exp(:infinity), do: :infinity
+  def exp(:neg_infinity), do: 0
+  def exp(:nan), do: :nan
   def exp(n) when is_number(n), do: :math.exp(n)
+
+  def exp(%Complex{re: :neg_infinity, im: _}), do: 0
+  def exp(%Complex{re: :infinity, im: :nan}), do: new(:infinity, :nan)
+  def exp(%Complex{re: :infinity, im: _}), do: :infinity
+  def exp(%Complex{re: _, im: :neg_infinity}), do: new(:nan, :nan)
+  def exp(%Complex{re: _, im: :infinity}), do: new(:nan, :nan)
+  def exp(%Complex{re: :nan, im: _}), do: new(:nan, :nan)
+  def exp(%Complex{re: _, im: :nan}), do: new(:nan, :nan)
 
   def exp(z = %Complex{}) do
     rho = :math.exp(z.re)
@@ -625,10 +741,13 @@ defmodule Complex do
   """
   @spec ln(t) :: t
   def ln(z)
+  def ln(:infinity), do: :infinity
+  def ln(:neg_infinity), do: new(:infinity, :math.pi())
+  def ln(:nan), do: :nan
   def ln(n) when is_number(n), do: :math.log(n)
 
   def ln(z = %Complex{}) do
-    new(:math.log(abs(z)), :math.atan2(z.im, z.re))
+    new(ln(abs(z)), atan2(z.im, z.re))
   end
 
   @doc """
@@ -648,6 +767,10 @@ defmodule Complex do
   @spec log10(t) :: t
   @spec log10(number) :: number
   def log10(z)
+
+  def log10(:infinity), do: :infinity
+  def log10(:neg_infinity), do: divide(ln(:neg_infinity), :math.log(10))
+  def log10(:nan), do: :nan
 
   def log10(n) when is_number(n), do: :math.log10(n)
 
@@ -672,6 +795,10 @@ defmodule Complex do
   @spec log2(t) :: t
   @spec log2(number) :: number
   def log2(z)
+
+  def log2(:infinity), do: :infinity
+  def log2(:neg_infinity), do: divide(ln(:neg_infinity), :math.log(2))
+  def log2(:nan), do: :nan
 
   def log2(n) when is_number(n), do: :math.log2(n)
 
@@ -698,6 +825,27 @@ defmodule Complex do
   @spec power(t, number) :: t
   @spec power(number, number) :: number
 
+  def power(:nan, _), do: :nan
+  def power(_, :nan), do: :nan
+
+  def power(:infinity, y) when is_number(y) and y >= 0, do: :infinity
+  def power(:infinity, 0), do: 1
+  def power(:infinity, y) when is_number(y) and y < 0, do: 0
+
+  def power(:neg_infinity, y) when is_number(y) and y >= 0 do
+    if rem(y, 2) == 0 do
+      :infinity
+    else
+      :neg_infinity
+    end
+  end
+
+  def power(:neg_infinity, 0), do: 1
+  def power(:neg_infinity, y) when is_number(y) and y < 0, do: 0
+
+  def power(_, :neg_infinity), do: 0
+  def power(_, :infinity), do: :infinity
+
   def power(x, y) when is_integer(x) and is_integer(y) and y >= 0, do: Integer.pow(x, y)
   def power(x, y) when is_number(x) and is_number(y), do: :math.pow(x, y)
 
@@ -720,11 +868,11 @@ defmodule Complex do
         divide(new(1.0, 0.0), x)
 
       true ->
-        rho = :math.sqrt(x.re * x.re + x.im * x.im)
-        theta = :math.atan2(x.im, x.re)
-        s = :math.pow(rho, y.re) * :math.exp(-y.im * theta)
-        r = y.re * theta + y.im * :math.log(rho)
-        new(s * :math.cos(r), s * :math.sin(r))
+        rho = abs(x)
+        theta = phase(x)
+        s = power(rho, y.re) * exp(multiply(multiply(-1, y.im), theta))
+        r = multiply(add(multiply(y.re, theta), y.im), ln(rho))
+        new(multiply(s, cos(r)), multiply(s, sin(r)))
     end
   end
 
@@ -746,6 +894,16 @@ defmodule Complex do
   def sin(z)
 
   def sin(n) when is_number(n), do: :math.sin(n)
+  def sin(n) when is_non_finite_number(n), do: :nan
+
+  def sin(%Complex{re: re, im: _}) when is_non_finite_number(re), do: :nan
+
+  def sin(%Complex{re: re, im: im}) when is_number(re) and is_non_finite_number(im),
+    do:
+      new(
+        multiply(:math.sin(re), cosh(im)),
+        multiply(:math.sin(re), sinh(im))
+      )
 
   def sin(z = %Complex{}) do
     new(
@@ -772,11 +930,16 @@ defmodule Complex do
   @spec negate(number) :: number
   def negate(z)
 
+  def negate(:nan), do: :nan
+  def negate(:neg_infinity), do: :infinity
+  def negate(:infinity), do: :neg_infinity
   def negate(n) when is_number(n), do: -n
 
   def negate(z = %Complex{}) do
-    new(-z.re, -z.im)
+    new(negate(z.re), negate(z.im))
   end
+
+  # TO-DO: support non_finite_numbers in inverse trig functions
 
   @doc """
   Returns a new complex that is the inverse sine (i.e., arcsine) of the
@@ -825,6 +988,15 @@ defmodule Complex do
   def cos(z)
 
   def cos(n) when is_number(n), do: :math.cos(n)
+
+  def cos(n) when is_non_finite_number(n), do: :nan
+
+  def cos(%Complex{re: re, im: im}) when is_number(re) and is_non_finite_number(im) do
+    new(
+      multiply(:math.cos(re), cosh(im)),
+      multiply(:math.sin(-re), sinh(im))
+    )
+  end
 
   def cos(z = %Complex{}) do
     new(
@@ -906,6 +1078,10 @@ defmodule Complex do
   @spec atan(number) :: number
   def atan(z)
 
+  def atan(:infinity), do: :math.pi() / 2
+  def atan(:neg_infinity), do: -:math.pi() / 2
+  def atan(:nan), do: :nan
+
   def atan(n) when is_number(n), do: :math.atan(n)
 
   def atan(z = %Complex{}) do
@@ -916,6 +1092,8 @@ defmodule Complex do
     t3 = add(new(1.0, 0.0), multiply(i, z))
     multiply(t1, subtract(ln(t2), ln(t3)))
   end
+
+  # TO-DO: support atan2 non_finite_numbers
 
   @doc """
   $atan2(b, a)$ returns the phase of the complex number $a + bi$.
@@ -1135,6 +1313,8 @@ defmodule Complex do
   @spec sinh(number) :: number
   def sinh(z)
 
+  def sinh(n) when is_non_finite_number(n), do: n
+
   def sinh(n) when is_number(n), do: :math.sinh(n)
 
   def sinh(z = %Complex{}) do
@@ -1200,6 +1380,11 @@ defmodule Complex do
   """
   @spec cosh(t) :: t
   @spec cosh(number) :: number
+
+  def cosh(:infinity), do: :infinity
+  def cosh(:neg_infinity), do: :infinity
+  def cosh(:nan), do: :nan
+
   def cosh(z) do
     z
     |> exp()
@@ -1505,6 +1690,10 @@ defmodule Complex do
     end
   end
 
+  def erf(:infinity), do: 1
+  def erf(:neg_infinity), do: -1
+  def erf(:nan), do: :nan
+
   def erf(%Complex{re: re, im: im}) do
     if im != 0 do
       raise ArithmeticError, "erf not implemented for non-real numbers"
@@ -1570,6 +1759,8 @@ defmodule Complex do
     erf_inv_p(w) * z
   end
 
+  def erf_inv(n) when is_non_finite_number(n), do: :nan
+
   def erf_inv(%Complex{re: re, im: im}) do
     if im != 0 do
       raise ArithmeticError, "erf_inv not implemented for non-real numbers"
@@ -1612,4 +1803,5 @@ defmodule Complex do
 
   defp as_complex(%Complex{} = x), do: x
   defp as_complex(x) when is_number(x), do: new(x)
+  defp as_complex(x) when x in @non_finite_numbers, do: new(x)
 end
