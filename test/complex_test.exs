@@ -80,7 +80,7 @@ defmodule ComplexTest do
     assert_close Complex.divide(b, a), 1.5
   end
 
-  test "Arithmetic (non finite)" do
+  test "add and subtract (non finite)" do
     for x <- [:nan, 1, -1, 0, :infinity, :neg_infinity] do
       assert Complex.add(:nan, x) == :nan
       assert Complex.add(x, :nan) == :nan
@@ -115,6 +115,52 @@ defmodule ComplexTest do
       assert Complex.subtract(Complex.new(re1, im1), Complex.new(re2, im2)) ==
                Complex.new(Complex.subtract(re1, re2), Complex.subtract(im1, im2))
     end
+  end
+
+  test "multiply (non finite)" do
+    assert Complex.multiply(:infinity, -1) == :neg_infinity
+    assert Complex.multiply(:infinity, 0) == :nan
+    assert Complex.multiply(:infinity, 1) == :infinity
+    assert Complex.multiply(-1, :infinity) == :neg_infinity
+    assert Complex.multiply(0, :infinity) == :nan
+    assert Complex.multiply(1, :infinity) == :infinity
+
+    assert Complex.multiply(:neg_infinity, -1) == :infinity
+    assert Complex.multiply(:neg_infinity, 0) == :nan
+    assert Complex.multiply(:neg_infinity, 1) == :neg_infinity
+    assert Complex.multiply(-1, :neg_infinity) == :infinity
+    assert Complex.multiply(0, :neg_infinity) == :nan
+    assert Complex.multiply(1, :neg_infinity) == :neg_infinity
+
+    for x <- [:infinity, :neg_infinity, -1, 0, 1] do
+      assert Complex.multiply(:nan, x) == :nan
+      assert Complex.multiply(x, :nan) == :nan
+    end
+
+    for x <- [:infinity, :neg_infinity], y <- [:infinity, :neg_infinity] do
+      if x == y do
+        assert Complex.multiply(x, y) == :infinity
+      else
+        assert Complex.multiply(x, y) == :neg_infinity
+      end
+    end
+
+    assert Complex.multiply(:infinity, Complex.new(1, 2)) == Complex.new(:infinity, :infinity)
+
+    assert Complex.multiply(:infinity, Complex.new(-3, -4)) ==
+             Complex.new(:neg_infinity, :neg_infinity)
+
+    assert Complex.multiply(:neg_infinity, Complex.new(1, 2)) ==
+             Complex.new(:neg_infinity, :neg_infinity)
+
+    assert Complex.multiply(:neg_infinity, Complex.new(-3, -4)) ==
+             Complex.new(:infinity, :infinity)
+
+    assert Complex.multiply(Complex.new(:infinity), Complex.new(:neg_infinity, 1)) ==
+             Complex.new(:neg_infinity, :nan)
+
+    assert Complex.square(Complex.new(1, :infinity)) == Complex.new(:neg_infinity, :infinity)
+    assert Complex.square(Complex.new(:infinity, 1)) == Complex.new(:infinity, :infinity)
   end
 
   test "Math functions" do
