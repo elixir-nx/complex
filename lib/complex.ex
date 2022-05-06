@@ -1125,7 +1125,7 @@ defmodule Complex do
   ### Examples
 
       iex> Complex.acos(Complex.from_polar(2,:math.pi))
-      %Complex{im: 1.3169578969248164, re: 3.141592653589793}
+      %Complex{im: 1.3169578969248164, re: -3.141592653589793}
 
   """
   @spec acos(t | number | non_finite_number) :: t | number | non_finite_number
