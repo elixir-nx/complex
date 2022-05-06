@@ -1041,6 +1041,11 @@ defmodule Complex do
 
   def asin(n) when is_number(n), do: :math.asin(n)
 
+  def asin(n) when is_non_finite_number(n), do: :nan
+
+  def asin(%Complex{re: re, im: im}) when is_non_finite_number(re) or is_non_finite_number(im),
+    do: new(:nan, :nan)
+
   def asin(z = %Complex{}) do
     i = new(0.0, 1.0)
     # result = -i*ln(i*z + sqrt(1.0-z*z))
@@ -1110,6 +1115,11 @@ defmodule Complex do
 
   def acos(n) when is_number(n), do: :math.acos(n)
 
+  def acos(n) when is_non_finite_number(n), do: :nan
+
+  def acos(%Complex{re: re, im: im}) when is_non_finite_number(re) or is_non_finite_number(im),
+    do: new(:nan, :nan)
+
   def acos(z = %Complex{}) do
     i = new(0.0, 1.0)
     one = new(1.0, 0.0)
@@ -1137,7 +1147,7 @@ defmodule Complex do
 
   def tan(n) when is_number(n), do: :math.tan(n)
 
-  def tan(z = %Complex{}) do
+  def tan(z) do
     divide(sin(z), cos(z))
   end
 
@@ -1233,13 +1243,12 @@ defmodule Complex do
       %Complex{im: -2.962299212953233e-16, re: 0.45765755436028577}
 
   """
-  @spec cot(t) :: t
-  @spec cot(number) :: number
+  @spec cot(t | number | non_finite_number) :: t | number | non_finite_number
   def cot(z)
 
   def cot(n) when is_number(n), do: 1 / :math.tan(n)
 
-  def cot(z = %Complex{}) do
+  def cot(z) do
     divide(cos(z), sin(z))
   end
 
@@ -1260,13 +1269,16 @@ defmodule Complex do
       %Complex{im: 2.9999999999999996, re: 1.9999999999999993}
 
   """
-  @spec acot(t) :: t
-  @spec acot(number) :: number
+  @spec acot(t | number | non_finite_number) :: t | number | non_finite_number
   def acot(z)
 
   def acot(n) when is_number(n), do: :math.atan(1 / n)
 
-  def acot(z = %Complex{}) do
+  def acot(:infinity), do: 0
+  def acot(:neg_infinity), do: :math.pi()
+  def acot(:nan), do: :nan
+
+  def acot(z) do
     i = new(0.0, 1.0)
     # result = 0.5*i*(ln(1-i/z)-ln(1+i/z))
     t1 = multiply(new(0.5, 0.0), i)
@@ -1318,6 +1330,10 @@ defmodule Complex do
     :math.acos(1 / n)
   end
 
+  def asec(:infinity), do: :math.pi() / 2
+  def asec(:neg_infinity), do: 3 * :math.pi() / 2
+  def asec(:nan), do: :nan
+
   def asec(z = %Complex{}) do
     i = new(0.0, 1.0)
     # result = -i*ln(i*sqrt(1-1/(z*z))+1/z)
@@ -1367,11 +1383,13 @@ defmodule Complex do
       %Complex{im: 3.0, re: 1.9999999999999993}
 
   """
-  @spec acsc(t) :: t
-  @spec acsc(number) :: number
+  @spec acsc(t | number | non_finite_number) :: t | number | non_finite_number
   def acsc(z)
 
   def acsc(n) when is_number(n), do: :math.asin(1 / n)
+  def acsc(:infinity), do: 0
+  def acsc(:neg_infinity), do: -:math.pi()
+  def acsc(:nan), do: :nan
 
   def acsc(z = %Complex{}) do
     i = new(0.0, 1.0)
@@ -1445,6 +1463,10 @@ defmodule Complex do
     end
   end
 
+  def asinh(:infinity), do: :infinity
+  def asinh(:neg_infinity), do: :neg_infinity
+  def asinh(:nan), do: :nan
+
   def asinh(z) do
     # result = ln(z+sqrt(z*z+1))
     # result = ln(z+sqrt(t1))
@@ -1505,6 +1527,9 @@ defmodule Complex do
       :math.log(n + :math.sqrt(n * n - 1))
     end
   end
+
+  def acosh(:infinity), do: :infinity
+  def acosh(:nan), do: :nan
 
   def acosh(z) do
     # result = ln(z+sqrt(z*z-1))
