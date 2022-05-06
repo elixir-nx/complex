@@ -1529,6 +1529,10 @@ defmodule Complex do
   end
 
   def acosh(:infinity), do: :infinity
+
+  def acosh(:neg_infinity),
+    do: raise(ArithmeticError, "Complex.acosh(:neg_infinity) is undefined")
+
   def acosh(:nan), do: :nan
 
   def acosh(z) do
