@@ -662,6 +662,49 @@ defmodule ComplexTest do
     assert_close Complex.acoth(1.0049698), a
   end
 
+  test "trig and hyperbolic trig functions non-finite" do
+    for n <- [:infinity, :neg_infinity, :nan] do
+      assert Complex.asin(n) == :nan
+      assert Complex.asin(Complex.new(n)) == Complex.new(:nan, :nan)
+      assert Complex.asin(Complex.new(n, 1)) == Complex.new(:nan, :nan)
+      assert Complex.asin(Complex.new(1, n)) == Complex.new(:nan, :nan)
+      assert Complex.asin(Complex.new(0, n)) == Complex.new(:nan, :nan)
+      assert Complex.acos(n) == :nan
+      assert Complex.acos(Complex.new(n)) == Complex.new(:nan, :nan)
+      assert Complex.acos(Complex.new(n, 1)) == Complex.new(:nan, :nan)
+      assert Complex.acos(Complex.new(1, n)) == Complex.new(:nan, :nan)
+      assert Complex.acos(Complex.new(0, n)) == Complex.new(:nan, :nan)
+      assert Complex.tan(Complex.new(n)) == Complex.new(:nan, :nan)
+      assert Complex.tan(Complex.new(n, 1)) == Complex.new(:nan, :nan)
+      assert Complex.tan(Complex.new(1, n)) == Complex.new(:nan, :nan)
+      assert Complex.tan(Complex.new(0, n)) == Complex.new(:nan, :nan)
+      assert Complex.cot(Complex.new(n)) == Complex.new(:nan, :nan)
+      assert Complex.cot(Complex.new(n, 1)) == Complex.new(:nan, :nan)
+      assert Complex.cot(Complex.new(1, n)) == Complex.new(:nan, :nan)
+      assert Complex.cot(Complex.new(0, n)) == Complex.new(:nan, :nan)
+      assert Complex.asinh(n) == n
+    end
+
+    assert Complex.acot(:infinity) == 0
+    assert Complex.acot(:neg_infinity) == :math.pi()
+    assert Complex.acot(:nan) == :nan
+
+    assert Complex.asec(:infinity) == :math.pi() / 2
+    assert Complex.asec(:neg_infinity) == 3 * :math.pi() / 2
+    assert Complex.asec(:nan) == :nan
+
+    assert Complex.acsc(:infinity) == 0
+    assert Complex.acsc(:neg_infinity) == -:math.pi()
+    assert Complex.acsc(:nan) == :nan
+
+    assert Complex.acosh(:infinity) == :infinity
+    assert Complex.acosh(:nan) == :nan
+
+    assert_raise ArithmeticError, "Complex.acosh(:neg_infinity) is undefined", fn ->
+      Complex.acosh(:neg_infinity)
+    end
+  end
+
   for {m, f} <- [{Kernel, :inspect}, {String.Chars.Complex, :to_string}, {Complex, :to_string}] do
     test "#{m}.#{f}/1" do
       assert "1.0+1.0i" == apply(unquote(m), unquote(f), [Complex.new(1.0, 1.0)])
