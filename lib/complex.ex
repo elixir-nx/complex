@@ -312,10 +312,10 @@ defmodule Complex do
   def phase(%Complex{re: :infinity, im: im}) when is_number(im), do: 0
   def phase(%Complex{re: :neg_infinity, im: im}) when is_number(im), do: :math.pi()
 
-  def phase(%Complex{re: :infinity, im: :infinity}), do: :math.pi()/4
-  def phase(%Complex{re: :infinity, im: :neg_infinity}), do: -:math.pi()/4
-  def phase(%Complex{re: :neg_infinity, im: :infinity}), do: 3*:math.pi()/4
-  def phase(%Complex{re: :neg_infinity, im: :neg_infinity}), do: 5*:math.pi()/4
+  def phase(%Complex{re: :infinity, im: :infinity}), do: :math.pi() / 4
+  def phase(%Complex{re: :infinity, im: :neg_infinity}), do: -:math.pi() / 4
+  def phase(%Complex{re: :neg_infinity, im: :infinity}), do: 3 * :math.pi() / 4
+  def phase(%Complex{re: :neg_infinity, im: :neg_infinity}), do: 5 * :math.pi() / 4
 
   def phase(%Complex{re: :infinity}), do: :nan
   def phase(%Complex{re: :neg_infinity}), do: :nan
@@ -506,6 +506,14 @@ defmodule Complex do
 
   def multiply(%Complex{re: re, im: im}, x) when is_non_finite_number(x) or is_number(x) do
     new(multiply(re, x), multiply(im, x))
+  end
+
+  def multiply(%Complex{re: re_l, im: im_l}, %Complex{re: re_r, im: im_r}) when im_r == 0 do
+    new(multiply(re_r, re_l), multiply(re_r, im_l))
+  end
+
+  def multiply(%Complex{re: re_l, im: im_l}, %Complex{re: re_r, im: im_r}) when re_r == 0 do
+    new(negate(multiply(im_l, im_r)), multiply(re_l, im_r))
   end
 
   def multiply(left, right) when is_number(left) and is_number(right), do: left * right
