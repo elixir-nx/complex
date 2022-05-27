@@ -14,7 +14,7 @@ Add *complex* as a dependency in your `mix.exs` file.
 
 ```elixir
 def deps do
-  [{:complex, "~> 0.3.0"}]
+  [{:complex, "~> 0.4.1"}]
 end
 ```
 
