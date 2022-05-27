@@ -45,9 +45,9 @@ defmodule ComplexTest do
     assert {%Complex{re: :infinity, im: :neg_infinity}, tail} == Complex.parse("Inf-Infi" <> tail)
     assert {%Complex{re: :nan, im: :nan}, tail} == Complex.parse("NaN+NaNi" <> tail)
 
-    assert :error == Complex.parse("Inf")
-    assert :error == Complex.parse("-Inf")
-    assert :error == Complex.parse("NaN")
+    assert {%Complex{re: :infinity, im: 0}, tail} == Complex.parse("Inf" <> tail)
+    assert {%Complex{re: :neg_infinity, im: 0}, tail} == Complex.parse("-Inf" <> tail)
+    assert {%Complex{re: :nan, im: 0}, tail} == Complex.parse("NaN" <> tail)
 
     assert {%Complex{re: 0, im: :infinity}, ""} == Complex.parse("Infi")
     assert {%Complex{re: 0, im: :infinity}, ""} == Complex.parse("+Infi")
@@ -327,9 +327,16 @@ defmodule ComplexTest do
       assert Complex.phase(Complex.new(re, im)) == phase
     end
 
-    for re <- [:infinity, :neg_infinity], im <- [:infinity, :nan, :neg_infinity, -1, 1] do
-      assert Complex.phase(Complex.new(re, im)) == :nan
-    end
+    assert Complex.phase(Complex.new(:infinity, :infinity)) == :math.pi() / 4
+    assert Complex.phase(Complex.new(:infinity, :nan)) == :nan
+    assert Complex.phase(Complex.new(:infinity, :neg_infinity)) == -:math.pi() / 4
+    assert Complex.phase(Complex.new(:infinity, -1)) == 0
+    assert Complex.phase(Complex.new(:infinity, 1)) == 0
+    assert Complex.phase(Complex.new(:neg_infinity, :infinity)) == 3 * :math.pi() / 4
+    assert Complex.phase(Complex.new(:neg_infinity, :nan)) == :nan
+    assert Complex.phase(Complex.new(:neg_infinity, :neg_infinity)) == 5 * :math.pi() / 4
+    assert Complex.phase(Complex.new(:neg_infinity, -1)) == :math.pi()
+    assert Complex.phase(Complex.new(:neg_infinity, 1)) == :math.pi()
 
     assert Complex.phase(Complex.new(1, :infinity)) == :math.pi() / 2
     assert Complex.phase(Complex.new(1, :neg_infinity)) == -:math.pi() / 2
