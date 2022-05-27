@@ -327,14 +327,14 @@ defmodule ComplexTest do
       assert Complex.phase(Complex.new(re, im)) == phase
     end
 
-    assert Complex.phase(Complex.new(:infinity, :infinity)) == :math.pi()/4
+    assert Complex.phase(Complex.new(:infinity, :infinity)) == :math.pi() / 4
     assert Complex.phase(Complex.new(:infinity, :nan)) == :nan
-    assert Complex.phase(Complex.new(:infinity, :neg_infinity)) == -:math.pi()/4
+    assert Complex.phase(Complex.new(:infinity, :neg_infinity)) == -:math.pi() / 4
     assert Complex.phase(Complex.new(:infinity, -1)) == 0
     assert Complex.phase(Complex.new(:infinity, 1)) == 0
-    assert Complex.phase(Complex.new(:neg_infinity, :infinity)) == 3*:math.pi()/4
+    assert Complex.phase(Complex.new(:neg_infinity, :infinity)) == 3 * :math.pi() / 4
     assert Complex.phase(Complex.new(:neg_infinity, :nan)) == :nan
-    assert Complex.phase(Complex.new(:neg_infinity, :neg_infinity)) == 5 * :math.pi()/4
+    assert Complex.phase(Complex.new(:neg_infinity, :neg_infinity)) == 5 * :math.pi() / 4
     assert Complex.phase(Complex.new(:neg_infinity, -1)) == :math.pi()
     assert Complex.phase(Complex.new(:neg_infinity, 1)) == :math.pi()
 
