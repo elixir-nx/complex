@@ -513,7 +513,13 @@ defmodule Complex do
   end
 
   def multiply(%Complex{re: re_l, im: im_l}, %Complex{re: re_r, im: im_r}) when re_r == 0 do
-    new(negate(multiply(im_l, im_r)), multiply(re_l, im_r))
+    re_result =
+      case multiply(im_l, im_r) do
+        result when result == 0 -> 0
+        result -> negate(result)
+      end
+
+    new(re_result, multiply(re_l, im_r))
   end
 
   def multiply(left, right) when is_number(left) and is_number(right), do: left * right
