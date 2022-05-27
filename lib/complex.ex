@@ -173,6 +173,9 @@ defmodule Complex do
 
       iex> Complex.parse("Inf-NaNi")
       {%Complex{im: :nan, re: :infinity}, ""}
+
+      iex> Complex.parse("Inf")
+      {%Complex{im: 0.0, re: :infinity}, ""}
   """
   @spec parse(String.t()) :: {t, String.t()} | :error
   def parse(str) do
@@ -180,6 +183,12 @@ defmodule Complex do
          {imag_part, tail} <- parse_imag(tail) do
       {new(real_part, multiply(sign_multiplier, imag_part)), tail}
     else
+      {:imag_non_finite, {imag_part, tail}} ->
+        {new(0, imag_part), tail}
+
+      {:real_non_finite, {real_part, tail}} ->
+        {new(real_part, 0), tail}
+
       _ ->
         case parse_imag(str) do
           :error -> :error
@@ -200,6 +209,14 @@ defmodule Complex do
   defp parse_real("NaN-" <> tail), do: {:nan, -1, tail}
   defp parse_real("+NaN-" <> tail), do: {:nan, -1, tail}
   defp parse_real("-NaN-" <> tail), do: {:nan, -1, tail}
+
+  defp parse_real("Infi" <> tail), do: {:imag_non_finite, {:infinity, tail}}
+  defp parse_real("-Infi" <> tail), do: {:imag_non_finite, {:neg_infinity, tail}}
+  defp parse_real("NaNi" <> tail), do: {:imag_non_finite, {:nan, tail}}
+
+  defp parse_real("Inf" <> tail), do: {:real_non_finite, {:infinity, tail}}
+  defp parse_real("-Inf" <> tail), do: {:real_non_finite, {:neg_infinity, tail}}
+  defp parse_real("NaN" <> tail), do: {:real_non_finite, {:nan, tail}}
 
   defp parse_real(str) do
     case Float.parse(str) do
@@ -291,9 +308,14 @@ defmodule Complex do
   def phase(:infinity), do: 0
   def phase(:neg_infinity), do: :math.pi()
 
-  def phase(%Complex{re: :nan, im: im}) when im == 0, do: :nan
-  def phase(%Complex{re: :infinity, im: im}) when im == 0, do: 0
-  def phase(%Complex{re: :neg_infinity, im: im}) when im == 0, do: :math.pi()
+  def phase(%Complex{re: :nan, im: im}) when is_number(im), do: :nan
+  def phase(%Complex{re: :infinity, im: im}) when is_number(im), do: 0
+  def phase(%Complex{re: :neg_infinity, im: im}) when is_number(im), do: :math.pi()
+
+  def phase(%Complex{re: :infinity, im: :infinity}), do: :math.pi()/4
+  def phase(%Complex{re: :infinity, im: :neg_infinity}), do: -:math.pi()/4
+  def phase(%Complex{re: :neg_infinity, im: :infinity}), do: 3*:math.pi()/4
+  def phase(%Complex{re: :neg_infinity, im: :neg_infinity}), do: 5*:math.pi()/4
 
   def phase(%Complex{re: :infinity}), do: :nan
   def phase(%Complex{re: :neg_infinity}), do: :nan
@@ -953,11 +975,11 @@ defmodule Complex do
         divide(new(1.0, 0.0), x)
 
       true ->
-        rho = :math.sqrt(x.re * x.re + x.im * x.im)
-        theta = :math.atan2(x.im, x.re)
-        s = :math.pow(rho, y.re) * :math.exp(-y.im * theta)
-        r = y.re * theta + y.im * :math.log(rho)
-        new(s * :math.cos(r), s * :math.sin(r))
+        rho = abs(x)
+        theta = phase(x)
+        s = multiply(power(rho, y.re), exp(multiply(negate(y.im), theta)))
+        r = add(multiply(y.re, theta), multiply(y.im, ln(rho)))
+        new(multiply(s, cos(r)), multiply(s, sin(r)))
     end
   end
 
