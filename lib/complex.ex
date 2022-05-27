@@ -449,6 +449,9 @@ defmodule Complex do
       iex> Complex.multiply(3, Complex.new(1, 2))
       %Complex{im: 6.0, re: 3.0}
 
+      iex> Complex.multiply(-2, Complex.new(:infinity, :neg_infinity))
+      %Complex{im: :infinity, re: :neg_infinity}
+
   """
   @spec multiply(t | number | non_finite_number, t | number | non_finite_number) ::
           t | number | non_finite_number
@@ -475,7 +478,11 @@ defmodule Complex do
   def multiply(:infinity, :neg_infinity), do: :neg_infinity
   def multiply(:infinity, :infinity), do: :infinity
 
-  def multiply(x, %Complex{re: re, im: im}) when is_non_finite_number(x) do
+  def multiply(x, %Complex{re: re, im: im}) when is_non_finite_number(x) or is_number(x) do
+    new(multiply(re, x), multiply(im, x))
+  end
+
+  def multiply(%Complex{re: re, im: im}, x) when is_non_finite_number(x) or is_number(x) do
     new(multiply(re, x), multiply(im, x))
   end
 
