@@ -865,6 +865,8 @@ defmodule Complex do
   def ln(:infinity), do: :infinity
   def ln(:neg_infinity), do: new(:infinity, :math.pi())
   def ln(:nan), do: :nan
+  def ln(n) when is_number(n) and n == 0, do: :neg_infinity
+  def ln(n) when is_number(n) and n < 0, do: :nan
   def ln(n) when is_number(n), do: :math.log(n)
 
   def ln(z = %Complex{}) do
@@ -891,6 +893,8 @@ defmodule Complex do
   def log10(:infinity), do: :infinity
   def log10(:neg_infinity), do: divide(ln(:neg_infinity), :math.log(10))
   def log10(:nan), do: :nan
+  def log10(n) when is_number(n) and n == 0, do: :neg_infinity
+  def log10(n) when is_number(n) and n < 0, do: :nan
 
   def log10(n) when is_number(n), do: :math.log10(n)
 
@@ -918,6 +922,8 @@ defmodule Complex do
   def log2(:infinity), do: :infinity
   def log2(:neg_infinity), do: divide(ln(:neg_infinity), :math.log(2))
   def log2(:nan), do: :nan
+  def log2(n) when is_number(n) and n == 0, do: :neg_infinity
+  def log2(n) when is_number(n) and n < 0, do: :nan
 
   def log2(n) when is_number(n), do: :math.log2(n)
 
