@@ -384,6 +384,22 @@ defmodule ComplexTest do
     assert_close Complex.log10(a), :math.log10(a)
     assert_close Complex.log2(a), :math.log2(a)
     assert_close Complex.power(a, b), :math.pow(a, b)
+
+    assert Complex.ln(0) == :neg_infinity
+    assert Complex.log10(0) == :neg_infinity
+    assert Complex.log2(0) == :neg_infinity
+
+    assert Complex.ln(:infinity) == :infinity
+    assert Complex.log10(:infinity) == :infinity
+    assert Complex.log2(:infinity) == :infinity
+
+    assert Complex.ln(-1) == :nan
+    assert Complex.log10(-1) == :nan
+    assert Complex.log2(-1) == :nan
+
+    assert Complex.ln(:nan) == :nan
+    assert Complex.log10(:nan) == :nan
+    assert Complex.log2(:nan) == :nan
   end
 
   test "power (non-finite)" do
