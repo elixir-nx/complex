@@ -756,7 +756,7 @@ defmodule Complex do
 
   ### See also
 
-  `abs/2`, `cbrt/1`, `phase/1`
+  `abs/1`, `cbrt/1`, `phase/1`
 
   ### Examples
 
@@ -815,7 +815,7 @@ defmodule Complex do
 
   ### See also
 
-  `abs/2`, `phase/1`, `sqrt/1`
+  `abs/1`, `phase/1`, `sqrt/1`
 
   ### Examples
 
