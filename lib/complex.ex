@@ -740,7 +740,7 @@ defmodule Complex do
   @spec conjugate(t | number | non_finite_number) :: t | number | non_finite_number
   def conjugate(z)
 
-  def conjugate(n) when is_number(n), do: n
+  def conjugate(n) when is_number(n) or is_non_finite_number(n), do: n
 
   def conjugate(%Complex{re: r, im: :neg_infinity}), do: new(r, :infinity)
   def conjugate(%Complex{re: r, im: :infinity}), do: new(r, :neg_infinity)
@@ -756,7 +756,7 @@ defmodule Complex do
 
   ### See also
 
-  `abs/2`, `phase/1`
+  `abs/1`, `cbrt/1`, `phase/1`
 
   ### Examples
 
@@ -767,7 +767,7 @@ defmodule Complex do
   @spec sqrt(t | number | non_finite_number) :: t | number | non_finite_number
   def sqrt(z)
   def sqrt(:infinity), do: :infinity
-  def sqrt(:neg_infinity), do: Complex.new(0, :infinity)
+  def sqrt(:neg_infinity), do: :nan
   def sqrt(:nan), do: :nan
   def sqrt(n) when is_number(n), do: :math.sqrt(n)
 
@@ -805,6 +805,51 @@ defmodule Complex do
         new(i / (2 * i2), i2)
       end
     end
+  end
+
+  @doc """
+  Returns a new number that is the complex cube root of the provided
+  number.
+
+  Returns the principal branch of the cube root for complex inputs.
+
+  ### See also
+
+  `abs/1`, `phase/1`, `sqrt/1`
+
+  ### Examples
+
+      iex> Complex.cbrt(-8)
+      -2.0
+
+  When a negative number is given as a complex input,
+  the output now changes. Instead of still giving a
+  negative number, we now get a number with phase
+  $\\frac{\\pi}{3}$
+
+      iex> z = Complex.cbrt(Complex.new(-8, 0))
+      %Complex{re: 1.0000000000000002, im: 1.7320508075688772}
+      iex> Complex.abs(z)
+      2.0
+      iex> Complex.phase(z)
+      1.0471975511965976
+      iex> :math.pi() / 3
+      1.0471975511965976
+
+  """
+  @spec cbrt(t | number | non_finite_number) :: t | float() | non_finite_number
+  def cbrt(z)
+  def cbrt(:infinity), do: :infinity
+  def cbrt(:neg_infinity), do: :neg_infinity
+  def cbrt(:nan), do: :nan
+  def cbrt(n) when is_number(n) and n >= 0, do: :math.pow(n, 1 / 3)
+  def cbrt(n) when is_number(n), do: -1 * cbrt(abs(n))
+
+  def cbrt(z) do
+    r = abs(z)
+    theta = phase(z)
+
+    from_polar(cbrt(r), theta / 3)
   end
 
   @doc """

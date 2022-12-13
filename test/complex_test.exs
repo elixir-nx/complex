@@ -555,7 +555,7 @@ defmodule ComplexTest do
 
   test "sqrt (non-finite)" do
     assert Complex.sqrt(:infinity) == :infinity
-    assert Complex.sqrt(:neg_infinity) == Complex.new(0, :infinity)
+    assert Complex.sqrt(:neg_infinity) == :nan
     assert Complex.sqrt(:nan) == :nan
 
     assert Complex.sqrt(Complex.new(:infinity, 1)) == Complex.new(:infinity)
