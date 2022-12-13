@@ -815,7 +815,7 @@ defmodule Complex do
 
   ### See also
 
-  abs/2`, `phase/1`, `sqrt/1`
+  `abs/2`, `phase/1`, `sqrt/1`
 
   ### Examples
 
@@ -825,7 +825,7 @@ defmodule Complex do
   When a negative number is given as a complex input,
   the output now changes. Instead of still giving a
   negative number, we now get a number with phase
-  $\frac{\pi}{3}$
+  $\\frac{\\pi}{3}$
 
       iex> z = Complex.cbrt(Complex.new(-8, 0))
       %Complex{re: 1.0000000000000002, im: 1.7320508075688772}
