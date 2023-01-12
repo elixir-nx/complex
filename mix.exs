@@ -4,7 +4,7 @@ defmodule Complex.Mixfile do
   def project do
     [
       app: :complex,
-      version: "0.4.2",
+      version: "0.4.3",
       description: description(),
       package: package(),
       elixir: "~> 1.12",
