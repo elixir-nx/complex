@@ -1048,6 +1048,9 @@ defmodule Complex do
     end
   end
 
+  @deprecated "Use pow/2 instead"
+  def power(x, y), do: pow(x, y)
+
   @doc """
   Returns a new complex that is the sine of the provided parameter.
 
