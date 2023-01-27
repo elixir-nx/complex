@@ -26,5 +26,5 @@ defmodule Complex.Kernel do
   def a * b, do: Complex.multiply(a, b)
   def a / b, do: Complex.divide(a, b)
 
-  def unquote(@pow_atom)(a, b), do: Complex.power(a, b)
+  def unquote(@pow_atom)(a, b), do: Complex.pow(a, b)
 end
