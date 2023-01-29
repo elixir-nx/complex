@@ -986,21 +986,21 @@ defmodule Complex do
 
   ### Examples
 
-      iex> Complex.power(Complex.from_polar(2,:math.pi), Complex.new(0, 1))
+      iex> Complex.pow(Complex.from_polar(2,:math.pi), Complex.new(0, 1))
       %Complex{im: 0.027612020368333014, re: 0.03324182700885666}
 
   """
-  @spec power(t | non_finite_number | number, t | non_finite_number | number) ::
+  @spec pow(t | non_finite_number | number, t | non_finite_number | number) ::
           t | non_finite_number | number
 
-  def power(:nan, _), do: :nan
-  def power(_, :nan), do: :nan
+  def pow(:nan, _), do: :nan
+  def pow(_, :nan), do: :nan
 
-  def power(:infinity, y) when is_number(y) and y > 0, do: :infinity
-  def power(:infinity, y) when y == 0, do: 1
-  def power(:infinity, y) when is_number(y) and y < 0, do: 0
+  def pow(:infinity, y) when is_number(y) and y > 0, do: :infinity
+  def pow(:infinity, y) when y == 0, do: 1
+  def pow(:infinity, y) when is_number(y) and y < 0, do: 0
 
-  def power(:neg_infinity, y) when is_number(y) and y > 0 do
+  def pow(:neg_infinity, y) when is_number(y) and y > 0 do
     if rem(y, 2) == 0 do
       :infinity
     else
@@ -1008,20 +1008,20 @@ defmodule Complex do
     end
   end
 
-  def power(:neg_infinity, y) when y == 0, do: 1
-  def power(:neg_infinity, y) when is_number(y) and y < 0, do: 0
+  def pow(:neg_infinity, y) when y == 0, do: 1
+  def pow(:neg_infinity, y) when is_number(y) and y < 0, do: 0
 
-  def power(x, :infinity) when x == 0, do: 0
-  def power(%Complex{re: re, im: im}, :infinity) when re == 0 and im == 0, do: 0
-  def power(x, :neg_infinity) when x == 0, do: :infinity
-  def power(%Complex{re: re, im: im}, :neg_infinity) when re == 0 and im == 0, do: :infinity
-  def power(_, :neg_infinity), do: 0
-  def power(_, :infinity), do: :infinity
+  def pow(x, :infinity) when x == 0, do: 0
+  def pow(%Complex{re: re, im: im}, :infinity) when re == 0 and im == 0, do: 0
+  def pow(x, :neg_infinity) when x == 0, do: :infinity
+  def pow(%Complex{re: re, im: im}, :neg_infinity) when re == 0 and im == 0, do: :infinity
+  def pow(_, :neg_infinity), do: 0
+  def pow(_, :infinity), do: :infinity
 
-  def power(x, y) when is_integer(x) and is_integer(y) and y >= 0, do: Integer.pow(x, y)
-  def power(x, y) when is_number(x) and is_number(y), do: :math.pow(x, y)
+  def pow(x, y) when is_integer(x) and is_integer(y) and y >= 0, do: Integer.pow(x, y)
+  def pow(x, y) when is_number(x) and is_number(y), do: :math.pow(x, y)
 
-  def power(x, y) do
+  def pow(x, y) do
     x = as_complex(x)
     y = as_complex(y)
 
@@ -1042,11 +1042,14 @@ defmodule Complex do
       true ->
         rho = abs(x)
         theta = phase(x)
-        s = multiply(power(rho, y.re), exp(multiply(negate(y.im), theta)))
+        s = multiply(pow(rho, y.re), exp(multiply(negate(y.im), theta)))
         r = add(multiply(y.re, theta), multiply(y.im, ln(rho)))
         new(multiply(s, cos(r)), multiply(s, sin(r)))
     end
   end
+
+  @deprecated "Use pow/2 instead"
+  def power(x, y), do: pow(x, y)
 
   @doc """
   Returns a new complex that is the sine of the provided parameter.
