@@ -918,6 +918,9 @@ defmodule Complex do
     new(log(abs(z)), atan2(z.im, z.re))
   end
 
+  @deprecated "Use log/1 instead"
+  def ln(x), do: log(x)
+
   @doc """
   Returns a new complex that is the complex log base 10 of the provided
   complex number.
