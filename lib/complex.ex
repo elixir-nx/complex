@@ -858,7 +858,7 @@ defmodule Complex do
 
   ### See also
 
-  `ln/1`
+  `log/1`
 
   ### Examples
 
@@ -893,7 +893,7 @@ defmodule Complex do
 
   @doc """
   Returns a new complex that is the complex natural log of the provided
-  complex number, $ln(z) = log_e(z)$.
+  complex number, $log(z) = log_e(z)$.
 
   ### See also
 
@@ -901,22 +901,25 @@ defmodule Complex do
 
   ### Examples
 
-      iex> Complex.ln(Complex.from_polar(2,:math.pi))
+      iex> Complex.log(Complex.from_polar(2,:math.pi))
       %Complex{im: 3.141592653589793, re: 0.6931471805599453}
 
   """
-  @spec ln(t | number | non_finite_number) :: t | number | non_finite_number
-  def ln(z)
-  def ln(:infinity), do: :infinity
-  def ln(:neg_infinity), do: new(:infinity, :math.pi())
-  def ln(:nan), do: :nan
-  def ln(n) when is_number(n) and n == 0, do: :neg_infinity
-  def ln(n) when is_number(n) and n < 0, do: :nan
-  def ln(n) when is_number(n), do: :math.log(n)
+  @spec log(t | number | non_finite_number) :: t | number | non_finite_number
+  def log(z)
+  def log(:infinity), do: :infinity
+  def log(:neg_infinity), do: new(:infinity, :math.pi())
+  def log(:nan), do: :nan
+  def log(n) when is_number(n) and n == 0, do: :neg_infinity
+  def log(n) when is_number(n) and n < 0, do: :nan
+  def log(n) when is_number(n), do: :math.log(n)
 
-  def ln(z = %Complex{}) do
-    new(ln(abs(z)), atan2(z.im, z.re))
+  def log(z = %Complex{}) do
+    new(log(abs(z)), atan2(z.im, z.re))
   end
+
+  @deprecated "Use log/1 instead"
+  def ln(x), do: log(x)
 
   @doc """
   Returns a new complex that is the complex log base 10 of the provided
@@ -924,7 +927,7 @@ defmodule Complex do
 
   ### See also
 
-  `ln/1`
+  `log/1`
 
   ### Examples
 
@@ -936,7 +939,7 @@ defmodule Complex do
   def log10(z)
 
   def log10(:infinity), do: :infinity
-  def log10(:neg_infinity), do: divide(ln(:neg_infinity), :math.log(10))
+  def log10(:neg_infinity), do: divide(log(:neg_infinity), :math.log(10))
   def log10(:nan), do: :nan
   def log10(n) when is_number(n) and n == 0, do: :neg_infinity
   def log10(n) when is_number(n) and n < 0, do: :nan
@@ -944,7 +947,7 @@ defmodule Complex do
   def log10(n) when is_number(n), do: :math.log10(n)
 
   def log10(z = %Complex{}) do
-    divide(ln(z), new(:math.log(10.0), 0.0))
+    divide(log(z), new(:math.log(10.0), 0.0))
   end
 
   @doc """
@@ -953,7 +956,7 @@ defmodule Complex do
 
   ### See also
 
-  `ln/1`, `log10/1`
+  `log/1`, `log10/1`
 
   ### Examples
 
@@ -965,7 +968,7 @@ defmodule Complex do
   def log2(z)
 
   def log2(:infinity), do: :infinity
-  def log2(:neg_infinity), do: divide(ln(:neg_infinity), :math.log(2))
+  def log2(:neg_infinity), do: divide(log(:neg_infinity), :math.log(2))
   def log2(:nan), do: :nan
   def log2(n) when is_number(n) and n == 0, do: :neg_infinity
   def log2(n) when is_number(n) and n < 0, do: :nan
@@ -973,7 +976,7 @@ defmodule Complex do
   def log2(n) when is_number(n), do: :math.log2(n)
 
   def log2(z = %Complex{}) do
-    divide(ln(z), new(:math.log(2.0), 0.0))
+    divide(log(z), new(:math.log(2.0), 0.0))
   end
 
   @doc """
@@ -982,7 +985,7 @@ defmodule Complex do
 
   ### See also
 
-  `ln/1`, `log10/1`
+  `log/1`, `log10/1`
 
   ### Examples
 
@@ -1043,7 +1046,7 @@ defmodule Complex do
         rho = abs(x)
         theta = phase(x)
         s = multiply(pow(rho, y.re), exp(multiply(negate(y.im), theta)))
-        r = add(multiply(y.re, theta), multiply(y.im, ln(rho)))
+        r = add(multiply(y.re, theta), multiply(y.im, log(rho)))
         new(multiply(s, cos(r)), multiply(s, sin(r)))
     end
   end
@@ -1145,11 +1148,11 @@ defmodule Complex do
 
   def asin(z = %Complex{}) do
     i = new(0.0, 1.0)
-    # result = -i*ln(i*z + sqrt(1.0-z*z))
-    # result = -i*ln(t1 + sqrt(t2))
+    # result = -i*log(i*z + sqrt(1.0-z*z))
+    # result = -i*log(t1 + sqrt(t2))
     t1 = multiply(i, z)
     t2 = subtract(new(1.0, 0.0), multiply(z, z))
-    multiply(negate(i), ln(add(t1, sqrt(t2))))
+    multiply(negate(i), log(add(t1, sqrt(t2))))
   end
 
   @doc """
@@ -1220,10 +1223,10 @@ defmodule Complex do
   def acos(z = %Complex{}) do
     i = new(0.0, 1.0)
     one = new(1.0, 0.0)
-    # result = -i*ln(z + sqrt(z*z-1.0))
-    # result = -i*ln(z + sqrt(t1))
+    # result = -i*log(z + sqrt(z*z-1.0))
+    # result = -i*log(z + sqrt(t1))
     t1 = subtract(multiply(z, z), one)
-    multiply(negate(i), ln(add(z, sqrt(t1))))
+    multiply(negate(i), log(add(z, sqrt(t1))))
   end
 
   @doc """
@@ -1276,11 +1279,11 @@ defmodule Complex do
 
   def atan(z = %Complex{}) do
     i = new(0.0, 1.0)
-    # result = 0.5*i*(ln(1-i*z)-ln(1+i*z))
+    # result = 0.5*i*(log(1-i*z)-log(1+i*z))
     t1 = multiply(new(0.5, 0.0), i)
     t2 = subtract(new(1.0, 0.0), multiply(i, z))
     t3 = add(new(1.0, 0.0), multiply(i, z))
-    multiply(t1, subtract(ln(t2), ln(t3)))
+    multiply(t1, subtract(log(t2), log(t3)))
   end
 
   @doc """
@@ -1377,11 +1380,11 @@ defmodule Complex do
 
   def acot(z) do
     i = new(0.0, 1.0)
-    # result = 0.5*i*(ln(1-i/z)-ln(1+i/z))
+    # result = 0.5*i*(log(1-i/z)-log(1+i/z))
     t1 = multiply(new(0.5, 0.0), i)
     t2 = subtract(new(1.0, 0.0), divide(i, z))
     t3 = add(new(1.0, 0.0), divide(i, z))
-    multiply(t1, subtract(ln(t2), ln(t3)))
+    multiply(t1, subtract(log(t2), log(t3)))
   end
 
   @doc """
@@ -1433,15 +1436,15 @@ defmodule Complex do
 
   def asec(z = %Complex{}) do
     i = new(0.0, 1.0)
-    # result = -i*ln(i*sqrt(1-1/(z*z))+1/z)
-    # result = -i*ln(i*sqrt(1-t2)+t1)
+    # result = -i*log(i*sqrt(1-1/(z*z))+1/z)
+    # result = -i*log(i*sqrt(1-t2)+t1)
     t1 = divide(1, z)
     t2 = square(t1)
-    # result = -i*ln(i*sqrt(t3)+t1)
-    # result = -i*ln(t4+t1)
+    # result = -i*log(i*sqrt(t3)+t1)
+    # result = -i*log(t4+t1)
     t3 = subtract(1, t2)
     t4 = multiply(i, sqrt(t3))
-    multiply(negate(i), ln(add(t4, t1)))
+    multiply(negate(i), log(add(t4, t1)))
   end
 
   @doc """
@@ -1491,15 +1494,15 @@ defmodule Complex do
   def acsc(z = %Complex{}) do
     i = new(0.0, 1.0)
     one = new(1.0, 0.0)
-    # result = -i*ln(sqrt(1-1/(z*z))+i/z)
-    # result = -i*ln(sqrt(1-t2)+t1)
+    # result = -i*log(sqrt(1-1/(z*z))+i/z)
+    # result = -i*log(sqrt(1-t2)+t1)
     t1 = divide(i, z)
     t2 = divide(one, multiply(z, z))
-    # result = -i*ln(sqrt(t3)+t1)
-    # result = -i*ln(t4+t1)
+    # result = -i*log(sqrt(t3)+t1)
+    # result = -i*log(t4+t1)
     t3 = subtract(one, t2)
     t4 = sqrt(t3)
-    multiply(negate(i), ln(add(t4, t1)))
+    multiply(negate(i), log(add(t4, t1)))
   end
 
   @doc """
@@ -1565,12 +1568,12 @@ defmodule Complex do
   def asinh(:nan), do: :nan
 
   def asinh(z) do
-    # result = ln(z+sqrt(z*z+1))
-    # result = ln(z+sqrt(t1))
-    # result = ln(t2)
+    # result = log(z+sqrt(z*z+1))
+    # result = log(z+sqrt(t1))
+    # result = log(t2)
     t1 = add(multiply(z, z), 1)
     t2 = add(z, sqrt(t1))
-    ln(t2)
+    log(t2)
   end
 
   @doc """
@@ -1633,12 +1636,12 @@ defmodule Complex do
   def acosh(:nan), do: :nan
 
   def acosh(z) do
-    # result = ln(z+sqrt(z*z-1))
-    # result = ln(z+sqrt(t1))
-    # result = ln(t2)
+    # result = log(z+sqrt(z*z-1))
+    # result = log(z+sqrt(t1))
+    # result = log(t2)
     t1 = subtract(multiply(z, z), 1)
     t2 = add(z, sqrt(t1))
-    ln(t2)
+    log(t2)
   end
 
   @doc """
@@ -1695,13 +1698,13 @@ defmodule Complex do
   def atanh(z) do
     one = new(1.0, 0.0)
     p5 = new(0.5, 0.0)
-    # result = 0.5*(ln((1+z)/(1-z)))
-    # result = 0.5*(ln(t2/t1))
-    # result = 0.5*(ln(t3))
+    # result = 0.5*(log((1+z)/(1-z)))
+    # result = 0.5*(log(t2/t1))
+    # result = 0.5*(log(t3))
     t1 = subtract(one, z)
     t2 = add(one, z)
     t3 = divide(t2, t1)
-    multiply(p5, ln(t3))
+    multiply(p5, log(t3))
   end
 
   @doc """
@@ -1742,13 +1745,13 @@ defmodule Complex do
   """
   @spec asech(t | number | non_finite_number) :: t | number | non_finite_number
   def asech(z) do
-    # result = ln(1/z+sqrt(1/z+1)*sqrt(1/z-1))
-    # result = ln(t1+sqrt(t1+1)*sqrt(t1-1))
-    # result = ln(t1+t2*t3)
+    # result = log(1/z+sqrt(1/z+1)*sqrt(1/z-1))
+    # result = log(t1+sqrt(t1+1)*sqrt(t1-1))
+    # result = log(t1+t2*t3)
     t1 = divide(1, z)
     t2 = sqrt(add(t1, 1))
     t3 = sqrt(subtract(t1, 1))
-    ln(add(t1, multiply(t2, t3)))
+    log(add(t1, multiply(t2, t3)))
   end
 
   @doc """
@@ -1787,13 +1790,13 @@ defmodule Complex do
   """
   @spec acsch(t | number | non_finite_number) :: t | number | non_finite_number
   def acsch(z) do
-    # result = ln(1/z+sqrt(1/(z*z)+1))
-    # result = ln(t1+sqrt(t2+1))
-    # result = ln(t1+t3)
+    # result = log(1/z+sqrt(1/(z*z)+1))
+    # result = log(t1+sqrt(t2+1))
+    # result = log(t1+t3)
     t1 = divide(1, z)
     t2 = divide(1, multiply(z, z))
     t3 = sqrt(add(t2, 1))
-    ln(add(t1, t3))
+    log(add(t1, t3))
   end
 
   @doc """
@@ -1834,13 +1837,13 @@ defmodule Complex do
   """
   @spec acoth(t | number | non_finite_number) :: t | number | non_finite_number
   def acoth(z) do
-    # result = 0.5*(ln(1+1/z)-ln(1-1/z))
-    # result = 0.5*(ln(1+t1)-ln(1-t1))
-    # result = 0.5*(ln(t2)-ln(t3))
+    # result = 0.5*(log(1+1/z)-log(1-1/z))
+    # result = 0.5*(log(1+t1)-log(1-t1))
+    # result = 0.5*(log(t2)-log(t3))
     t1 = divide(1, z)
     t2 = add(1, t1)
     t3 = subtract(1, t1)
-    multiply(0.5, subtract(ln(t2), ln(t3)))
+    multiply(0.5, subtract(log(t2), log(t3)))
   end
 
   @doc ~S"""
