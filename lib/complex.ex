@@ -733,6 +733,9 @@ defmodule Complex do
 
   ### Examples
 
+      iex> Complex.conjugate(1)
+      %Complex{im: -0.0, re: 1.0}
+
       iex> Complex.conjugate(Complex.new(1,2))
       %Complex{im: -2.0, re: 1.0}
 
@@ -740,7 +743,7 @@ defmodule Complex do
   @spec conjugate(t | number | non_finite_number) :: t | number | non_finite_number
   def conjugate(z)
 
-  def conjugate(n) when is_number(n) or is_non_finite_number(n), do: n
+  def conjugate(n) when is_number(n) or is_non_finite_number(n), do: new(n, -0.0)
 
   def conjugate(%Complex{re: r, im: :neg_infinity}), do: new(r, :infinity)
   def conjugate(%Complex{re: r, im: :infinity}), do: new(r, :neg_infinity)
