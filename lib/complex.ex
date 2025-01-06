@@ -1309,8 +1309,8 @@ defmodule Complex do
   def atan2(:neg_infinity, :neg_infinity), do: -3 * :math.pi() / 4
   def atan2(:neg_infinity, :nan), do: :nan
   def atan2(:neg_infinity, a) when is_number(a), do: -:math.pi() / 2
-  def atan2(:nan, a) when is_number(a), do: :nan
-  def atan2(a, :nan) when is_number(a), do: :nan
+  def atan2(:nan, a) when is_number(a) or is_non_finite_number(a), do: :nan
+  def atan2(a, :nan) when is_number(a) or is_non_finite_number(a), do: :nan
   def atan2(:nan, :nan), do: :nan
   def atan2(a, :infinity) when is_number(a), do: 0
   def atan2(a, :neg_infinity) when is_number(a), do: :math.pi()
