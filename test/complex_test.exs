@@ -960,6 +960,27 @@ defmodule ComplexTest do
     assert Complex.pow(:neg_infinity, 0) == 1.0
 
     ## Complex
+    ### If inf or -inf is in any argument, we return complex NaN
+    assert Complex.pow(Complex.new(:infinity, 1), 1) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(1, :infinity), 1) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(1, 1), :infinity) == Complex.new(:nan, :nan)
+    assert Complex.pow(1, Complex.new(:infinity, 1)) == Complex.new(:nan, :nan)
+    assert Complex.pow(1, Complex.new(1, :infinity)) == Complex.new(:nan, :nan)
+    assert Complex.pow(:infinity, Complex.new(1, 1)) == Complex.new(:nan, :nan)
+
+    assert Complex.pow(Complex.new(:neg_infinity, 1), 1) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(1, :neg_infinity), 1) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(1, 1), :neg_infinity) == Complex.new(:nan, :nan)
+    assert Complex.pow(1, Complex.new(:neg_infinity, 1)) == Complex.new(:nan, :nan)
+    assert Complex.pow(1, Complex.new(1, :neg_infinity)) == Complex.new(:nan, :nan)
+    assert Complex.pow(:neg_infinity, Complex.new(1, 1)) == Complex.new(:nan, :nan)
+
+    assert Complex.pow(Complex.new(:nan, 1), 1) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(1, :nan), 1) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(1, 1), :nan) == Complex.new(:nan, :nan)
+    assert Complex.pow(1, Complex.new(:nan, 1)) == Complex.new(:nan, :nan)
+    assert Complex.pow(1, Complex.new(1, :nan)) == Complex.new(:nan, :nan)
+    assert Complex.pow(:nan, Complex.new(1, 1)) == Complex.new(:nan, :nan)
   end
 
   test "complex casting - atan2/2"
