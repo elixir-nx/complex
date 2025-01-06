@@ -389,6 +389,12 @@ defmodule Complex do
   @spec add(t | number | non_finite_number, t | number | non_finite_number) ::
           t | number | non_finite_number
 
+  def add(z, %Complex{re: re, im: im}) when z in [:infinity, :neg_infinity, :nan],
+    do: Complex.new(add(z, re), im)
+
+  def add(%Complex{re: re, im: im}, z) when z in [:infinity, :neg_infinity, :nan],
+    do: Complex.new(add(z, re), im)
+
   def add(:nan, _), do: :nan
   def add(_, :nan), do: :nan
 
