@@ -983,7 +983,26 @@ defmodule ComplexTest do
     assert Complex.pow(:nan, Complex.new(1, 1)) == Complex.new(:nan, :nan)
   end
 
-  test "complex casting - atan2/2"
+  test "complex casting - atan2/2" do
+    assert Complex.atan2(Complex.new(1, 0), 1) == Complex.new(0.7853981633974483, 0)
+    assert Complex.atan2(1, Complex.new(1, 0)) == Complex.new(0.7853981633974483, 0)
+
+    assert Complex.atan2(:nan, Complex.new(1, 0)) == Complex.new(:nan, 0)
+    assert Complex.atan2(Complex.new(1, 0), :nan) == Complex.new(:nan, 0)
+    assert Complex.atan2(:nan, 1) == :nan
+    assert Complex.atan2(1, :nan) == :nan
+    assert Complex.atan2(:nan, :nan) == :nan
+
+    assert Complex.atan2(:infinity, 1) == :math.pi() / 2
+    assert Complex.atan2(:infinity, Complex.new(1, 0)) == Complex.new(:math.pi() / 2, 0)
+    assert Complex.atan2(Complex.new(1, 0), :infinity) == Complex.new(0, 0)
+    assert Complex.atan2(1, :infinity) == 0
+
+    assert Complex.atan2(:neg_infinity, 1) == -:math.pi() / 2
+    assert Complex.atan2(:neg_infinity, Complex.new(1, 0)) == Complex.new(-:math.pi() / 2, 0)
+    assert Complex.atan2(Complex.new(1, 0), :neg_infinity) == Complex.new(:math.pi(), 0)
+    assert Complex.atan2(1, :neg_infinity) == :math.pi()
+  end
 
   defp assert_close(left, right, opts \\ []) do
     eps = opts[:eps] || 1.0e-5
