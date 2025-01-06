@@ -569,33 +569,29 @@ defmodule Complex do
   def divide(x, y) when is_non_finite_number(x) and is_non_finite_number(y), do: :nan
   def divide(x, y) when is_non_finite_number(x) and is_number(y) and y >= 0, do: x
   def divide(x, y) when x == 0 and y == 0, do: :nan
-  def divide(:nan, _), do: :nan
-  def divide(_, :nan), do: :nan
+  def divide(:nan, a) when is_number(a), do: :nan
+  def divide(a, :nan) when is_number(a), do: :nan
   def divide(:infinity, y) when is_number(y) and y < 0, do: :neg_infinity
   def divide(:neg_infinity, y) when is_number(y) and y < 0, do: :infinity
-  def divide(_, :infinity), do: 0
-  def divide(_, :neg_infinity), do: 0
+  def divide(a, :infinity) when is_number(a), do: 0
+  def divide(a, :neg_infinity) when is_number(a), do: 0
 
   def divide(x, y) when is_number(x) and is_number(y), do: x / y
+
+  def divide(%Complex{re: re, im: im}, b)
+      when is_number(re) and is_number(im) and b in [:infinity, :neg_infinity] do
+    new(0, 0)
+  end
 
   def divide(x, y) do
     %Complex{re: r1, im: i1} = as_complex(x)
     %Complex{re: r2, im: i2} = as_complex(y)
 
-    cond do
-      i2 == 0 ->
-        new(divide(r1, r2), divide(i1, r2))
+    num_re = add(multiply(r1, r2), multiply(i1, i2))
+    num_im = subtract(multiply(i1, r2), multiply(r1, i2))
+    den = add(square(r2), square(i2))
 
-      r2 == 0 ->
-        new(divide(i1, i2), negate(divide(r1, i2)))
-
-      true ->
-        num_re = add(multiply(r1, r2), multiply(i1, i2))
-        num_im = subtract(multiply(i1, r2), multiply(r1, i2))
-        den = add(square(r2), square(i2))
-
-        new(divide(num_re, den), divide(num_im, den))
-    end
+    new(divide(num_re, den), divide(num_im, den))
   end
 
   @doc """
