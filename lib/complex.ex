@@ -437,6 +437,12 @@ defmodule Complex do
   @spec subtract(t | number | non_finite_number, t | number | non_finite_number) ::
           t | number | non_finite_number
 
+  def subtract(z, %Complex{re: re, im: im}) when z in [:infinity, :neg_infinity, :nan],
+    do: Complex.new(subtract(z, re), negate(im))
+
+  def subtract(%Complex{re: re, im: im}, z) when z in [:infinity, :neg_infinity, :nan],
+    do: Complex.new(subtract(re, z), im)
+
   def subtract(:nan, _), do: :nan
   def subtract(_, :nan), do: :nan
   def subtract(:infinity, :infinity), do: :nan
