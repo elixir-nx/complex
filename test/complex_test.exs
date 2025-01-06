@@ -939,7 +939,28 @@ defmodule ComplexTest do
     assert Complex.divide(Complex.new(1, :nan), 1) == Complex.new(:nan, :nan)
   end
 
-  test "complex casting - pow/2"
+  test "complex casting - pow/2" do
+    # With NaN, if either argument is complex we return complex NaN
+    assert Complex.pow(1, :nan) == :nan
+    assert Complex.pow(:nan, 1) == :nan
+    assert Complex.pow(Complex.new(1, 1), :nan) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(1, :nan), 1) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(:nan, 1), 1) == Complex.new(:nan, :nan)
+
+    # Infinities
+    ## Real
+    assert Complex.pow(:infinity, 3) == :infinity
+    assert Complex.pow(3, :infinity) == :infinity
+    assert Complex.pow(3, :neg_infinity) == 0.0
+    assert Complex.pow(:neg_infinity, 3) == :neg_infinity
+
+    assert Complex.pow(0, :infinity) == 0.0
+    assert Complex.pow(0, :neg_infinity) == :infinity
+    assert Complex.pow(:infinity, 0) == 1.0
+    assert Complex.pow(:neg_infinity, 0) == 1.0
+
+    ## Complex
+  end
 
   test "complex casting - atan2/2"
 
