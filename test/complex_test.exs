@@ -894,7 +894,7 @@ defmodule ComplexTest do
     assert Complex.multiply(:nan, 1) == :nan
     assert Complex.multiply(1, :nan) == :nan
 
-    ## First directioon
+    ## First direction
     assert Complex.multiply(:nan, Complex.new(1, 1)) == Complex.new(:nan, :nan)
     assert Complex.multiply(1, Complex.new(:nan, 1)) == Complex.new(:nan, :nan)
     assert Complex.multiply(1, Complex.new(1, :nan)) == Complex.new(:nan, :nan)
@@ -907,9 +907,41 @@ defmodule ComplexTest do
 
   test "complex casting - divide/2" do
     assert Complex.divide(1, 1) == 1
+
+    assert Complex.divide(:infinity, Complex.new(:infinity, 1)) == Complex.new(:nan, :nan)
+    assert Complex.divide(:neg_infinity, Complex.new(:neg_infinity, 1)) == Complex.new(:nan, :nan)
+
     assert Complex.divide(:infinity, Complex.new(1, 1)) == Complex.new(:infinity, :neg_infinity)
+
+    assert Complex.divide(:neg_infinity, Complex.new(1, 1)) ==
+             Complex.new(:neg_infinity, :infinity)
+
     assert Complex.divide(Complex.new(1, 1), :infinity) == Complex.new(0, 0)
+    assert Complex.divide(Complex.new(1, 1), :neg_infinity) == Complex.new(0, 0)
+
+    assert Complex.divide(Complex.new(:infinity, 1), :infinity) == Complex.new(:nan, :nan)
+    assert Complex.divide(Complex.new(1, :infinity), :infinity) == Complex.new(:nan, :nan)
+    assert Complex.divide(Complex.new(:infinity, 1), :neg_infinity) == Complex.new(:nan, :nan)
+    assert Complex.divide(Complex.new(1, :infinity), :neg_infinity) == Complex.new(:nan, :nan)
+
+    # NaNs
+    assert Complex.divide(:nan, 1) == :nan
+    assert Complex.divide(1, :nan) == :nan
+
+    ## First direction
+    assert Complex.divide(:nan, Complex.new(1, 1)) == Complex.new(:nan, :nan)
+    assert Complex.divide(1, Complex.new(:nan, 1)) == Complex.new(:nan, :nan)
+    assert Complex.divide(1, Complex.new(1, :nan)) == Complex.new(:nan, :nan)
+
+    ## Second direction
+    assert Complex.divide(Complex.new(1, 1), :nan) == Complex.new(:nan, :nan)
+    assert Complex.divide(Complex.new(:nan, 1), 1) == Complex.new(:nan, :nan)
+    assert Complex.divide(Complex.new(1, :nan), 1) == Complex.new(:nan, :nan)
   end
+
+  test "complex casting - pow/2"
+
+  test "complex casting - atan2/2"
 
   defp assert_close(left, right, opts \\ []) do
     eps = opts[:eps] || 1.0e-5
