@@ -484,7 +484,7 @@ defmodule Complex do
       %Complex{im: 6.0, re: 3.0}
 
       iex> Complex.multiply(-2, Complex.new(:infinity, :neg_infinity))
-      %Complex{im: :infinity, re: :neg_infinity}
+      %Complex{im: :nan, re: :nan}
 
   """
   @spec multiply(t | number | non_finite_number, t | number | non_finite_number) ::
