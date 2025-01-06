@@ -783,6 +783,69 @@ defmodule ComplexTest do
     assert Complex.erf_inv(-1) == :neg_infinity
   end
 
+  test "complex casting - add/2" do
+    assert Complex.add(:infinity, 1) == :infinity
+    assert Complex.add(:neg_infinity, 1) == :neg_infinity
+
+    assert Complex.add(:infinity, Complex.new(:neg_infinity, 0)) == Complex.new(:nan, 0)
+    assert Complex.add(:neg_infinity, Complex.new(:infinity, 0)) == Complex.new(:nan, 0)
+    assert Complex.add(:infinity, Complex.new(:infinity, 0)) == Complex.new(:infinity, 0)
+
+    assert Complex.add(:neg_infinity, Complex.new(:neg_infinity, 0)) ==
+             Complex.new(:neg_infinity, 0)
+
+    assert Complex.add(Complex.new(:neg_infinity, 0), :infinity) == Complex.new(:nan, 0)
+    assert Complex.add(Complex.new(:infinity, 0), :neg_infinity) == Complex.new(:nan, 0)
+    assert Complex.add(Complex.new(:infinity, 0), :infinity) == Complex.new(:infinity, 0)
+
+    assert Complex.add(Complex.new(:neg_infinity, 0), :neg_infinity) ==
+             Complex.new(:neg_infinity, 0)
+
+    assert Complex.add(:infinity, Complex.new(1, 2)) == Complex.new(:infinity, 2)
+    assert Complex.add(Complex.new(1, 2), :infinity) == Complex.new(:infinity, 2)
+  end
+
+  test "complex casting - subtract/2" do
+    assert Complex.subtract(:infinity, 1) == :infinity
+    assert Complex.subtract(:neg_infinity, 1) == :neg_infinity
+
+    assert Complex.subtract(:infinity, Complex.new(:neg_infinity, 0)) == Complex.new(:infinity, 0)
+
+    assert Complex.subtract(:neg_infinity, Complex.new(:infinity, 0)) ==
+             Complex.new(:neg_infinity, 0)
+
+    assert Complex.subtract(:infinity, Complex.new(:infinity, 0)) == Complex.new(:nan, 0)
+
+    assert Complex.subtract(:neg_infinity, Complex.new(:neg_infinity, 0)) ==
+             Complex.new(:nan, 0)
+
+    assert Complex.subtract(Complex.new(:neg_infinity, 0), :infinity) ==
+             Complex.new(:neg_infinity, 0)
+
+    assert Complex.subtract(Complex.new(:infinity, 0), :neg_infinity) == Complex.new(:infinity, 0)
+    assert Complex.subtract(Complex.new(:infinity, 0), :infinity) == Complex.new(:nan, 0)
+
+    assert Complex.subtract(Complex.new(:neg_infinity, 0), :neg_infinity) ==
+             Complex.new(:nan, 0)
+
+    assert Complex.subtract(:infinity, Complex.new(1, 2)) == Complex.new(:infinity, -2)
+    assert Complex.subtract(Complex.new(1, 2), :infinity) == Complex.new(:neg_infinity, 2)
+  end
+
+  test "complex casting - multiply/2" do
+    assert Complex.multiply(1, 1) == 1
+    assert Complex.multiply(:infinity, Complex.new(1, 1)) == Complex.new(:infinity, :infinity)
+
+    assert Complex.multiply(:neg_infinity, Complex.new(1, 1)) ==
+             Complex.new(:neg_infinity, :neg_infinity)
+  end
+
+  test "complex casting - divide/2" do
+    assert Complex.divide(1, 1) == 1
+    assert Complex.divide(:infinity, Complex.new(1, 1)) == Complex.new(:infinity, :neg_infinity)
+    assert Complex.divide(Complex.new(1, 1), :infinity) == Complex.new(0, 0)
+  end
+
   defp assert_close(left, right, opts \\ []) do
     eps = opts[:eps] || 1.0e-5
 
