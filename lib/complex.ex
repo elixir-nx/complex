@@ -490,6 +490,16 @@ defmodule Complex do
   @spec multiply(t | number | non_finite_number, t | number | non_finite_number) ::
           t | number | non_finite_number
 
+  def multiply(x, c = %Complex{re: _re, im: _im}) when is_non_finite_number(x) or is_number(x) do
+    z = new(x, 0)
+    multiply(z, c)
+  end
+
+  def multiply(c = %Complex{re: _re, im: _im}, x) when is_non_finite_number(x) or is_number(x) do
+    z = new(x, 0)
+    multiply(c, z)
+  end
+
   def multiply(:infinity, right) when is_number(right) and right > 0, do: :infinity
   def multiply(:infinity, right) when right == 0, do: :nan
   def multiply(:infinity, right) when is_number(right) and right < 0, do: :neg_infinity
@@ -511,28 +521,6 @@ defmodule Complex do
   def multiply(:neg_infinity, :infinity), do: :neg_infinity
   def multiply(:infinity, :neg_infinity), do: :neg_infinity
   def multiply(:infinity, :infinity), do: :infinity
-
-  def multiply(x, %Complex{re: re, im: im}) when is_non_finite_number(x) or is_number(x) do
-    new(multiply(re, x), multiply(im, x))
-  end
-
-  def multiply(%Complex{re: re, im: im}, x) when is_non_finite_number(x) or is_number(x) do
-    new(multiply(re, x), multiply(im, x))
-  end
-
-  def multiply(%Complex{re: re_l, im: im_l}, %Complex{re: re_r, im: im_r}) when im_r == 0 do
-    new(multiply(re_r, re_l), multiply(re_r, im_l))
-  end
-
-  def multiply(%Complex{re: re_l, im: im_l}, %Complex{re: re_r, im: im_r}) when re_r == 0 do
-    re_result =
-      case multiply(im_l, im_r) do
-        result when result == 0 -> 0
-        result -> negate(result)
-      end
-
-    new(re_result, multiply(re_l, im_r))
-  end
 
   def multiply(left, right) when is_number(left) and is_number(right), do: left * right
 
