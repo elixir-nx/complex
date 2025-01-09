@@ -169,27 +169,22 @@ defmodule ComplexTest do
       assert Complex.divide(x, 0) == x
       assert Complex.divide(x, 1) == x
 
-      if y == :nan do
-        assert Complex.divide(Complex.new(x), Complex.new(y)) == Complex.new(:nan, :nan)
-      else
-        assert Complex.divide(Complex.new(x), Complex.new(y)) == Complex.new(:nan)
-      end
-
-      assert Complex.divide(Complex.new(x), 0) == Complex.new(x, :nan)
-      assert Complex.divide(Complex.new(x), 1) == Complex.new(x)
+      assert Complex.divide(Complex.new(x), Complex.new(y)) == Complex.new(:nan, :nan)
+      assert Complex.divide(Complex.new(x), 0) == Complex.new(:nan, :nan)
+      assert Complex.divide(Complex.new(x), 1) == Complex.new(x, :nan)
     end
 
     assert Complex.divide(:nan, 1) == :nan
     assert Complex.divide(1, :nan) == :nan
 
-    assert Complex.divide(Complex.new(:nan), 1) == Complex.new(:nan, 0)
+    assert Complex.divide(Complex.new(:nan), 1) == Complex.new(:nan, :nan)
     assert Complex.divide(1, Complex.new(:nan)) == Complex.new(:nan, :nan)
 
     assert Complex.divide(:infinity, -1) == :neg_infinity
     assert Complex.divide(:neg_infinity, -1) == :infinity
 
-    assert Complex.divide(Complex.new(:infinity), -1) == Complex.new(:neg_infinity, 0)
-    assert Complex.divide(Complex.new(:neg_infinity), -1) == Complex.new(:infinity, 0)
+    assert Complex.divide(Complex.new(:infinity), -1) == Complex.new(:neg_infinity, :nan)
+    assert Complex.divide(Complex.new(:neg_infinity), -1) == Complex.new(:infinity, :nan)
 
     assert Complex.divide(-1, :infinity) == 0
     assert Complex.divide(0, :infinity) == 0
@@ -425,8 +420,8 @@ defmodule ComplexTest do
     assert Complex.pow(:neg_infinity, :neg_infinity) == 0
     assert Complex.pow(0, :neg_infinity) == :infinity
     assert Complex.pow(0, :infinity) == 0
-    assert Complex.pow(Complex.new(0, 0), :neg_infinity) == :infinity
-    assert Complex.pow(Complex.new(0, 0), :infinity) == 0
+    assert Complex.pow(Complex.new(0, 0), :neg_infinity) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(0, 0), :infinity) == Complex.new(0, 0)
   end
 
   test "log, log10, log2 (non-finite)" do
@@ -499,7 +494,7 @@ defmodule ComplexTest do
              Complex.new(:infinity, :math.pi() / :math.log(10))
 
     assert Complex.log2(:infinity) == :infinity
-    assert Complex.log2(:neg_infinity) == Complex.new(:infinity, :math.pi() / :math.log(2))
+    assert Complex.log2(:neg_infinity) == Complex.new(:infinity, :nan)
     assert Complex.log2(:nan) == :nan
 
     assert Complex.log2(Complex.new(:infinity, :infinity)) ==
@@ -781,6 +776,227 @@ defmodule ComplexTest do
     assert Complex.erf_inv(:nan) == :nan
     assert Complex.erf_inv(1) == :infinity
     assert Complex.erf_inv(-1) == :neg_infinity
+  end
+
+  test "complex casting - add/2" do
+    assert Complex.add(:infinity, 1) == :infinity
+    assert Complex.add(:neg_infinity, 1) == :neg_infinity
+
+    assert Complex.add(:infinity, Complex.new(:neg_infinity, 0)) == Complex.new(:nan, 0)
+    assert Complex.add(:neg_infinity, Complex.new(:infinity, 0)) == Complex.new(:nan, 0)
+    assert Complex.add(:infinity, Complex.new(:infinity, 0)) == Complex.new(:infinity, 0)
+
+    assert Complex.add(:neg_infinity, Complex.new(:neg_infinity, 0)) ==
+             Complex.new(:neg_infinity, 0)
+
+    assert Complex.add(Complex.new(:neg_infinity, 0), :infinity) == Complex.new(:nan, 0)
+    assert Complex.add(Complex.new(:infinity, 0), :neg_infinity) == Complex.new(:nan, 0)
+    assert Complex.add(Complex.new(:infinity, 0), :infinity) == Complex.new(:infinity, 0)
+
+    assert Complex.add(Complex.new(:neg_infinity, 0), :neg_infinity) ==
+             Complex.new(:neg_infinity, 0)
+
+    assert Complex.add(:infinity, Complex.new(1, 2)) == Complex.new(:infinity, 2)
+    assert Complex.add(Complex.new(1, 2), :infinity) == Complex.new(:infinity, 2)
+  end
+
+  test "complex casting - subtract/2" do
+    assert Complex.subtract(:infinity, 1) == :infinity
+    assert Complex.subtract(:neg_infinity, 1) == :neg_infinity
+
+    assert Complex.subtract(:infinity, Complex.new(:neg_infinity, 0)) == Complex.new(:infinity, 0)
+
+    assert Complex.subtract(:neg_infinity, Complex.new(:infinity, 0)) ==
+             Complex.new(:neg_infinity, 0)
+
+    assert Complex.subtract(:infinity, Complex.new(:infinity, 0)) == Complex.new(:nan, 0)
+
+    assert Complex.subtract(:neg_infinity, Complex.new(:neg_infinity, 0)) ==
+             Complex.new(:nan, 0)
+
+    assert Complex.subtract(Complex.new(:neg_infinity, 0), :infinity) ==
+             Complex.new(:neg_infinity, 0)
+
+    assert Complex.subtract(Complex.new(:infinity, 0), :neg_infinity) == Complex.new(:infinity, 0)
+    assert Complex.subtract(Complex.new(:infinity, 0), :infinity) == Complex.new(:nan, 0)
+
+    assert Complex.subtract(Complex.new(:neg_infinity, 0), :neg_infinity) ==
+             Complex.new(:nan, 0)
+
+    assert Complex.subtract(:infinity, Complex.new(1, 2)) == Complex.new(:infinity, -2)
+    assert Complex.subtract(Complex.new(1, 2), :infinity) == Complex.new(:neg_infinity, 2)
+  end
+
+  test "complex casting - multiply/2" do
+    assert Complex.multiply(1, 1) == 1
+    assert Complex.multiply(:infinity, Complex.new(1, 1)) == Complex.new(:infinity, :infinity)
+
+    assert Complex.multiply(:neg_infinity, Complex.new(1, 1)) ==
+             Complex.new(:neg_infinity, :neg_infinity)
+
+    assert Complex.multiply(:infinity, :infinity) == :infinity
+    assert Complex.multiply(:neg_infinity, :infinity) == :neg_infinity
+    assert Complex.multiply(:infinity, :neg_infinity) == :neg_infinity
+    assert Complex.multiply(:neg_infinity, :neg_infinity) == :infinity
+
+    # First direction
+    assert Complex.multiply(Complex.new(:infinity, 1), :infinity) == Complex.new(:infinity, :nan)
+
+    assert Complex.multiply(Complex.new(:neg_infinity, 1), :neg_infinity) ==
+             Complex.new(:infinity, :nan)
+
+    assert Complex.multiply(Complex.new(:infinity, 1), :neg_infinity) ==
+             Complex.new(:neg_infinity, :nan)
+
+    assert Complex.multiply(Complex.new(:neg_infinity, 1), :infinity) ==
+             Complex.new(:neg_infinity, :nan)
+
+    assert Complex.multiply(Complex.new(1, :infinity), :infinity) == Complex.new(:nan, :infinity)
+
+    assert Complex.multiply(Complex.new(1, :infinity), :neg_infinity) ==
+             Complex.new(:nan, :neg_infinity)
+
+    assert Complex.multiply(Complex.new(1, :neg_infinity), :neg_infinity) ==
+             Complex.new(:nan, :infinity)
+
+    assert Complex.multiply(Complex.new(1, :neg_infinity), :infinity) ==
+             Complex.new(:nan, :neg_infinity)
+
+    # Second direction
+    assert Complex.multiply(:infinity, Complex.new(:infinity, 1)) == Complex.new(:infinity, :nan)
+
+    assert Complex.multiply(:neg_infinity, Complex.new(:neg_infinity, 1)) ==
+             Complex.new(:infinity, :nan)
+
+    assert Complex.multiply(:neg_infinity, Complex.new(:infinity, 1)) ==
+             Complex.new(:neg_infinity, :nan)
+
+    assert Complex.multiply(:infinity, Complex.new(:neg_infinity, 1)) ==
+             Complex.new(:neg_infinity, :nan)
+
+    assert Complex.multiply(:infinity, Complex.new(1, :infinity)) == Complex.new(:nan, :infinity)
+
+    assert Complex.multiply(:neg_infinity, Complex.new(1, :infinity)) ==
+             Complex.new(:nan, :neg_infinity)
+
+    assert Complex.multiply(:neg_infinity, Complex.new(1, :neg_infinity)) ==
+             Complex.new(:nan, :infinity)
+
+    assert Complex.multiply(:infinity, Complex.new(1, :neg_infinity)) ==
+             Complex.new(:nan, :neg_infinity)
+
+    # NaNs
+    assert Complex.multiply(:nan, 1) == :nan
+    assert Complex.multiply(1, :nan) == :nan
+
+    ## First direction
+    assert Complex.multiply(:nan, Complex.new(1, 1)) == Complex.new(:nan, :nan)
+    assert Complex.multiply(1, Complex.new(:nan, 1)) == Complex.new(:nan, :nan)
+    assert Complex.multiply(1, Complex.new(1, :nan)) == Complex.new(:nan, :nan)
+
+    ## Second direction
+    assert Complex.multiply(Complex.new(1, 1), :nan) == Complex.new(:nan, :nan)
+    assert Complex.multiply(Complex.new(:nan, 1), 1) == Complex.new(:nan, :nan)
+    assert Complex.multiply(Complex.new(1, :nan), 1) == Complex.new(:nan, :nan)
+  end
+
+  test "complex casting - divide/2" do
+    assert Complex.divide(1, 1) == 1
+
+    assert Complex.divide(:infinity, Complex.new(:infinity, 1)) == Complex.new(:nan, :nan)
+    assert Complex.divide(:neg_infinity, Complex.new(:neg_infinity, 1)) == Complex.new(:nan, :nan)
+
+    assert Complex.divide(:infinity, Complex.new(1, 1)) == Complex.new(:infinity, :neg_infinity)
+
+    assert Complex.divide(:neg_infinity, Complex.new(1, 1)) ==
+             Complex.new(:neg_infinity, :infinity)
+
+    assert Complex.divide(Complex.new(1, 1), :infinity) == Complex.new(0, 0)
+    assert Complex.divide(Complex.new(1, 1), :neg_infinity) == Complex.new(0, 0)
+
+    assert Complex.divide(Complex.new(:infinity, 1), :infinity) == Complex.new(:nan, :nan)
+    assert Complex.divide(Complex.new(1, :infinity), :infinity) == Complex.new(:nan, :nan)
+    assert Complex.divide(Complex.new(:infinity, 1), :neg_infinity) == Complex.new(:nan, :nan)
+    assert Complex.divide(Complex.new(1, :infinity), :neg_infinity) == Complex.new(:nan, :nan)
+
+    # NaNs
+    assert Complex.divide(:nan, 1) == :nan
+    assert Complex.divide(1, :nan) == :nan
+
+    ## First direction
+    assert Complex.divide(:nan, Complex.new(1, 1)) == Complex.new(:nan, :nan)
+    assert Complex.divide(1, Complex.new(:nan, 1)) == Complex.new(:nan, :nan)
+    assert Complex.divide(1, Complex.new(1, :nan)) == Complex.new(:nan, :nan)
+
+    ## Second direction
+    assert Complex.divide(Complex.new(1, 1), :nan) == Complex.new(:nan, :nan)
+    assert Complex.divide(Complex.new(:nan, 1), 1) == Complex.new(:nan, :nan)
+    assert Complex.divide(Complex.new(1, :nan), 1) == Complex.new(:nan, :nan)
+  end
+
+  test "complex casting - pow/2" do
+    # With NaN, if either argument is complex we return complex NaN
+    assert Complex.pow(1, :nan) == :nan
+    assert Complex.pow(:nan, 1) == :nan
+    assert Complex.pow(Complex.new(1, 1), :nan) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(1, :nan), 1) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(:nan, 1), 1) == Complex.new(:nan, :nan)
+
+    # Infinities
+    ## Real
+    assert Complex.pow(:infinity, 3) == :infinity
+    assert Complex.pow(3, :infinity) == :infinity
+    assert Complex.pow(3, :neg_infinity) == 0.0
+    assert Complex.pow(:neg_infinity, 3) == :neg_infinity
+
+    assert Complex.pow(0, :infinity) == 0.0
+    assert Complex.pow(0, :neg_infinity) == :infinity
+    assert Complex.pow(:infinity, 0) == 1.0
+    assert Complex.pow(:neg_infinity, 0) == 1.0
+
+    ## Complex
+    ### If inf or -inf is in any argument, we return complex NaN
+    assert Complex.pow(Complex.new(:infinity, 1), 1) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(1, :infinity), 1) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(1, 1), :infinity) == Complex.new(:nan, :nan)
+    assert Complex.pow(1, Complex.new(:infinity, 1)) == Complex.new(:nan, :nan)
+    assert Complex.pow(1, Complex.new(1, :infinity)) == Complex.new(:nan, :nan)
+    assert Complex.pow(:infinity, Complex.new(1, 1)) == Complex.new(:nan, :nan)
+
+    assert Complex.pow(Complex.new(:neg_infinity, 1), 1) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(1, :neg_infinity), 1) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(1, 1), :neg_infinity) == Complex.new(:nan, :nan)
+    assert Complex.pow(1, Complex.new(:neg_infinity, 1)) == Complex.new(:nan, :nan)
+    assert Complex.pow(1, Complex.new(1, :neg_infinity)) == Complex.new(:nan, :nan)
+    assert Complex.pow(:neg_infinity, Complex.new(1, 1)) == Complex.new(:nan, :nan)
+
+    assert Complex.pow(Complex.new(:nan, 1), 1) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(1, :nan), 1) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(1, 1), :nan) == Complex.new(:nan, :nan)
+    assert Complex.pow(1, Complex.new(:nan, 1)) == Complex.new(:nan, :nan)
+    assert Complex.pow(1, Complex.new(1, :nan)) == Complex.new(:nan, :nan)
+    assert Complex.pow(:nan, Complex.new(1, 1)) == Complex.new(:nan, :nan)
+  end
+
+  test "complex casting - atan2/2" do
+    assert Complex.atan2(Complex.new(1, 0), 1) == Complex.new(0.7853981633974483, 0)
+    assert Complex.atan2(1, Complex.new(1, 0)) == Complex.new(0.7853981633974483, 0)
+
+    assert Complex.atan2(:nan, Complex.new(1, 0)) == Complex.new(:nan, 0)
+    assert Complex.atan2(Complex.new(1, 0), :nan) == Complex.new(:nan, 0)
+    assert Complex.atan2(:nan, 1) == :nan
+    assert Complex.atan2(1, :nan) == :nan
+    assert Complex.atan2(:nan, :nan) == :nan
+
+    assert Complex.atan2(:infinity, 1) == :math.pi() / 2
+    assert Complex.atan2(:infinity, Complex.new(1, 0)) == Complex.new(:math.pi() / 2, 0)
+    assert Complex.atan2(Complex.new(1, 0), :infinity) == Complex.new(0, 0)
+    assert Complex.atan2(1, :infinity) == 0
+
+    assert Complex.atan2(:neg_infinity, 1) == -:math.pi() / 2
+    assert Complex.atan2(:neg_infinity, Complex.new(1, 0)) == Complex.new(-:math.pi() / 2, 0)
+    assert Complex.atan2(Complex.new(1, 0), :neg_infinity) == Complex.new(:math.pi(), 0)
+    assert Complex.atan2(1, :neg_infinity) == :math.pi()
   end
 
   defp assert_close(left, right, opts \\ []) do
