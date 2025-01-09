@@ -573,7 +573,7 @@ defmodule ComplexTest do
     assert Complex.exp(:nan) == :nan
 
     for x <- [:infinity, :neg_infinity, :nan, -1, 0, 1] do
-      assert Complex.exp(Complex.new(:neg_infinity, x)) == 0
+      assert Complex.exp(Complex.new(:neg_infinity, x)) == Complex.new(0, 0)
     end
 
     assert Complex.exp(Complex.new(:infinity, :nan)) == Complex.new(:infinity, :nan)
