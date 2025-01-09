@@ -7,8 +7,13 @@ defmodule Complex.Mixfile do
       version: "0.6.0",
       description: description(),
       package: package(),
-      elixir: "~> 1.12",
+      elixir: "~> 1.16",
       deps: deps(),
+      build_embedded: Mix.env() == :prod,
+      preferred_cli_env: [
+        docs: :docs,
+        "hex.publish": :docs
+      ],
       docs: [
         main: "Complex",
         authors: package()[:maintainers],
@@ -22,13 +27,12 @@ defmodule Complex.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger]]
+    [extra_applications: [:logger]]
   end
 
   defp deps do
     [
-      {:ex_doc, "~> 0.28.3", only: :dev, runtime: false},
-      {:dialyxir, "~> 0.4", only: [:dev]}
+      {:ex_doc, "~> 0.36.1", only: :docs}
     ]
   end
 
@@ -42,7 +46,7 @@ defmodule Complex.Mixfile do
   defp package do
     [
       maintainers: ["Tom Krauss", "Paulo Valente", "José Valim"],
-      licenses: ["Apache 2.0"],
+      licenses: ["Apache-2.0"],
       links: %{
         "GitHub" => "https://github.com/elixir-nx/complex.git",
         "Docs" => "http://hexdocs.pm/complex"
