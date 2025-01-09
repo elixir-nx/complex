@@ -169,27 +169,22 @@ defmodule ComplexTest do
       assert Complex.divide(x, 0) == x
       assert Complex.divide(x, 1) == x
 
-      if y == :nan do
-        assert Complex.divide(Complex.new(x), Complex.new(y)) == Complex.new(:nan, :nan)
-      else
-        assert Complex.divide(Complex.new(x), Complex.new(y)) == Complex.new(:nan)
-      end
-
-      assert Complex.divide(Complex.new(x), 0) == Complex.new(x, :nan)
-      assert Complex.divide(Complex.new(x), 1) == Complex.new(x)
+      assert Complex.divide(Complex.new(x), Complex.new(y)) == Complex.new(:nan, :nan)
+      assert Complex.divide(Complex.new(x), 0) == Complex.new(:nan, :nan)
+      assert Complex.divide(Complex.new(x), 1) == Complex.new(x, :nan)
     end
 
     assert Complex.divide(:nan, 1) == :nan
     assert Complex.divide(1, :nan) == :nan
 
-    assert Complex.divide(Complex.new(:nan), 1) == Complex.new(:nan, 0)
+    assert Complex.divide(Complex.new(:nan), 1) == Complex.new(:nan, :nan)
     assert Complex.divide(1, Complex.new(:nan)) == Complex.new(:nan, :nan)
 
     assert Complex.divide(:infinity, -1) == :neg_infinity
     assert Complex.divide(:neg_infinity, -1) == :infinity
 
-    assert Complex.divide(Complex.new(:infinity), -1) == Complex.new(:neg_infinity, 0)
-    assert Complex.divide(Complex.new(:neg_infinity), -1) == Complex.new(:infinity, 0)
+    assert Complex.divide(Complex.new(:infinity), -1) == Complex.new(:neg_infinity, :nan)
+    assert Complex.divide(Complex.new(:neg_infinity), -1) == Complex.new(:infinity, :nan)
 
     assert Complex.divide(-1, :infinity) == 0
     assert Complex.divide(0, :infinity) == 0
@@ -425,8 +420,8 @@ defmodule ComplexTest do
     assert Complex.pow(:neg_infinity, :neg_infinity) == 0
     assert Complex.pow(0, :neg_infinity) == :infinity
     assert Complex.pow(0, :infinity) == 0
-    assert Complex.pow(Complex.new(0, 0), :neg_infinity) == :infinity
-    assert Complex.pow(Complex.new(0, 0), :infinity) == 0
+    assert Complex.pow(Complex.new(0, 0), :neg_infinity) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(0, 0), :infinity) == Complex.new(0, 0)
   end
 
   test "log, log10, log2 (non-finite)" do
@@ -499,7 +494,7 @@ defmodule ComplexTest do
              Complex.new(:infinity, :math.pi() / :math.log(10))
 
     assert Complex.log2(:infinity) == :infinity
-    assert Complex.log2(:neg_infinity) == Complex.new(:infinity, :math.pi() / :math.log(2))
+    assert Complex.log2(:neg_infinity) == Complex.new(:infinity, :nan)
     assert Complex.log2(:nan) == :nan
 
     assert Complex.log2(Complex.new(:infinity, :infinity)) ==

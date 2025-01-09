@@ -578,8 +578,22 @@ defmodule Complex do
 
   def divide(x, y) when is_number(x) and is_number(y), do: x / y
 
+  def divide(n, b) when is_number(n) and b in [:infinity, :neg_infinity] do
+    0
+  end
+
+  def divide(n, %Complex{re: re_r, im: im_r})
+      when is_number(n) and re_r in [:infinity, :neg_infinity] and im_r == 0 do
+    new(0, 0)
+  end
+
   def divide(%Complex{re: re, im: im}, b)
       when is_number(re) and is_number(im) and b in [:infinity, :neg_infinity] do
+    new(0, 0)
+  end
+
+  def divide(%Complex{re: re, im: im}, %Complex{re: re_r, im: im_r})
+      when is_number(re) and is_number(im) and re_r in [:infinity, :neg_infinity] and im_r == 0 do
     new(0, 0)
   end
 
@@ -935,12 +949,48 @@ defmodule Complex do
   def log10(z)
 
   def log10(:infinity), do: :infinity
-  def log10(:neg_infinity), do: divide(log(:neg_infinity), :math.log(10))
+
+  def log10(:neg_infinity) do
+    new(:infinity, :math.pi() / :math.log(10))
+  end
+
   def log10(:nan), do: :nan
   def log10(n) when is_number(n) and n == 0, do: :neg_infinity
   def log10(n) when is_number(n) and n < 0, do: :nan
 
   def log10(n) when is_number(n), do: :math.log10(n)
+
+  def log10(%Complex{re: :infinity, im: im}) when is_number(im) do
+    new(:infinity, 0)
+  end
+
+  def log10(%Complex{re: :neg_infinity, im: im}) when is_number(im) do
+    new(:infinity, :math.pi() / :math.log(10))
+  end
+
+  def log10(%Complex{im: :infinity, re: re}) when is_number(re) do
+    new(:infinity, :math.pi() / (2 * :math.log(10)))
+  end
+
+  def log10(%Complex{im: :neg_infinity, re: re}) when is_number(re) do
+    new(:infinity, -:math.pi() / (2 * :math.log(10)))
+  end
+
+  def log10(%Complex{re: :infinity, im: :infinity}) do
+    new(:infinity, :math.pi() / (4 * :math.log(10)))
+  end
+
+  def log10(%Complex{re: :infinity, im: :neg_infinity}) do
+    new(:infinity, -:math.pi() / (4 * :math.log(10)))
+  end
+
+  def log10(%Complex{re: :neg_infinity, im: :neg_infinity}) do
+    new(:infinity, -3 * :math.pi() / (4 * :math.log(10)))
+  end
+
+  def log10(%Complex{re: :neg_infinity, im: :infinity}) do
+    new(:infinity, 3 * :math.pi() / (4 * :math.log(10)))
+  end
 
   def log10(z = %Complex{}) do
     divide(log(z), new(:math.log(10.0), 0.0))
@@ -971,6 +1021,38 @@ defmodule Complex do
 
   def log2(n) when is_number(n), do: :math.log2(n)
 
+  def log2(%Complex{re: :infinity, im: im}) when is_number(im) do
+    new(:infinity, 0)
+  end
+
+  def log2(%Complex{re: :neg_infinity, im: im}) when is_number(im) do
+    new(:infinity, :math.pi() / :math.log(2))
+  end
+
+  def log2(%Complex{im: :infinity, re: re}) when is_number(re) do
+    new(:infinity, :math.pi() / (2 * :math.log(2)))
+  end
+
+  def log2(%Complex{im: :neg_infinity, re: re}) when is_number(re) do
+    new(:infinity, -:math.pi() / (2 * :math.log(2)))
+  end
+
+  def log2(%Complex{re: :infinity, im: :infinity}) do
+    new(:infinity, :math.pi() / (4 * :math.log(2)))
+  end
+
+  def log2(%Complex{re: :infinity, im: :neg_infinity}) do
+    new(:infinity, -:math.pi() / (4 * :math.log(2)))
+  end
+
+  def log2(%Complex{re: :neg_infinity, im: :neg_infinity}) do
+    new(:infinity, -3 * :math.pi() / (4 * :math.log(2)))
+  end
+
+  def log2(%Complex{re: :neg_infinity, im: :infinity}) do
+    new(:infinity, 3 * :math.pi() / (4 * :math.log(2)))
+  end
+
   def log2(z = %Complex{}) do
     divide(log(z), new(:math.log(2.0), 0.0))
   end
@@ -992,6 +1074,18 @@ defmodule Complex do
   @spec pow(t | non_finite_number | number, t | non_finite_number | number) ::
           t | non_finite_number | number
 
+  def pow(%Complex{re: re, im: im}, :infinity) when re == 0 and im == 0, do: new(0, 0)
+
+  def pow(%Complex{re: re, im: im}, %Complex{re: :infinity, im: im_r})
+      when re == 0 and im == 0 and im_r == 0,
+      do: new(0, 0)
+
+  def pow(z, %Complex{}) when is_non_finite_number(z), do: new(:nan, :nan)
+  def pow(%Complex{}, z) when is_non_finite_number(z), do: new(:nan, :nan)
+  def pow(%Complex{re: z}, _) when is_non_finite_number(z), do: new(:nan, :nan)
+  def pow(%Complex{im: z}, _) when is_non_finite_number(z), do: new(:nan, :nan)
+  def pow(_, %Complex{re: z}) when is_non_finite_number(z), do: new(:nan, :nan)
+  def pow(_, %Complex{im: z}) when is_non_finite_number(z), do: new(:nan, :nan)
   def pow(:nan, _), do: :nan
   def pow(_, :nan), do: :nan
 
@@ -1011,9 +1105,8 @@ defmodule Complex do
   def pow(:neg_infinity, y) when is_number(y) and y < 0, do: 0
 
   def pow(x, :infinity) when x == 0, do: 0
-  def pow(%Complex{re: re, im: im}, :infinity) when re == 0 and im == 0, do: 0
   def pow(x, :neg_infinity) when x == 0, do: :infinity
-  def pow(%Complex{re: re, im: im}, :neg_infinity) when re == 0 and im == 0, do: :infinity
+  def pow(%Complex{re: re, im: im}, :neg_infinity) when re == 0 and im == 0, do: new(:infinity, 0)
   def pow(_, :neg_infinity), do: 0
   def pow(_, :infinity), do: :infinity
 
@@ -1414,7 +1507,7 @@ defmodule Complex do
   ### Examples
 
       iex> Complex.asec(Complex.from_polar(2,:math.pi))
-      %Complex{im: 0.0, re: 2.0943951023931957}
+      %Complex{im: -0.0, re: 2.0943951023931957}
 
       iex> Complex.sec(Complex.asec(Complex.new(2,3)))
       %Complex{im: 2.9999999999999982, re: 1.9999999999999987}
