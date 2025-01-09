@@ -884,11 +884,26 @@ defmodule Complex do
   def exp(:nan), do: :nan
   def exp(n) when is_number(n), do: :math.exp(n)
 
-  def exp(%Complex{re: :neg_infinity, im: _}), do: 0
+  def exp(%Complex{re: :neg_infinity, im: _}), do: new(0, 0)
   def exp(%Complex{re: :infinity, im: :nan}), do: new(:infinity, :nan)
 
-  def exp(%Complex{re: :infinity, im: im}) when is_number(im),
-    do: new(:infinity, multiply(:infinity, im))
+  def exp(%Complex{re: :infinity, im: im}) when is_number(im) do
+    re =
+      case :math.cos(im) do
+        x when x > 0 -> :infinity
+        x when x < 0 -> :neg_infinity
+        _ -> :nan
+      end
+
+    im =
+      case :math.sin(im) do
+        x when x > 0 -> :infinity
+        x when x < 0 -> :neg_infinity
+        _ -> :nan
+      end
+
+    new(re, im)
+  end
 
   def exp(%Complex{re: _, im: :neg_infinity}), do: new(:nan, :nan)
   def exp(%Complex{re: _, im: :infinity}), do: new(:nan, :nan)
@@ -1618,10 +1633,12 @@ defmodule Complex do
   def sinh(n) when is_number(n), do: :math.sinh(n)
 
   def sinh(z = %Complex{}) do
-    z
-    |> exp()
-    |> subtract(exp(negate(z)))
-    |> divide(2)
+    %Complex{re: re, im: im} =
+      z
+      |> exp()
+      |> subtract(exp(negate(z)))
+
+    new(divide(re, 2), divide(im, 2))
   end
 
   @doc """
@@ -1686,12 +1703,15 @@ defmodule Complex do
   def cosh(:infinity), do: :infinity
   def cosh(:neg_infinity), do: :infinity
   def cosh(:nan), do: :nan
+  def cosh(n) when is_number(n), do: :math.cosh(n)
 
   def cosh(z) do
-    z
-    |> exp()
-    |> add(exp(negate(z)))
-    |> divide(2)
+    %Complex{re: re, im: im} =
+      z
+      |> exp()
+      |> add(exp(negate(z)))
+
+    new(divide(re, 2), divide(im, 2))
   end
 
   @doc """
