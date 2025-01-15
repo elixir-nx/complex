@@ -88,7 +88,7 @@ defmodule Complex do
 
   defp to_string_component(n) when n == 0, do: "+0.0"
 
-  defp to_string_component(n) do
+  defp to_string_component(n) when is_number(n) do
     abs_s = Kernel.to_string(abs(n))
 
     if n >= 0 do
