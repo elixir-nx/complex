@@ -1017,4 +1017,188 @@ defmodule ComplexTest do
         """)
     end
   end
+
+  # ── IEEE 754 compliance ──────────────────────────────────────────
+
+  describe "IEEE 754: overflow returns Inf instead of crashing" do
+    test "exp(large) returns :infinity" do
+      assert Complex.exp(1000) == :infinity
+      assert Complex.exp(1000.0) == :infinity
+    end
+
+    test "sinh(large positive) returns :infinity" do
+      assert Complex.sinh(1000) == :infinity
+      assert Complex.sinh(1000.0) == :infinity
+    end
+
+    test "sinh(large negative) returns :neg_infinity" do
+      assert Complex.sinh(-1000) == :neg_infinity
+      assert Complex.sinh(-1000.0) == :neg_infinity
+    end
+
+    test "cosh(large) returns :infinity" do
+      assert Complex.cosh(1000) == :infinity
+      assert Complex.cosh(1000.0) == :infinity
+    end
+  end
+
+  describe "IEEE 754: domain errors return NaN instead of crashing" do
+    test "asin outside [-1, 1]" do
+      assert Complex.asin(2.0) == :nan
+      assert Complex.asin(-2.0) == :nan
+    end
+
+    test "acos outside [-1, 1]" do
+      assert Complex.acos(2.0) == :nan
+      assert Complex.acos(-2.0) == :nan
+    end
+
+    test "acosh below 1" do
+      assert Complex.acosh(0.5) == :nan
+      assert Complex.acosh(-1.0) == :nan
+    end
+
+    test "atanh outside (-1, 1)" do
+      assert Complex.atanh(2.0) == :nan
+      assert Complex.atanh(-2.0) == :nan
+    end
+
+    test "atanh at boundaries" do
+      assert Complex.atanh(1.0) == :infinity
+      assert Complex.atanh(1) == :infinity
+      assert Complex.atanh(-1.0) == :neg_infinity
+      assert Complex.atanh(-1) == :neg_infinity
+    end
+  end
+
+  describe "IEEE 754: division by zero" do
+    test "positive / 0.0 = :infinity" do
+      assert Complex.divide(1.0, 0.0) == :infinity
+      assert Complex.divide(5, 0.0) == :infinity
+    end
+
+    test "negative / 0.0 = :neg_infinity" do
+      assert Complex.divide(-1.0, 0.0) == :neg_infinity
+      assert Complex.divide(-5, 0.0) == :neg_infinity
+    end
+
+    test "0.0 / 0.0 = :nan" do
+      assert Complex.divide(0.0, 0.0) == :nan
+      assert Complex.divide(0, 0.0) == :nan
+    end
+
+    test "positive / -0.0 = :neg_infinity" do
+      assert Complex.divide(1.0, -0.0) == :neg_infinity
+    end
+
+    test "negative / -0.0 = :infinity" do
+      assert Complex.divide(-1.0, -0.0) == :infinity
+    end
+
+    test "normal division still works" do
+      assert Complex.divide(6.0, 3.0) == 2.0
+      assert Complex.divide(10, 2) == 5
+    end
+  end
+
+  describe "IEEE 754: sqrt domain errors" do
+    test "sqrt(negative) returns :nan" do
+      assert Complex.sqrt(-1) == :nan
+      assert Complex.sqrt(-1.0) == :nan
+      assert Complex.sqrt(-4.0) == :nan
+    end
+  end
+
+  describe "IEEE 754: pow edge cases" do
+    test "pow(0, negative) returns :infinity" do
+      assert Complex.pow(0, -1) == :infinity
+      assert Complex.pow(0.0, -1.0) == :infinity
+    end
+  end
+
+  describe "IEEE 754: cot/acot/acsc domain errors" do
+    test "cot(0) returns :infinity (1/tan(0) = 1/0)" do
+      assert Complex.cot(0) == :infinity
+      assert Complex.cot(0.0) == :infinity
+    end
+
+    test "acot(0) returns pi/2" do
+      assert_close Complex.acot(0), :math.pi() / 2
+      assert_close Complex.acot(0.0), :math.pi() / 2
+    end
+
+    test "acsc(0) returns :infinity" do
+      assert Complex.acsc(0) == :infinity
+      assert Complex.acsc(0.0) == :infinity
+    end
+
+    test "acsc(0.5) returns :nan (asin(2) domain error)" do
+      assert Complex.acsc(0.5) == :nan
+    end
+  end
+
+  describe "IEEE 754: integer division by zero" do
+    test "divide(1, 0) returns :infinity" do
+      assert Complex.divide(1, 0) == :infinity
+    end
+
+    test "divide(-1, 0) returns :neg_infinity" do
+      assert Complex.divide(-1, 0) == :neg_infinity
+    end
+
+    test "divide(0, 0) returns :nan" do
+      assert Complex.divide(0, 0) == :nan
+    end
+  end
+
+  describe "IEEE 754: pow domain errors" do
+    test "pow(-1, 0.5) returns :nan (sqrt of negative)" do
+      assert Complex.pow(-1, 0.5) == :nan
+      assert Complex.pow(-1.0, 0.5) == :nan
+    end
+  end
+
+  describe "IEEE 754: log edge cases" do
+    test "log(0) returns :neg_infinity" do
+      assert Complex.log(0) == :neg_infinity
+      assert Complex.log(0.0) == :neg_infinity
+    end
+
+    test "log(negative) returns :nan" do
+      assert Complex.log(-1.0) == :nan
+    end
+
+    test "log10(0) returns :neg_infinity" do
+      assert Complex.log10(0) == :neg_infinity
+    end
+
+    test "log2(0) returns :neg_infinity" do
+      assert Complex.log2(0) == :neg_infinity
+    end
+  end
+
+  describe "IEEE 754: tanh at extremes" do
+    test "tanh(large) clamps to 1/-1" do
+      assert Complex.tanh(1000) == 1.0
+      assert Complex.tanh(-1000) == -1.0
+    end
+  end
+
+  describe "IEEE 754: normal values still work" do
+    test "exp(0) == 1" do
+      assert Complex.exp(0) == 1.0
+    end
+
+    test "asin(0.5) is correct" do
+      assert_close Complex.asin(0.5), :math.asin(0.5)
+    end
+
+    test "sinh(1) is correct" do
+      assert_close Complex.sinh(1.0), :math.sinh(1.0)
+    end
+
+    test "cosh(1) is correct" do
+      assert_close Complex.cosh(1.0), :math.cosh(1.0)
+    end
+  end
 end
