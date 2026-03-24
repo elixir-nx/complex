@@ -576,6 +576,15 @@ defmodule Complex do
   def divide(a, :infinity) when is_number(a), do: 0
   def divide(a, :neg_infinity) when is_number(a), do: 0
 
+  def divide(x, +0.0) when is_number(x) and x > 0, do: :infinity
+  def divide(x, +0.0) when is_number(x) and x < 0, do: :neg_infinity
+  def divide(x, +0.0) when is_number(x), do: :nan
+  def divide(x, -0.0) when is_number(x) and x > 0, do: :neg_infinity
+  def divide(x, -0.0) when is_number(x) and x < 0, do: :infinity
+  def divide(x, -0.0) when is_number(x), do: :nan
+  def divide(x, 0) when is_number(x) and x > 0, do: :infinity
+  def divide(x, 0) when is_number(x) and x < 0, do: :neg_infinity
+  def divide(x, 0) when is_number(x), do: :nan
   def divide(x, y) when is_number(x) and is_number(y), do: x / y
 
   def divide(n, b) when is_number(n) and b in [:infinity, :neg_infinity] do
@@ -779,7 +788,12 @@ defmodule Complex do
   def sqrt(:infinity), do: :infinity
   def sqrt(:neg_infinity), do: :nan
   def sqrt(:nan), do: :nan
-  def sqrt(n) when is_number(n), do: :math.sqrt(n)
+
+  def sqrt(n) when is_number(n) do
+    :math.sqrt(n)
+  rescue
+    ArithmeticError -> :nan
+  end
 
   def sqrt(%Complex{re: :nan}), do: Complex.new(:nan, :nan)
   def sqrt(%Complex{im: :nan}), do: Complex.new(:nan, :nan)
@@ -882,7 +896,12 @@ defmodule Complex do
   def exp(:infinity), do: :infinity
   def exp(:neg_infinity), do: 0
   def exp(:nan), do: :nan
-  def exp(n) when is_number(n), do: :math.exp(n)
+
+  def exp(n) when is_number(n) do
+    :math.exp(n)
+  rescue
+    ArithmeticError -> :infinity
+  end
 
   def exp(%Complex{re: :neg_infinity, im: _}), do: new(0, 0)
   def exp(%Complex{re: :infinity, im: :nan}), do: new(:infinity, :nan)
@@ -1126,7 +1145,16 @@ defmodule Complex do
   def pow(_, :infinity), do: :infinity
 
   def pow(x, y) when is_integer(x) and is_integer(y) and y >= 0, do: Integer.pow(x, y)
-  def pow(x, y) when is_number(x) and is_number(y), do: :math.pow(x, y)
+
+  def pow(x, y) when is_number(x) and is_number(y) do
+    :math.pow(x, y)
+  rescue
+    ArithmeticError ->
+      cond do
+        x == 0 and y < 0 -> :infinity
+        true -> :nan
+      end
+  end
 
   def pow(x, y) do
     x = as_complex(x)
@@ -1243,7 +1271,11 @@ defmodule Complex do
   @spec asin(t | number | non_finite_number) :: t | number | non_finite_number
   def asin(z)
 
-  def asin(n) when is_number(n), do: :math.asin(n)
+  def asin(n) when is_number(n) do
+    :math.asin(n)
+  rescue
+    ArithmeticError -> :nan
+  end
 
   def asin(n) when is_non_finite_number(n), do: :nan
 
@@ -1317,7 +1349,11 @@ defmodule Complex do
   @spec acos(t | number | non_finite_number) :: t | number | non_finite_number
   def acos(z)
 
-  def acos(n) when is_number(n), do: :math.acos(n)
+  def acos(n) when is_number(n) do
+    :math.acos(n)
+  rescue
+    ArithmeticError -> :nan
+  end
 
   def acos(n) when is_non_finite_number(n), do: :nan
 
@@ -1452,7 +1488,11 @@ defmodule Complex do
   @spec cot(t | number | non_finite_number) :: t | number | non_finite_number
   def cot(z)
 
-  def cot(n) when is_number(n), do: 1 / :math.tan(n)
+  def cot(n) when is_number(n) do
+    1 / :math.tan(n)
+  rescue
+    ArithmeticError -> :infinity
+  end
 
   def cot(z) do
     divide(cos(z), sin(z))
@@ -1478,7 +1518,11 @@ defmodule Complex do
   @spec acot(t | number | non_finite_number) :: t | number | non_finite_number
   def acot(z)
 
-  def acot(n) when is_number(n), do: :math.atan(1 / n)
+  def acot(n) when is_number(n) do
+    :math.atan(1 / n)
+  rescue
+    ArithmeticError -> :math.pi() / 2
+  end
 
   def acot(:infinity), do: 0
   def acot(:neg_infinity), do: :math.pi()
@@ -1592,7 +1636,13 @@ defmodule Complex do
   @spec acsc(t | number | non_finite_number) :: t | number | non_finite_number
   def acsc(z)
 
-  def acsc(n) when is_number(n), do: :math.asin(1 / n)
+  def acsc(n) when is_number(n) do
+    :math.asin(1 / n)
+  rescue
+    ArithmeticError ->
+      if n == 0, do: :infinity, else: :nan
+  end
+
   def acsc(:infinity), do: 0
   def acsc(:neg_infinity), do: -:math.pi()
   def acsc(:nan), do: :nan
@@ -1630,7 +1680,11 @@ defmodule Complex do
 
   def sinh(n) when is_non_finite_number(n), do: n
 
-  def sinh(n) when is_number(n), do: :math.sinh(n)
+  def sinh(n) when is_number(n) do
+    :math.sinh(n)
+  rescue
+    ArithmeticError -> if n > 0, do: :infinity, else: :neg_infinity
+  end
 
   def sinh(z = %Complex{}) do
     %Complex{re: re, im: im} =
@@ -1703,7 +1757,12 @@ defmodule Complex do
   def cosh(:infinity), do: :infinity
   def cosh(:neg_infinity), do: :infinity
   def cosh(:nan), do: :nan
-  def cosh(n) when is_number(n), do: :math.cosh(n)
+
+  def cosh(n) when is_number(n) do
+    :math.cosh(n)
+  rescue
+    ArithmeticError -> :infinity
+  end
 
   def cosh(z) do
     %Complex{re: re, im: im} =
@@ -1732,10 +1791,16 @@ defmodule Complex do
   def acosh(z)
 
   if math_fun_supported?.(:acosh, 1) do
-    def acosh(n) when is_number(n), do: :math.acosh(n)
+    def acosh(n) when is_number(n) do
+      :math.acosh(n)
+    rescue
+      ArithmeticError -> :nan
+    end
   else
     def acosh(n) when is_number(n) do
       :math.log(n + :math.sqrt(n * n - 1))
+    rescue
+      ArithmeticError -> :nan
     end
   end
 
@@ -1798,11 +1863,22 @@ defmodule Complex do
   @spec atanh(t | number | non_finite_number) :: t | number | non_finite_number
   def atanh(z)
 
+  def atanh(1), do: :infinity
+  def atanh(1.0), do: :infinity
+  def atanh(-1), do: :neg_infinity
+  def atanh(-1.0), do: :neg_infinity
+
   if math_fun_supported?.(:atanh, 1) do
-    def atanh(n) when is_number(n), do: :math.atanh(n)
+    def atanh(n) when is_number(n) do
+      :math.atanh(n)
+    rescue
+      ArithmeticError -> :nan
+    end
   else
     def atanh(n) when is_number(n) do
       0.5 * :math.log((1 + n) / (1 - n))
+    rescue
+      ArithmeticError -> :nan
     end
   end
 
