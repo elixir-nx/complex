@@ -4,16 +4,12 @@ defmodule Complex.Mixfile do
   def project do
     [
       app: :complex,
-      version: "0.6.0",
+      version: "0.7.0",
       description: description(),
       package: package(),
       elixir: "~> 1.16",
       deps: deps(),
       build_embedded: Mix.env() == :prod,
-      preferred_cli_env: [
-        docs: :docs,
-        "hex.publish": :docs
-      ],
       docs: [
         main: "Complex",
         authors: package()[:maintainers],
@@ -28,6 +24,10 @@ defmodule Complex.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     [extra_applications: [:logger]]
+  end
+
+  def cli do
+    [preferred_envs: [docs: :docs, "hex.publish": :docs]]
   end
 
   defp deps do
