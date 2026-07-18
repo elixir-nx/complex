@@ -587,10 +587,6 @@ defmodule Complex do
   def divide(x, 0) when is_number(x), do: :nan
   def divide(x, y) when is_number(x) and is_number(y), do: x / y
 
-  def divide(n, b) when is_number(n) and b in [:infinity, :neg_infinity] do
-    0
-  end
-
   def divide(n, %Complex{re: re_r, im: im_r})
       when is_number(n) and re_r in [:infinity, :neg_infinity] and im_r == 0 do
     new(0, 0)
@@ -1109,6 +1105,7 @@ defmodule Complex do
           t | non_finite_number | number
 
   def pow(%Complex{re: re, im: im}, :infinity) when re == 0 and im == 0, do: new(0, 0)
+  def pow(%Complex{re: re, im: im}, :neg_infinity) when re == 0 and im == 0, do: new(:infinity, 0)
 
   def pow(%Complex{re: re, im: im}, %Complex{re: :infinity, im: im_r})
       when re == 0 and im == 0 and im_r == 0,
@@ -1140,7 +1137,6 @@ defmodule Complex do
 
   def pow(x, :infinity) when x == 0, do: 0
   def pow(x, :neg_infinity) when x == 0, do: :infinity
-  def pow(%Complex{re: re, im: im}, :neg_infinity) when re == 0 and im == 0, do: new(:infinity, 0)
   def pow(_, :neg_infinity), do: 0
   def pow(_, :infinity), do: :infinity
 
@@ -1455,7 +1451,6 @@ defmodule Complex do
   def atan2(:neg_infinity, a) when is_number(a), do: -:math.pi() / 2
   def atan2(:nan, a) when is_number(a) or is_non_finite_number(a), do: :nan
   def atan2(a, :nan) when is_number(a) or is_non_finite_number(a), do: :nan
-  def atan2(:nan, :nan), do: :nan
   def atan2(a, :infinity) when is_number(a), do: 0
   def atan2(a, :neg_infinity) when is_number(a), do: :math.pi()
 

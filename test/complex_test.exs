@@ -420,7 +420,7 @@ defmodule ComplexTest do
     assert Complex.pow(:neg_infinity, :neg_infinity) == 0
     assert Complex.pow(0, :neg_infinity) == :infinity
     assert Complex.pow(0, :infinity) == 0
-    assert Complex.pow(Complex.new(0, 0), :neg_infinity) == Complex.new(:nan, :nan)
+    assert Complex.pow(Complex.new(0, 0), :neg_infinity) == Complex.new(:infinity, 0)
     assert Complex.pow(Complex.new(0, 0), :infinity) == Complex.new(0, 0)
   end
 
