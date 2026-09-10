@@ -958,9 +958,6 @@ defmodule Complex do
     new(log(abs(z)), atan2(z.im, z.re))
   end
 
-  @deprecated "Use log/1 instead"
-  def ln(x), do: log(x)
-
   @doc """
   Returns a new complex that is the complex log base 10 of the provided
   complex number.
@@ -1178,9 +1175,6 @@ defmodule Complex do
         new(multiply(s, cos(r)), multiply(s, sin(r)))
     end
   end
-
-  @deprecated "Use pow/2 instead"
-  def power(x, y), do: pow(x, y)
 
   @doc """
   Returns a new complex that is the sine of the provided parameter.
