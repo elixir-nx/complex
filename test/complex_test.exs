@@ -1042,6 +1042,52 @@ defmodule ComplexTest do
     end
   end
 
+  describe "IEEE 754: binary operation overflow returns Inf instead of crashing" do
+    @max_float 1.7976931348623157e308
+
+    test "add overflow" do
+      assert Complex.add(@max_float, @max_float) == :infinity
+      assert Complex.add(-@max_float, -@max_float) == :neg_infinity
+    end
+
+    test "subtract overflow" do
+      assert Complex.subtract(@max_float, -@max_float) == :infinity
+      assert Complex.subtract(-@max_float, @max_float) == :neg_infinity
+    end
+
+    test "multiply overflow" do
+      assert Complex.multiply(@max_float, 2.0) == :infinity
+      assert Complex.multiply(@max_float, -2.0) == :neg_infinity
+      assert Complex.multiply(-@max_float, -2.0) == :infinity
+      assert Complex.multiply(@max_float, @max_float) == :infinity
+    end
+
+    test "divide overflow" do
+      assert Complex.divide(@max_float, 0.5) == :infinity
+      assert Complex.divide(@max_float, -0.5) == :neg_infinity
+      assert Complex.divide(-@max_float, 0.5) == :neg_infinity
+    end
+
+    test "pow overflow" do
+      assert Complex.pow(@max_float, 2) == :infinity
+      assert Complex.pow(@max_float, 2.0) == :infinity
+      assert Complex.pow(-@max_float, 3) == :neg_infinity
+      assert Complex.pow(-@max_float, 2) == :infinity
+    end
+
+    test "pow domain errors still return :nan" do
+      assert Complex.pow(-8.0, 0.5) == :nan
+    end
+
+    test "complex components overflow" do
+      assert Complex.add(Complex.new(@max_float, 1.0), Complex.new(@max_float, 1.0)) ==
+               Complex.new(:infinity, 2.0)
+
+      assert Complex.multiply(Complex.new(@max_float, 0.0), Complex.new(2.0, 0.0)) ==
+               Complex.new(:infinity, 0.0)
+    end
+  end
+
   describe "IEEE 754: domain errors return NaN instead of crashing" do
     test "asin outside [-1, 1]" do
       assert Complex.asin(2.0) == :nan

@@ -406,7 +406,11 @@ defmodule Complex do
   def add(:neg_infinity, _), do: :neg_infinity
   def add(_, :neg_infinity), do: :neg_infinity
 
-  def add(left, right) when is_number(left) and is_number(right), do: left + right
+  def add(left, right) when is_number(left) and is_number(right) do
+    left + right
+  rescue
+    ArithmeticError -> if left > 0, do: :infinity, else: :neg_infinity
+  end
 
   def add(left, right) do
     %Complex{re: re_left, im: im_left} = as_complex(left)
@@ -453,7 +457,11 @@ defmodule Complex do
   def subtract(:neg_infinity, _), do: :neg_infinity
   def subtract(_, :neg_infinity), do: :infinity
 
-  def subtract(left, right) when is_number(left) and is_number(right), do: left - right
+  def subtract(left, right) when is_number(left) and is_number(right) do
+    left - right
+  rescue
+    ArithmeticError -> if left > 0, do: :infinity, else: :neg_infinity
+  end
 
   def subtract(left, right) do
     %Complex{re: re_left, im: im_left} = as_complex(left)
@@ -522,7 +530,11 @@ defmodule Complex do
   def multiply(:infinity, :neg_infinity), do: :neg_infinity
   def multiply(:infinity, :infinity), do: :infinity
 
-  def multiply(left, right) when is_number(left) and is_number(right), do: left * right
+  def multiply(left, right) when is_number(left) and is_number(right) do
+    left * right
+  rescue
+    ArithmeticError -> if left > 0 == right > 0, do: :infinity, else: :neg_infinity
+  end
 
   def multiply(left, right) do
     %Complex{re: r1, im: i1} = as_complex(left)
@@ -585,7 +597,12 @@ defmodule Complex do
   def divide(x, 0) when is_number(x) and x > 0, do: :infinity
   def divide(x, 0) when is_number(x) and x < 0, do: :neg_infinity
   def divide(x, 0) when is_number(x), do: :nan
-  def divide(x, y) when is_number(x) and is_number(y), do: x / y
+
+  def divide(x, y) when is_number(x) and is_number(y) do
+    x / y
+  rescue
+    ArithmeticError -> if x > 0 == y > 0, do: :infinity, else: :neg_infinity
+  end
 
   def divide(n, %Complex{re: re_r, im: im_r})
       when is_number(n) and re_r in [:infinity, :neg_infinity] and im_r == 0 do
@@ -1145,7 +1162,9 @@ defmodule Complex do
     ArithmeticError ->
       cond do
         x == 0 and y < 0 -> :infinity
-        true -> :nan
+        x < 0 and y != trunc(y) -> :nan
+        x < 0 and rem(trunc(y), 2) != 0 -> :neg_infinity
+        true -> :infinity
       end
   end
 
