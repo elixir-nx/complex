@@ -346,7 +346,7 @@ defmodule Complex do
 
   """
   @spec to_polar(t | number | non_finite_number) ::
-          {float | non_finite_number, float | non_finite_number}
+          {number | non_finite_number, number | non_finite_number}
   def to_polar(t)
 
   def to_polar(z = %Complex{}) do
@@ -688,7 +688,7 @@ defmodule Complex do
       4.0
 
   """
-  @spec abs_squared(t | number | non_finite_number) :: number
+  @spec abs_squared(t | number | non_finite_number) :: number | non_finite_number
   def abs_squared(z)
 
   def abs_squared(:nan), do: :nan
@@ -1618,8 +1618,7 @@ defmodule Complex do
       %Complex{im: 1.2327514463765779e-16, re: -1.0997501702946164}
 
   """
-  @spec csc(t) :: t
-  @spec csc(number) :: number
+  @spec csc(t | number | non_finite_number) :: t | number | non_finite_number
   def csc(z) do
     divide(1, sin(z))
   end
