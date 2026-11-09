@@ -44,6 +44,21 @@ iex> Complex.new(0, 1)
 %Complex{im: 1.0, re: 0.0}
 ```
 
+### Sigil
+
+`use Complex.Kernel` (or `import Complex.Sigils`) gives you the `~z` sigil.
+The two numbers are separated by whitespace, mirroring Common Lisp's
+`#c(re im)` reader syntax. With the `p` modifier they are the magnitude and
+the angle (radians) instead:
+
+```elixir
+iex> ~z(3 4)
+%Complex{im: 4, re: 3}
+
+iex> ~z(2 1.57)p
+Complex.from_polar(2, 1.57)
+```
+
 ## License
 
    Copyright 2015 Thomas Krauss
