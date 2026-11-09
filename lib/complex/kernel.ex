@@ -1,7 +1,6 @@
 defmodule Complex.Kernel do
   @moduledoc """
-  Provides operator overloading for Elixir operators and the `~z` sigil
-  (see `Complex.Sigils`).
+  Provides operator overloading for Elixir operators.
 
   When you `use Complex.Kernel`, be aware that the arithmetic operators
   won't work in clause guards. For that you need to use the fully qualified
@@ -19,7 +18,6 @@ defmodule Complex.Kernel do
     quote do
       import Kernel, except: unquote(operators)
       import Complex.Kernel, only: unquote(operators)
-      import Complex.Sigils, only: [sigil_z: 2]
     end
   end
 
