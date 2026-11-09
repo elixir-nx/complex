@@ -288,6 +288,69 @@ defmodule Complex do
     end
   end
 
+  @doc ~S"""
+  Handles the sigil `~COMPLEX` for complex numbers in cartesian form.
+
+  The real and imaginary parts are separated by whitespace, mirroring
+  Common Lisp's `#c(re im)` reader syntax. Uppercase sigils do not
+  interpolate, so for variables use `new/2`.
+
+  Use `import Complex, only: :sigils` to make it available.
+
+  ### See also
+
+  `new/2`, `sigil_POLAR/2`
+
+  ### Examples
+
+      import Complex, only: :sigils
+
+      ~COMPLEX(3 4)
+      #=> %Complex{re: 3, im: 4}
+  """
+  @spec sigil_COMPLEX(String.t(), []) :: t
+  def sigil_COMPLEX(string, []) do
+    [re, im] = sigil_numbers(string)
+    new(re, im)
+  end
+
+  @doc ~S"""
+  Handles the sigil `~POLAR` for complex numbers in polar form.
+
+  The magnitude and the angle (in radians) are separated by whitespace.
+  Uppercase sigils do not interpolate, so for variables use `from_polar/2`.
+
+  Use `import Complex, only: :sigils` to make it available.
+
+  ### See also
+
+  `from_polar/2`, `sigil_COMPLEX/2`
+
+  ### Examples
+
+      import Complex, only: :sigils
+
+      ~POLAR(2 1.57)
+      #=> Complex.from_polar(2, 1.57)
+  """
+  @spec sigil_POLAR(String.t(), []) :: t
+  def sigil_POLAR(string, []) do
+    [r, phi] = sigil_numbers(string)
+    from_polar(r, phi)
+  end
+
+  defp sigil_numbers(string), do: string |> String.split() |> Enum.map(&sigil_number/1)
+
+  defp sigil_number(str) do
+    with :error <- exact_parse(Integer.parse(str)),
+         :error <- exact_parse(Float.parse(str)) do
+      raise ArgumentError, "invalid number in complex sigil: #{inspect(str)}"
+    end
+  end
+
+  defp exact_parse({n, ""}), do: n
+  defp exact_parse(_), do: :error
+
   @doc """
   Returns the phase angle of the supplied complex, in radians.
 
